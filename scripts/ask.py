@@ -66,12 +66,16 @@ def main(question: str | None, eval_path: str | None):
             click.echo(f"Atteso: {item.get('expected_summary', '(n/a)')}")
             click.echo(f"Sorgenti attese: {item.get('expected_sources', [])}")
             click.echo()
+        # Summary cumulativo di tutte le query dell'eval set.
+        click.echo(pipeline.tracker.format_session_summary())
         return
 
     if not question:
         raise click.UsageError("Specificare una domanda oppure --eval <file.yaml>")
     result = pipeline.ask(question)
     _print_result(question, result)
+    # Summary token della singola query — utile per spot-check di costo.
+    click.echo(pipeline.tracker.format_session_summary())
 
 
 if __name__ == "__main__":

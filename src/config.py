@@ -45,6 +45,7 @@ WIKI_DIR = DATA_DIR / "wiki"                # pagine wiki generate (entity + sou
 VECTORS_DIR = DATA_DIR / "vectors"          # store ChromaDB persistente
 HOT_LAYER_PATH = WIKI_DIR / "HOT_LAYER.md"  # singolo file: overview + index
 QUERY_LOG_PATH = DATA_DIR / "query_log.jsonl"  # audit trail append-only delle query
+TOKEN_LOG_PATH = DATA_DIR / "token_log.jsonl"  # consumo token per fase, append-only
 
 SCHEMA_DIR = PROJECT_ROOT / "schema"
 AGENTS_MD_PATH = SCHEMA_DIR / "AGENTS.md"   # contratto operativo letto in ogni chiamata LLM

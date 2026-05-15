@@ -25,12 +25,13 @@ from pathlib import Path
 
 from .config import (
     AGENTS_MD_PATH, CHUNK_SIZE_WORDS, CHUNK_OVERLAP_WORDS,
-    RAW_COLLECTION, WIKI_COLLECTION, VALID_LEVELS,
+    RAW_COLLECTION, WIKI_COLLECTION, VALID_LEVELS, TOKEN_LOG_PATH,
 )
 from .stores import RawStore, WikiStore, VectorDB
 from .embeddings import Embedder
 from .llm_client import LLMClient
 from .hot_layer import HotLayer
+from .token_tracker import TokenTracker
 
 
 # Regex per generare slug "stile filesystem" da titoli liberi. Tutto
@@ -105,14 +106,27 @@ class IngestPipeline:
     pagare l'overhead di inizializzazione su ingest batch.
     """
 
-    def __init__(self, llm: LLMClient | None = None, embedder: Embedder | None = None):
+    def __init__(
+        self,
+        llm: LLMClient | None = None,
+        embedder: Embedder | None = None,
+        tracker: TokenTracker | None = None,
+    ):
         """Inizializza la pipeline. I client sono opzionali per facilitare
-        i test con mock; default = client reali su Azure OpenAI."""
+        i test con mock; default = client reali su Azure OpenAI.
+
+        Il TokenTracker è creato qui se non fornito esternamente, in modo
+        che venga condiviso da LLMClient e Embedder e raccolga le metriche
+        di tutte le sotto-fasi dell'ingest.
+        """
+        # Tracker condiviso tra LLM ed Embedder: vincolo perché la fase
+        # corrente (contextvar) sia letta in modo consistente da entrambi.
+        self.tracker = tracker or TokenTracker(log_path=TOKEN_LOG_PATH)
         self.raw = RawStore()
         self.wiki = WikiStore()
         self.vdb = VectorDB()
-        self.embedder = embedder or Embedder()
-        self.llm = llm or LLMClient()
+        self.embedder = embedder or Embedder(tracker=self.tracker)
+        self.llm = llm or LLMClient(tracker=self.tracker)
         self.hot = HotLayer(self.wiki, self.llm)
         # AGENTS.md viene caricato UNA VOLTA all'init: nel ciclo di vita
         # tipico di un ingest batch non cambia. In caso di hot-reload del
@@ -159,33 +173,40 @@ class IngestPipeline:
             metadata["subtype"] = subtype
 
         # 1. Raw store: scrive il documento immutabile prima di tutto.
+        #    Nessuna chiamata API qui — solo filesystem.
         self.raw.save(doc_id, body, metadata)
 
         # 2. Raw index: SEMPRE indicizzato, indipendentemente dal livello.
         #    Questo è il punto chiave del "principio non negoziabile".
-        self._index_raw(doc_id, title, body)
+        #    Solo embedding API; fase taggata per il tracker.
+        with self.tracker.phase(f"ingest:{level.lower()}:raw_index"):
+            self._index_raw(doc_id, title, body)
 
         touched_pages: list[str] = []
 
-        # 3. Path divergenti per livello.
+        # 3. Path divergenti per livello. Ogni step LLM è in una fase
+        #    distinta per poter analizzare a posteriori dove va il budget.
         if level == "L0":
             # Stop qui: il documento è recuperabile solo via ricerca raw.
             pass
         elif level == "L1":
-            # Pagina source: sintesi standalone, niente integrazione.
-            source_page = self._make_source_page(doc_id, title, body)
+            with self.tracker.phase("ingest:l1:source_page"):
+                source_page = self._make_source_page(doc_id, title, body)
             touched_pages.append(source_page)
         elif level == "L2":
-            # L1 + integrazione entità nelle pagine wiki esistenti/nuove.
-            source_page = self._make_source_page(doc_id, title, body)
+            with self.tracker.phase("ingest:l2:source_page"):
+                source_page = self._make_source_page(doc_id, title, body)
             touched_pages.append(source_page)
+            # _integrate_entities internamente apre fasi annidate per
+            # identify / create / merge.
             entity_pages = self._integrate_entities(doc_id, title, body, hint_subtype=subtype)
             touched_pages.extend(entity_pages)
 
         # 4. Hot Layer: rebuild solo se la wiki è cambiata. Per L0
         #    non c'è nulla da riflettere nell'index.
         if touched_pages:
-            self.hot.rebuild()
+            with self.tracker.phase("ingest:hot_layer_rebuild"):
+                self.hot.rebuild()
 
         return {"doc_id": doc_id, "level": level, "wiki_pages": touched_pages}
 
@@ -325,17 +346,21 @@ class IngestPipeline:
         Returns:
             Lista dei page_id toccati (creati o aggiornati).
         """
-        entities = self._identify_entities(doc_id, title, body, hint_subtype)
+        with self.tracker.phase("ingest:l2:identify_entities"):
+            entities = self._identify_entities(doc_id, title, body, hint_subtype)
         touched: list[str] = []
         for ent in entities:
             page_id = ent["id"]
             subtype = ent["subtype"]
             # Branch principale: creazione vs merge. Cambia il prompt
-            # e quindi la natura della chiamata LLM.
+            # e quindi la natura (e il costo) della chiamata LLM:
+            # il merge include la pagina esistente in input, è più caro.
             if self.wiki.exists(page_id):
-                merged = self._merge_entity_page(page_id, doc_id, title, body)
+                with self.tracker.phase("ingest:l2:entity_merge"):
+                    merged = self._merge_entity_page(page_id, doc_id, title, body)
             else:
-                merged = self._create_entity_page(page_id, subtype, doc_id, title, body)
+                with self.tracker.phase("ingest:l2:entity_create"):
+                    merged = self._create_entity_page(page_id, subtype, doc_id, title, body)
             # Metadati aggiornati a ogni passaggio: importa che sources sia
             # cumulativo (vedi WikiStore.update_with_merge).
             extra_meta = {
@@ -346,7 +371,10 @@ class IngestPipeline:
                 "title": page_id.replace("_", " ").title(),
             }
             self.wiki.update_with_merge(page_id, merged, [doc_id], extra_meta=extra_meta)
-            self._index_wiki_page(page_id)
+            # Re-embed della pagina aggiornata. Fase dedicata per separare
+            # il costo dell'embedding wiki da quello della generazione testo.
+            with self.tracker.phase("ingest:l2:wiki_index"):
+                self._index_wiki_page(page_id)
             touched.append(page_id)
         return touched
 

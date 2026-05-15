@@ -33,7 +33,7 @@ Copy-Item .env.example .env
 ### Ingest dei 10 documenti seed
 
 ```powershell
-python scripts/ingest_doc.py --file data/raw/incoming/frodo_intro.txt        --title "Frodo Baggins — introduzione"   --level L2 --subtype character
+python scripts/ingest_doc.py --file data/raw/incoming/frodo_intro.txt        --title "Frodo Baggins — introduzione"    --level L2 --subtype character
 python scripts/ingest_doc.py --file data/raw/incoming/gandalf_intro.txt      --title "Gandalf — introduzione"          --level L2 --subtype character
 python scripts/ingest_doc.py --file data/raw/incoming/aragorn_intro.txt      --title "Aragorn — introduzione"          --level L2 --subtype character
 python scripts/ingest_doc.py --file data/raw/incoming/sam_intro.txt          --title "Samwise Gamgee"                  --level L1
@@ -43,6 +43,7 @@ python scripts/ingest_doc.py --file data/raw/incoming/mordor.txt             --t
 python scripts/ingest_doc.py --file data/raw/incoming/monte_fato.txt         --title "Monte Fato"                      --level L1
 python scripts/ingest_doc.py --file data/raw/incoming/consiglio_elrond.txt   --title "Consiglio di Elrond"             --level L2 --subtype event
 python scripts/ingest_doc.py --file data/raw/incoming/lettera_routine.txt    --title "Nota Mathom-house Halimath 1419" --level L0
+python scripts/ingest_doc.py --file data/raw/incoming/sauron_intro.txt       --title "Sauron"                          --level L2 --subtype character
 ```
 
 ### Fare una domanda
@@ -64,6 +65,29 @@ python scripts/ask.py --eval tests/eval_set.yaml
 ```powershell
 python scripts/lint.py
 ```
+
+### Report consumo token
+
+Ogni invocazione di `ingest_doc.py` e `ask.py` stampa un riepilogo dei token spesi nella sessione (breakdown per fase). Il dettaglio completo viene loggato in append a `data/token_log.jsonl`. Per analisi cumulative:
+
+```powershell
+python scripts/tokens.py                       # report totale
+python scripts/tokens.py --phase ingest        # solo ingest (tutti i sotto-step)
+python scripts/tokens.py --phase query:llm     # solo la sintesi finale
+python scripts/tokens.py --since 24h           # ultime 24 ore
+```
+
+Le fasi tracciate:
+- `ingest:l{0,1,2}:raw_index`     — embedding dei chunk raw
+- `ingest:l1:source_page`         — generazione pagina source L1
+- `ingest:l2:source_page`         — generazione pagina source L2
+- `ingest:l2:identify_entities`   — estrazione JSON entità
+- `ingest:l2:entity_create`       — creazione nuova pagina entity
+- `ingest:l2:entity_merge`        — merge in pagina entity esistente
+- `ingest:l2:wiki_index`          — embedding pagina wiki aggiornata
+- `ingest:hot_layer_rebuild`      — rigenerazione overview Hot Layer
+- `query:embedding`               — embedding della domanda
+- `query:llm_synthesis`           — chiamata finale di risposta
 
 ## Struttura
 

@@ -22,7 +22,7 @@ import re
 from datetime import datetime
 
 from .config import (
-    AGENTS_MD_PATH, QUERY_LOG_PATH,
+    AGENTS_MD_PATH, QUERY_LOG_PATH, TOKEN_LOG_PATH,
     RAW_COLLECTION, WIKI_COLLECTION,
     WIKI_TOP_K, RAW_TOP_K,
 )
@@ -30,6 +30,7 @@ from .stores import WikiStore, VectorDB
 from .embeddings import Embedder
 from .llm_client import LLMClient
 from .hot_layer import HotLayer
+from .token_tracker import TokenTracker
 
 
 # Tabella delle regole di risoluzione conflitti (sezione 6.2 del design).
@@ -54,52 +55,85 @@ def _load_agents() -> str:
     return AGENTS_MD_PATH.read_text(encoding="utf-8") if AGENTS_MD_PATH.exists() else ""
 
 
+# Regex per i wikilink `[[id]]`. Usata sia per il fallback parser (quando il
+# JSON finale è assente perché la risposta è stata troncata) sia per il check
+# di validità delle citazioni a valle.
+_WIKILINK_RE = re.compile(r"\[\[([a-zA-Z0-9_]+)\]\]")
+
+# Euristica per distinguere doc_id raw da page_id wiki guardando solo l'id:
+# i doc_id terminano sempre con un suffisso di timestamp `_AAAAMMGGHHMMSS`
+# (14 cifre) generato da IngestPipeline.ingest(). Le page_id wiki no.
+_DOC_ID_SUFFIX_RE = re.compile(r"_\d{14}$")
+
+
+def _split_links_by_kind(ids: list[str]) -> tuple[list[str], list[str]]:
+    """Divide una lista di id in (wiki_page_ids, raw_doc_ids) con euristica.
+
+    Usato come fallback quando il modello non ha emesso il blocco JSON
+    finale (es. risposta troncata a max_tokens).
+    """
+    wiki, raw = [], []
+    seen = set()
+    for _id in ids:
+        if _id in seen:
+            continue
+        seen.add(_id)
+        if _DOC_ID_SUFFIX_RE.search(_id):
+            raw.append(_id)
+        else:
+            wiki.append(_id)
+    return wiki, raw
+
+
 def _parse_response(text: str) -> dict:
     """Estrae la struttura semantica dalla risposta dell'LLM.
 
     Convenzione: l'LLM termina sempre la risposta con un blocco JSON
-    auto-descrittivo. Il parsing è tollerante: se l'estrazione fallisce,
-    restituisce uno scheletro coerente con confidence=low, in modo che
-    il chiamante non debba gestire eccezioni qui.
+    auto-descrittivo. Il parsing è tollerante e applica un fallback a
+    cascata:
+    1. Cerca un blocco JSON valido in coda al testo.
+    2. Se manca o è malformato, estrae gli id dai wikilink `[[...]]`
+       presenti nel body e li classifica con euristica wiki/raw.
+       In questo caso la confidence viene forzata a "low" perché il
+       contratto di output non è stato rispettato (anche se i contenuti
+       sono presenti).
 
     Returns:
         Dict con campi: answer, wiki_sources, raw_sources, confidence,
         raw_used, gaps.
     """
-    # La regex cattura un blocco JSON bilanciato a un livello di
-    # annidamento. Sufficiente per il nostro schema piatto.
-    # Si prende l'ULTIMO match perché l'LLM può menzionare {…} esemplificativi
-    # nella spiegazione e poi emettere il vero JSON in coda.
+    # 1) Path nominale: blocco JSON in coda.
     matches = list(re.finditer(r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", text, re.DOTALL))
-    if not matches:
-        return {
-            "answer": text.strip(),
-            "wiki_sources": [],
-            "raw_sources": [],
-            "confidence": "low",
-            "raw_used": False,
-        }
-    try:
-        data = json.loads(matches[-1].group(0))
-    except Exception:
-        # JSON malformato: usiamo l'intero testo come risposta e segnaliamo
-        # confidence low. Meglio degradare graceful che fallire.
-        return {
-            "answer": text.strip(),
-            "wiki_sources": [],
-            "raw_sources": [],
-            "confidence": "low",
-            "raw_used": False,
-        }
+    if matches:
+        try:
+            data = json.loads(matches[-1].group(0))
+            return {
+                "answer": data.get("answer", "").strip() or text.strip(),
+                "wiki_sources": data.get("wiki_sources") or [],
+                "raw_sources": data.get("raw_sources") or [],
+                "confidence": data.get("confidence", "low"),
+                "raw_used": bool(data.get("raw_sources")),
+                "gaps": data.get("gaps", ""),
+            }
+        except Exception:
+            # Cade nel fallback sottostante.
+            pass
+
+    # 2) Fallback: estrai i wikilink inline dal corpo della risposta.
+    # Tipico caso: risposta troncata a max_tokens prima del blocco JSON.
+    # Meglio mostrare le citazioni che il modello ha effettivamente fatto
+    # piuttosto che dichiarare "nessuna sorgente" su una risposta ricca.
+    inline_ids = _WIKILINK_RE.findall(text)
+    wiki, raw = _split_links_by_kind(inline_ids)
     return {
-        "answer": data.get("answer", "").strip(),
-        "wiki_sources": data.get("wiki_sources") or [],
-        "raw_sources": data.get("raw_sources") or [],
-        "confidence": data.get("confidence", "low"),
-        # raw_used è derivato (non chiesto al modello): se ha citato almeno
-        # una sorgente raw, allora l'indice raw è stato effettivamente utile.
-        "raw_used": bool(data.get("raw_sources")),
-        "gaps": data.get("gaps", ""),
+        "answer": text.strip(),
+        "wiki_sources": wiki,
+        "raw_sources": raw,
+        # Confidence forzata a low: senza JSON non sappiamo cosa il modello
+        # giudichi affidabile. Segnaliamo onestamente il degrado.
+        "confidence": "low",
+        "raw_used": bool(raw),
+        "gaps": "(JSON finale mancante: sorgenti ricostruite da wikilink inline)",
     }
 
 
@@ -110,12 +144,23 @@ class QueryPipeline:
     (utile in modalità batch via --eval).
     """
 
-    def __init__(self, llm: LLMClient | None = None, embedder: Embedder | None = None):
-        """Inizializza pipeline. Client opzionali per testing con mock."""
+    def __init__(
+        self,
+        llm: LLMClient | None = None,
+        embedder: Embedder | None = None,
+        tracker: TokenTracker | None = None,
+    ):
+        """Inizializza pipeline. Client opzionali per testing con mock.
+
+        Il TokenTracker è condiviso tra LLM ed Embedder così che le
+        chiamate dentro un `with self.tracker.phase(...)` vengano tutte
+        etichettate con la stessa fase.
+        """
+        self.tracker = tracker or TokenTracker(log_path=TOKEN_LOG_PATH)
         self.wiki = WikiStore()
         self.vdb = VectorDB()
-        self.llm = llm or LLMClient()
-        self.embedder = embedder or Embedder()
+        self.llm = llm or LLMClient(tracker=self.tracker)
+        self.embedder = embedder or Embedder(tracker=self.tracker)
         self.hot = HotLayer(self.wiki, self.llm)
         self.agents_md = _load_agents()
 
@@ -129,7 +174,13 @@ class QueryPipeline:
             di question e timestamp.
         """
         # Step 2-3: orientamento + retrieval multi-indice.
-        q_emb = self.embedder.embed(question)
+        # Fasi distinte per separare il costo di embedding della domanda
+        # (sempre 1 chiamata) dalla generazione finale.
+        with self.tracker.phase("query:embedding"):
+            q_emb = self.embedder.embed(question)
+        # Il retrieval su ChromaDB non consuma token (è solo similarity
+        # search locale), quindi qui non c'è fase token-tracking. Resta
+        # la fase logica "retrieval" per coerenza concettuale.
         wiki_hits = self.vdb.query(WIKI_COLLECTION, q_emb, WIKI_TOP_K)
         raw_hits = self.vdb.query(RAW_COLLECTION, q_emb, RAW_TOP_K)
 
@@ -140,6 +191,16 @@ class QueryPipeline:
         # il context.
         wiki_block = self._format_hits(wiki_hits, kind="WIKI")
         raw_block = self._format_hits(raw_hits, kind="RAW")
+
+        # Whitelist delle citazioni ammesse: solo gli id effettivamente
+        # recuperati. Senza questa lista il modello inventa wikilink
+        # plausibili ma inesistenti (osservato: morgoth, rings_of_power,
+        # war_of_the_ring...). Con la lista esplicita la hallucination
+        # cala drasticamente.
+        allowed_wiki = sorted({(h.get("metadata") or {}).get("page_id") or h["id"] for h in wiki_hits})
+        allowed_raw = sorted({(h.get("metadata") or {}).get("doc_id") or h["id"] for h in raw_hits})
+        allowed_wiki = [w for w in allowed_wiki if w]
+        allowed_raw = [r for r in allowed_raw if r]
 
         # Il system prompt è la "configurazione runtime" della pipeline:
         # contiene la strategia, le regole di conflitto, il contratto
@@ -168,6 +229,25 @@ class QueryPipeline:
             "che contraddice una sintesi è un segnale, non rumore. Se trovi una discrepanza, NON sceglierne "
             "una sola e nasconderla: esplicita entrambe le versioni nella risposta, cita le rispettive "
             "sorgenti, e indica quale prevale secondo le regole di risoluzione conflitti.\n\n"
+            # Whitelist + regole di formato citazione. Critico per evitare
+            # le hallucination di wikilink osservate sulle risposte lunghe.
+            "REGOLE DI CITAZIONE (vincolanti):\n"
+            "- Puoi citare con `[[id]]` SOLO id presenti nella whitelist sottostante. "
+            "  Se vuoi riferirti a un'entità non in whitelist, scrivila in testo piano "
+            "  SENZA wikilink (es. 'Morgoth', non '[[morgoth]]').\n"
+            "- Usa `[[page_id_wiki]]` per concetti, sintesi e relazioni.\n"
+            "- Usa `[[doc_id_raw]]` (quelli con suffisso _AAAAMMGGHHMMSS) per dettagli "
+            "  puntuali, date, citazioni testuali.\n"
+            "- Non duplicare wiki+raw nello stesso punto se rimandano allo stesso fatto: "
+            "  scegline UNO secondo le regole di risoluzione conflitti.\n"
+            "WIKI page_id ammessi: " + (", ".join(allowed_wiki) if allowed_wiki else "(nessuno)") + "\n"
+            "RAW  doc_id  ammessi: " + (", ".join(allowed_raw) if allowed_raw else "(nessuno)") + "\n\n"
+            "COMPATTEZZA:\n"
+            "La risposta finale (incluso il blocco JSON) deve stare entro ~600 parole. "
+            "Se l'argomento è vasto, dai priorità ai fatti essenziali e cita le pagine wiki "
+            "per gli approfondimenti, senza riprodurle integralmente. L'output deve SEMPRE "
+            "terminare con il blocco JSON: meglio una risposta più breve ma completa di JSON "
+            "che una lunga ma troncata.\n\n"
             f"{CONFLICT_RULES}\n\n"
             # Il blocco JSON finale è il "contratto di output" che permette
             # al parser di estrarre dati strutturati senza euristiche fragili.
@@ -188,7 +268,13 @@ class QueryPipeline:
         )
 
         # Singola chiamata LLM: tutto il contesto è già preparato.
-        full = self.llm.complete(system=system, user=user, max_tokens=2000)
+        # È la fase più costosa di una query: l'intero context (Hot Layer
+        # + AGENTS.md + wiki hits + raw hits) viene passato al modello.
+        # max_tokens=3500 lascia margine al modello per chiudere il blocco
+        # JSON anche su risposte ricche. Sotto i 3000 si è osservato
+        # truncation su domande aperte (es. "cosa sappiamo su X in dettaglio?").
+        with self.tracker.phase("query:llm_synthesis"):
+            full = self.llm.complete(system=system, user=user, max_tokens=3500)
         parsed = _parse_response(full)
         parsed["question"] = question
         parsed["timestamp"] = datetime.now().isoformat(timespec="seconds")

@@ -4,11 +4,11 @@ _Aggiornato: 2026-05-15_
 
 ## Overview
 
-La knowledge base attuale copre soprattutto personaggi, luoghi ed eventi legati al ciclo dell’Anello nella Terza Era. Sono presenti voci su protagonisti centrali (Frodo, Samwise, Bilbo, Aragorn, Arwen, Gandalf, Elrond, Saruman, Sauron, Shadowfax) e sugli artefatti dominanti della trama (Anello Unico, Narsil/Andúril, Anelli del Potere). L’ambientazione è delineata attraverso varie località chiave: la Contea (con focus su Hobbiton, Baggins e Buckland), Rivendell, Eriador, Arnor, Mordor con le sue strutture principali (Barad-dûr, Orodruin, Morannon, Cirith Ungol). Sul piano storico-narrativo compaiono voci su eventi come il Consiglio di Elrond, la Compagnia dell’Anello e la Guerra dell’Anello.
+La knowledge base attuale costituisce un nucleo introduttivo sul legendarium di Tolkien, con forte concentrazione sul periodo della Guerra dell’Anello nella Terza Era. Sono ben rappresentati i protagonisti principali del Signore degli Anelli (Frodo, Sam, Bilbo, Aragorn, Arwen, Gandalf, Elrond, Saruman, Sauron, Morgoth come antecedente remoto) e alcuni artefatti centrali (Anello Unico, Anelli del Potere, Narsil/Andúril). Sul piano geografico, il focus è sull’Eriador e sulla Contea (Hobbiton, Brea, Buckland, Casa Baggins/Bag End) e sui luoghi chiave di Mordor (Barad-dûr, Morannon, Orodruin), con l’aggiunta di località narrative cruciali come Cirith Ungol e Gran Burrone/Rivendell.  
 
-Le fonti disponibili sono per ora prevalentemente introduttive: sintetiche biografie (Aragorn, Frodo, Samwise, Gandalf), descrizioni generali di luoghi (Contea, Mordor, Monte Fato) e dell’Anello Unico. Mancano approfondimenti sistematici su genealogie, lingue, cronologie dettagliate, nonché la maggior parte delle epoche precedenti (Prima e Seconda Era) e delle popolazioni non direttamente coinvolte nella Guerra dell’Anello (Rohan, Gondor in dettaglio, Silvani, Nani, Valar). Anche le relazioni tra le entità esistenti sono solo implicite e non ancora articolate in modo strutturato.
+Sono coperti alcuni eventi cardine del ciclo dell’Anello, come il Consiglio di Elrond, la Compagnia dell’Anello e la Guerra dell’Anello, con fonti dedicate che offrono sintesi biografiche e storiche. Restano tuttavia lacune notevoli: mancano quasi del tutto le altre regioni della Terra di Mezzo (Rohan, Gondor al di fuori di Arnor, Lórien, Rhovanion, il Beleriand della Prima Era), gran parte dei popoli (Nani, Ent, Uomini di Rohan e Gondor, Elfi dei vari regni) e figure importanti come Galadriel, Legolas, Gimli, Boromir, Faramir, Théoden, Éowyn ed Éomer. Anche la mitologia più antica (Ainur, Valar, Silmaril, Númenor) è per ora solo implicata e non sistematicamente trattata.
 
-## Index (37 pagine)
+## Index (39 pagine)
 ### entity
 - [[aragorn_elessar]] (character) — ```yaml
 - [[arnor]] (place) — ```yaml
@@ -26,6 +26,7 @@ Le fonti disponibili sono per ora prevalentemente introduttive: sintetiche biogr
 - [[hobbiton]] (place) — ```yaml
 - [[morannon]] (place) — ```yaml
 - [[mordor]] (place) — ```yaml
+- [[morgoth]] (character) — ```yaml
 - [[narsil_anduril]] (artifact) — ```yaml
 - [[one_ring]] (artifact) — ```yaml
 - [[orodruin]] (place) — ```yaml
@@ -49,6 +50,7 @@ Le fonti disponibili sono per ora prevalentemente introduttive: sintetiche biogr
 - [[source_monte_fato_20260515143319]] — Il documento descrive il Monte Fato (Orodruin, Amon Amarth) come il vulcano centrale di Mordor e luogo chiave nella storia dell’Anello Unico…
 - [[source_mordor_20260515143155]] — Il documento presenta una sintesi geografica e storica di Mordor, “la Terra Nera” in Sindarin, regione dell’est della Terra di Mezzo che fun…
 - [[source_samwise_gamgee_20260515142814]] — Il documento presenta una sintetica biografia di Samwise Gamgee, detto Sam, hobbit della Contea nato nel 2980 T.E., figlio del giardiniere H…
+- [[source_sauron_20260515170128]] — Il documento presenta una sintesi della figura di Sauron all’interno del legendarium tolkieniano, dalla sua origine come Maia di Aulë con il…
 
 ## Riferimento AGENTS
 Vedi `schema/AGENTS.md` per regole operative e convenzioni di naming.

@@ -54,6 +54,10 @@ def main(file_path: str, title: str, level: str, subtype: str | None):
     click.echo(f"   doc_id     : {result['doc_id']}")
     click.echo(f"   wiki pages : {', '.join(result['wiki_pages']) if result['wiki_pages'] else '(nessuna)'}")
     click.echo("OK")
+    # Stampa il breakdown dei token consumati da questa singola ingest.
+    # Il log persistente su disco continua ad accumulare tra invocazioni;
+    # questo summary mostra solo la sessione corrente.
+    click.echo(pipeline.tracker.format_session_summary())
 
 
 if __name__ == "__main__":

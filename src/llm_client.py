@@ -7,11 +7,13 @@ questo file, mantenendo la firma `complete(system, user)` stabile.
 
 Walking skeleton: niente retry, streaming, function calling, prompt caching.
 Saranno aggiunti nelle fasi successive quando emergeranno i pattern d'uso.
+Tracking dei token integrato via TokenTracker opzionale.
 """
 
 import os
 from openai import AzureOpenAI
 from .config import LLM_DEPLOYMENT, AZURE_API_VERSION
+from .token_tracker import TokenTracker
 
 
 class LLMClient:
@@ -20,14 +22,19 @@ class LLMClient:
     Una sola responsabilità: dato un system prompt e un messaggio utente,
     restituire la stringa di testo prodotta dal modello. Tutto il resto
     (parsing JSON, gestione conflitti, retrieval) sta nei moduli chiamanti.
+
+    Se viene passato un TokenTracker, ogni chiamata emette un record di
+    consumo con la fase corrente (impostata via `tracker.phase(...)`).
     """
 
-    def __init__(self, deployment: str = LLM_DEPLOYMENT):
+    def __init__(self, deployment: str = LLM_DEPLOYMENT, tracker: TokenTracker | None = None):
         """Inizializza il client.
 
         Args:
             deployment: nome della deployment Azure (NON il nome del modello
                 base). Default letto da .env via config.LLM_DEPLOYMENT.
+            tracker: opzionale, se presente registra il consumo token di
+                ogni chiamata. Tipicamente injectato dalla pipeline.
 
         Raises:
             RuntimeError: se le credenziali Azure non sono configurate.
@@ -47,6 +54,7 @@ class LLMClient:
             api_version=AZURE_API_VERSION,
         )
         self.deployment = deployment
+        self.tracker = tracker
 
     def complete(self, system: str, user: str, max_tokens: int = 2048) -> str:
         """Esegue una completion chat con un singolo turno user.
@@ -59,6 +67,10 @@ class LLMClient:
         Returns:
             Testo della risposta, già strippato. Stringa vuota se il modello
             non ha prodotto contenuto testuale.
+
+        Side effect:
+            Se è configurato un tracker, registra un record con i token
+            consumati (input/output/cached) e la fase corrente.
         """
         messages = [
             {"role": "system", "content": system},
@@ -80,4 +92,26 @@ class LLMClient:
                 max_tokens=max_tokens,
                 messages=messages,
             )
+
+        # Emette un record di telemetria se la API ha restituito il blocco
+        # usage (Azure OpenAI lo include sempre per le chat). Lo facciamo
+        # PRIMA di restituire così anche eventuali eccezioni a valle non
+        # impediscono di tracciare il costo già sostenuto.
+        if self.tracker is not None and getattr(response, "usage", None):
+            u = response.usage
+            cached = 0
+            # Sui modelli più nuovi può comparire `prompt_tokens_details.cached_tokens`
+            # quando entra in gioco il prompt caching: lo isoliamo come metrica
+            # separata per stimare lo sconto applicato (variabile per modello).
+            details = getattr(u, "prompt_tokens_details", None)
+            if details is not None:
+                cached = getattr(details, "cached_tokens", 0) or 0
+            self.tracker.record(
+                operation="chat",
+                model=self.deployment,
+                prompt_tokens=getattr(u, "prompt_tokens", 0) or 0,
+                completion_tokens=getattr(u, "completion_tokens", 0) or 0,
+                cached_tokens=cached,
+            )
+
         return (response.choices[0].message.content or "").strip()
