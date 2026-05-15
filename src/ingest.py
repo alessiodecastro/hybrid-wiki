@@ -1,3 +1,22 @@
+"""
+Pipeline di ingest dei documenti, con i tre livelli del design.
+
+Il flusso comune a tutti i livelli garantisce il "principio non
+negoziabile" (sezione 3.2): ogni documento viene SEMPRE salvato e
+indicizzato integralmente nel raw layer, prima e indipendentemente da
+qualsiasi altra elaborazione.
+
+Differenze per livello:
+- L0: stop dopo il raw layer (documenti ad alto volume, basso valore).
+- L1: aggiunge una pagina wiki "source" sintetizzata dall'LLM.
+- L2: L1 + identificazione entità e merge nelle pagine entity esistenti,
+      con esplicitazione di eventuali contraddizioni.
+
+Walking skeleton: la classificazione del livello è MANUALE, passata come
+parametro CLI. Nelle fasi successive sarà assistita da un classificatore
+automatico con review umana.
+"""
+
 from __future__ import annotations
 import json
 import re
@@ -14,35 +33,64 @@ from .llm_client import LLMClient
 from .hot_layer import HotLayer
 
 
+# Regex per generare slug "stile filesystem" da titoli liberi. Tutto
+# minuscolo, solo alfanumerici e underscore, senza accenti né punteggiatura.
 _slug_re = re.compile(r"[^a-z0-9]+")
 
 
 def slugify(text: str) -> str:
+    """Converte un testo libero in uno slug filesystem-safe.
+
+    Esempio: "Frodo Baggins — introduzione" -> "frodo_baggins_introduzione"
+    """
     s = _slug_re.sub("_", text.lower()).strip("_")
-    return s or "doc"
+    return s or "doc"  # fallback per stringhe vuote o composte solo da punteggiatura
 
 
 def chunk_text(text: str, size: int = CHUNK_SIZE_WORDS, overlap: int = CHUNK_OVERLAP_WORDS) -> list[str]:
+    """Spezza un testo in chunk sovrapposti, granularità a parola.
+
+    Lo sliding window con overlap garantisce che frasi a cavallo tra due
+    chunk siano comunque presenti integralmente in almeno uno: questo
+    riduce la perdita di contesto su tagli infelici.
+
+    Args:
+        size: numero di parole per chunk.
+        overlap: numero di parole sovrapposte tra chunk consecutivi.
+
+    Returns:
+        Lista di chunk. Documento più corto di `size` -> singolo chunk.
+    """
     words = text.split()
     if not words:
         return []
     if len(words) <= size:
         return [" ".join(words)]
     chunks = []
+    # step rappresenta l'avanzamento "netto" tra inizio di un chunk e il
+    # successivo. Vincolo step >= 1 evita loop infiniti se overlap >= size.
     step = max(1, size - overlap)
     for start in range(0, len(words), step):
         end = start + size
         chunks.append(" ".join(words[start:end]))
         if end >= len(words):
+            # Ultimo chunk processato: il prossimo sarebbe oltre la fine.
             break
     return chunks
 
 
 def _load_agents() -> str:
+    """Carica il contratto operativo (AGENTS.md), iniettato in ogni prompt LLM."""
     return AGENTS_MD_PATH.read_text(encoding="utf-8") if AGENTS_MD_PATH.exists() else ""
 
 
 def _extract_json(text: str) -> dict:
+    """Estrae il primo blocco JSON da un testo libero.
+
+    Necessario perché l'LLM a volte aggiunge prosa intorno al JSON nonostante
+    le istruzioni. La regex è "greedy multiline": cattura dal primo `{` fino
+    all'ultimo `}`.
+    """
     m = re.search(r"\{.*\}", text, re.DOTALL)
     if not m:
         raise ValueError(f"Nessun JSON trovato nella risposta:\n{text}")
@@ -50,17 +98,46 @@ def _extract_json(text: str) -> dict:
 
 
 class IngestPipeline:
+    """Orchestratore dell'ingest dei documenti nei tre livelli L0/L1/L2.
+
+    Mantiene riferimenti agli store e ai client esterni (LLM, embedder)
+    e li riusa per tutte le elaborazioni successive — utile per non
+    pagare l'overhead di inizializzazione su ingest batch.
+    """
+
     def __init__(self, llm: LLMClient | None = None, embedder: Embedder | None = None):
+        """Inizializza la pipeline. I client sono opzionali per facilitare
+        i test con mock; default = client reali su Azure OpenAI."""
         self.raw = RawStore()
         self.wiki = WikiStore()
         self.vdb = VectorDB()
         self.embedder = embedder or Embedder()
         self.llm = llm or LLMClient()
         self.hot = HotLayer(self.wiki, self.llm)
+        # AGENTS.md viene caricato UNA VOLTA all'init: nel ciclo di vita
+        # tipico di un ingest batch non cambia. In caso di hot-reload del
+        # contratto operativo, ricreare la pipeline.
         self.agents_md = _load_agents()
 
-    # ---------- pubblico ----------
+    # ------------------------------------------------------------------
+    # API pubblica
+    # ------------------------------------------------------------------
     def ingest(self, file_path: str | Path, title: str, level: str, subtype: str | None = None) -> dict:
+        """Ingesta un documento. Punto di ingresso unico per tutti i livelli.
+
+        Args:
+            file_path: path del file di testo sorgente.
+            title: titolo leggibile (usato anche per generare il doc_id).
+            level: "L0" | "L1" | "L2".
+            subtype: opzionale, suggerisce all'estrazione entità il tipo
+                principale (character/place/...). Usato solo in L2.
+
+        Returns:
+            Dict con doc_id assegnato, livello, e pagine wiki toccate.
+
+        Raises:
+            ValueError: se il livello è invalido o il file è vuoto.
+        """
         if level not in VALID_LEVELS:
             raise ValueError(f"Livello invalido: {level}. Ammessi: {VALID_LEVELS}")
         path = Path(file_path)
@@ -68,6 +145,8 @@ class IngestPipeline:
         if not body:
             raise ValueError(f"File vuoto: {path}")
 
+        # doc_id = slug del titolo + timestamp. Il timestamp evita collisioni
+        # quando lo stesso documento viene re-ingestato (versionamento di fatto).
         doc_id = f"{slugify(title)}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
         metadata = {
             "title": title,
@@ -79,44 +158,70 @@ class IngestPipeline:
         if subtype:
             metadata["subtype"] = subtype
 
-        # 1. Raw store
+        # 1. Raw store: scrive il documento immutabile prima di tutto.
         self.raw.save(doc_id, body, metadata)
 
-        # 2. Raw index (sempre)
+        # 2. Raw index: SEMPRE indicizzato, indipendentemente dal livello.
+        #    Questo è il punto chiave del "principio non negoziabile".
         self._index_raw(doc_id, title, body)
 
         touched_pages: list[str] = []
 
-        # 3. Livelli
+        # 3. Path divergenti per livello.
         if level == "L0":
+            # Stop qui: il documento è recuperabile solo via ricerca raw.
             pass
         elif level == "L1":
+            # Pagina source: sintesi standalone, niente integrazione.
             source_page = self._make_source_page(doc_id, title, body)
             touched_pages.append(source_page)
         elif level == "L2":
+            # L1 + integrazione entità nelle pagine wiki esistenti/nuove.
             source_page = self._make_source_page(doc_id, title, body)
             touched_pages.append(source_page)
             entity_pages = self._integrate_entities(doc_id, title, body, hint_subtype=subtype)
             touched_pages.extend(entity_pages)
 
-        # 4. Hot layer (solo se è cambiato qualcosa nella wiki)
+        # 4. Hot Layer: rebuild solo se la wiki è cambiata. Per L0
+        #    non c'è nulla da riflettere nell'index.
         if touched_pages:
             self.hot.rebuild()
 
         return {"doc_id": doc_id, "level": level, "wiki_pages": touched_pages}
 
-    # ---------- helpers ----------
+    # ------------------------------------------------------------------
+    # Helper privati
+    # ------------------------------------------------------------------
     def _index_raw(self, doc_id: str, title: str, body: str) -> None:
+        """Chunka il body e popola la collection raw_chunks.
+
+        Ogni chunk ha id deterministico `{doc_id}__chunk_{NNN}` così che
+        un re-ingest dello stesso doc_id (caso raro ma possibile in dev)
+        produca upsert in-place invece di duplicati.
+        """
         chunks = chunk_text(body)
         if not chunks:
             return
         ids = [f"{doc_id}__chunk_{i:03d}" for i in range(len(chunks))]
-        metas = [{"doc_id": doc_id, "title": title, "chunk_idx": i, "kind": "raw"} for i in range(len(chunks))]
+        metas = [
+            {"doc_id": doc_id, "title": title, "chunk_idx": i, "kind": "raw"}
+            for i in range(len(chunks))
+        ]
+        # Singola chiamata batch all'API embeddings: massimizza throughput
+        # e minimizza il numero di richieste fatturabili.
         embs = self.embedder.embed_batch(chunks)
         self.vdb.add(RAW_COLLECTION, ids, embs, chunks, metas)
 
     def _index_wiki_page(self, page_id: str) -> None:
+        """(Re-)indicizza una pagina wiki nella collection wiki_pages.
+
+        Strategia: delete + upsert. Pulisce eventuali vettori obsoleti
+        legati a una versione precedente della stessa pagina (succede
+        nel ciclo di merge L2).
+        """
         fm, body = self.wiki.get(page_id)
+        # L'embedding è calcolato sul body completo prefisso dal page_id:
+        # il nome della pagina è un segnale semantico forte (es. "frodo_baggins").
         emb = self.embedder.embed(f"{page_id}\n\n{body}")
         meta = {
             "page_id": page_id,
@@ -128,7 +233,17 @@ class IngestPipeline:
         self.vdb.add(WIKI_COLLECTION, [page_id], [emb], [body], [meta])
 
     def _make_source_page(self, doc_id: str, title: str, body: str) -> str:
+        """Genera la pagina source per un documento (L1 e L2).
+
+        La pagina source è la sintesi 1:1 di un singolo documento raw.
+        Funge da "ponte" tra raw e wiki: l'audit trail della sintesi.
+
+        Returns:
+            page_id della pagina creata.
+        """
         page_id = f"source_{doc_id}"
+        # Il system prompt include AGENTS.md per garantire coerenza tra
+        # tutte le sintesi (tono, citazioni, struttura).
         system = (
             "Sei un curatore del companion wiki Tolkien. Produci una sintesi narrativa "
             "in italiano del documento sotto, strutturata in tre sezioni Markdown: "
@@ -147,7 +262,7 @@ class IngestPipeline:
             "tags": ["source"],
             "sources": [doc_id],
             "last_updated": date.today().isoformat(),
-            "confidence": "medium",
+            "confidence": "medium",  # default per le sintesi: l'LLM può aver omesso dettagli
             "stale": False,
             "title": f"Sintesi: {title}",
         }
@@ -156,7 +271,19 @@ class IngestPipeline:
         return page_id
 
     def _identify_entities(self, doc_id: str, title: str, body: str, hint_subtype: str | None) -> list[dict]:
-        hint = f"\nIl curatore suggerisce che l'entità principale è di tipo: {hint_subtype}." if hint_subtype else ""
+        """Chiede all'LLM di estrarre le entità rilevanti dal documento.
+
+        Output forzato a JSON per parsing affidabile. Il prompt è esplicito
+        sul fatto di filtrare le menzioni di passaggio: vogliamo le entità
+        "trattate", non semplicemente citate. Questo è un trade-off:
+        riduce il rumore ma può perdere dettagli rilevanti per il merge
+        (vedi caso della contraddizione 1601 vs 1604 sulla fondazione
+        della Contea nei documenti seed).
+        """
+        hint = (
+            f"\nIl curatore suggerisce che l'entità principale è di tipo: {hint_subtype}."
+            if hint_subtype else ""
+        )
         system = (
             "Sei l'estrattore di entità del companion wiki Tolkien. "
             "Identifica le entità rilevanti citate nel documento. "
@@ -172,8 +299,14 @@ class IngestPipeline:
         try:
             data = _extract_json(raw)
         except Exception as e:
+            # Non bloccante: in caso di output malformato, l'ingest L2
+            # degrada gracefully a L1 (pagina source presente, nessuna
+            # integrazione entità).
             print(f"[WARN] parsing entità fallito ({e}); nessuna entità integrata.")
             return []
+
+        # Dedup e validazione: il modello a volte ripete la stessa entità
+        # o omette campi richiesti.
         entities = data.get("entities") or []
         clean = []
         seen = set()
@@ -187,15 +320,24 @@ class IngestPipeline:
         return clean
 
     def _integrate_entities(self, doc_id: str, title: str, body: str, hint_subtype: str | None) -> list[str]:
+        """Per ogni entità identificata: crea o aggiorna la pagina entity.
+
+        Returns:
+            Lista dei page_id toccati (creati o aggiornati).
+        """
         entities = self._identify_entities(doc_id, title, body, hint_subtype)
         touched: list[str] = []
         for ent in entities:
             page_id = ent["id"]
             subtype = ent["subtype"]
+            # Branch principale: creazione vs merge. Cambia il prompt
+            # e quindi la natura della chiamata LLM.
             if self.wiki.exists(page_id):
                 merged = self._merge_entity_page(page_id, doc_id, title, body)
             else:
                 merged = self._create_entity_page(page_id, subtype, doc_id, title, body)
+            # Metadati aggiornati a ogni passaggio: importa che sources sia
+            # cumulativo (vedi WikiStore.update_with_merge).
             extra_meta = {
                 "type": "entity",
                 "subtype": subtype,
@@ -209,6 +351,7 @@ class IngestPipeline:
         return touched
 
     def _create_entity_page(self, page_id: str, subtype: str, doc_id: str, title: str, body: str) -> str:
+        """Genera ex-novo una pagina entity dal documento sorgente."""
         system = (
             f"Sei un curatore del companion wiki Tolkien. Crea una NUOVA pagina enciclopedica "
             f"per l'entità '{page_id}' (tipo: {subtype}) basandoti sul documento fornito. "
@@ -222,6 +365,14 @@ class IngestPipeline:
         return self.llm.complete(system=system, user=user, max_tokens=1500)
 
     def _merge_entity_page(self, page_id: str, doc_id: str, title: str, body: str) -> str:
+        """Fonde un nuovo documento in una pagina entity esistente.
+
+        Operazione delicata: deve preservare le informazioni preesistenti
+        ancora valide, aggiungere quelle nuove, e ESPLICITARE eventuali
+        contraddizioni in una sezione "## Contraddizioni note". Questo è
+        il meccanismo principale con cui il sistema gestisce le tensioni
+        tra fonti diverse.
+        """
         existing_fm, existing_body = self.wiki.get(page_id)
         existing_sources = existing_fm.get("sources") or []
         system = (

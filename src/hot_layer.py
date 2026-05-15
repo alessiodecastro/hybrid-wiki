@@ -1,3 +1,26 @@
+"""
+Hot Layer: la "memoria attiva" iniettata in ogni chiamata di query.
+
+Funzione architetturale (sezione 5.3 del design):
+fornire all'LLM un orientamento immediato sul dominio senza obbligarlo a
+"esplorare a tentoni" il vector DB. Nel walking skeleton il Hot Layer è
+composto da:
+
+- Overview: 2-3 paragrafi generati dall'LLM che descrivono lo stato
+  corrente della knowledge base.
+- Index: lista deterministica (NON generata da LLM) di tutte le pagine
+  wiki, raggruppate per type. Necessariamente esaustiva e ordinata.
+
+L'index è deterministico (build a partire dai frontmatter) perché deve
+essere completo e veritiero: un index generato da LLM rischierebbe di
+inventare pagine o ometterne. L'overview è invece libera: serve a dare
+"colore" e contesto, non a fungere da indice navigabile.
+
+Vincolo dimensionale: il Hot Layer deve restare sotto ~5k token. Oltre
+questa soglia satura la memoria di lavoro dell'LLM (vedi design 5.3) e
+va sostituito con un index gerarchico caricato dinamicamente.
+"""
+
 from __future__ import annotations
 from datetime import date
 from .config import HOT_LAYER_PATH, AGENTS_MD_PATH
@@ -5,34 +28,69 @@ from .stores import WikiStore
 from .llm_client import LLMClient
 
 
+# Soglia oltre la quale stampiamo un warning. Approssimazione conservativa:
+# l'index lineare comincia a degradare la qualità del prompt quando occupa
+# più del 10-15% di una context window da ~30-40k token utili.
 HOT_LAYER_WARN_TOKENS = 5000
 
 
 def _estimate_tokens(text: str) -> int:
+    """Stima euristica del numero di token in un testo.
+
+    Approssimazione 1 token ≈ 4 caratteri, valida per l'inglese e
+    ragionevolmente per l'italiano. Sufficiente per il warning.
+    """
     return max(1, len(text) // 4)
 
 
 def _load_agents_md() -> str:
+    """Carica il contratto operativo. Stringa vuota se non esiste ancora."""
     if AGENTS_MD_PATH.exists():
         return AGENTS_MD_PATH.read_text(encoding="utf-8")
     return ""
 
 
 class HotLayer:
+    """Gestisce il file HOT_LAYER.md: ricostruzione e caricamento.
+
+    Il file vive in data/wiki/HOT_LAYER.md ed è versionabile via git.
+    Viene rigenerato a ogni ingest L1/L2 (operazione che modifica la wiki)
+    e letto a ogni query.
+    """
+
     def __init__(self, wiki_store: WikiStore, llm: LLMClient | None = None):
+        """Inizializza il Hot Layer.
+
+        Args:
+            wiki_store: sorgente delle pagine wiki da indicizzare.
+            llm: opzionale. Se None, l'overview viene sostituita da un
+                testo placeholder (utile in test / offline).
+        """
         self.wiki_store = wiki_store
         self.llm = llm
 
     def load(self) -> str:
+        """Carica il Hot Layer corrente. Fallback su placeholder se non esiste."""
         if not HOT_LAYER_PATH.exists():
             return "# Hot Layer\n\n(vuoto: nessuna pagina wiki ancora)\n"
         return HOT_LAYER_PATH.read_text(encoding="utf-8")
 
     def _build_index(self) -> tuple[str, list[dict]]:
+        """Costruisce l'index deterministico a partire dai frontmatter.
+
+        Returns:
+            (markdown_index, entries) dove entries è la lista dei dict usati
+            anche per generare l'overview.
+        """
         entries = []
         for page_id in self.wiki_store.list():
             fm, body = self.wiki_store.get(page_id)
-            first_line = next((l.strip() for l in body.splitlines() if l.strip() and not l.startswith("#")), "")
+            # Estrae la prima riga di testo non-header come descrizione breve.
+            # Heuristic semplice ma robusta sul nostro formato di pagina.
+            first_line = next(
+                (l.strip() for l in body.splitlines() if l.strip() and not l.startswith("#")),
+                "",
+            )
             descr = (first_line[:140] + "…") if len(first_line) > 140 else first_line
             entries.append({
                 "id": page_id,
@@ -41,7 +99,13 @@ class HotLayer:
                 "tags": fm.get("tags", []) or [],
                 "description": descr,
             })
+        # Ordinamento stabile per type poi id: rende l'index leggibile e il
+        # diff git informativo (nessuno scrambling tra rebuild successivi).
         entries.sort(key=lambda e: (e["type"], e["id"]))
+
+        # Render markdown: header per tipo, una bullet per pagina con link
+        # wikilink-style [[id]] che il modello impara a riconoscere come
+        # riferimento navigabile.
         lines = []
         current_type = None
         for e in entries:
@@ -53,7 +117,15 @@ class HotLayer:
         return "\n".join(lines).strip() or "(nessuna pagina)", entries
 
     def _build_overview(self, entries: list[dict]) -> str:
+        """Genera l'overview narrativa via LLM.
+
+        Riceve solo metadata sintetici (no body completo) per contenere il
+        costo: bastano id/type/descrizione per scrivere 200 parole di
+        contesto generale.
+        """
         if not entries or self.llm is None:
+            # Fallback deterministico: usato in cold start (wiki vuota) o in
+            # test senza LLM disponibile.
             return ("Il sistema contiene pagine wiki sul dominio Tolkien. "
                     "L'index sottostante elenca le entità disponibili.")
         summary_input = "\n".join(
@@ -70,15 +142,30 @@ class HotLayer:
         try:
             return self.llm.complete(system=system, user=user, max_tokens=600)
         except Exception as e:
+            # Errore non bloccante: il sistema deve poter funzionare anche
+            # se la generazione dell'overview fallisce (es. rate limit).
+            # L'index resta corretto e questo è ciò che conta.
             return f"(overview non generata: {e})"
 
     def rebuild(self) -> str:
+        """Ricostruisce il file HOT_LAYER.md da zero.
+
+        Side effect: scrive su disco. Ritorna anche il contenuto per
+        eventuale ispezione/test.
+        """
         index_md, entries = self._build_index()
         overview = self._build_overview(entries)
         glossary = _load_agents_md()
+        # Il glossary completo (AGENTS.md) NON viene incluso nel Hot Layer
+        # perché aumenterebbe troppo la dimensione del prompt di ogni query.
+        # AGENTS.md viene già passato separatamente come parte del system
+        # prompt dalla query pipeline. Qui mettiamo solo un puntatore.
         glossary_excerpt = ""
         if glossary:
-            glossary_excerpt = "\n## Riferimento AGENTS\nVedi `schema/AGENTS.md` per regole operative e convenzioni di naming.\n"
+            glossary_excerpt = (
+                "\n## Riferimento AGENTS\n"
+                "Vedi `schema/AGENTS.md` per regole operative e convenzioni di naming.\n"
+            )
         content = (
             f"# Hot Layer — Companion Wiki Tolkien\n\n"
             f"_Aggiornato: {date.today().isoformat()}_\n\n"
@@ -87,6 +174,11 @@ class HotLayer:
             f"{glossary_excerpt}"
         )
         HOT_LAYER_PATH.write_text(content, encoding="utf-8")
+        # Warning informativo: non blocca, ma segnala che è ora di passare
+        # a un index gerarchico.
         if _estimate_tokens(content) > HOT_LAYER_WARN_TOKENS:
-            print(f"[WARN] Hot Layer stimato in ~{_estimate_tokens(content)} token (> {HOT_LAYER_WARN_TOKENS}). Considerare un index gerarchico.")
+            print(
+                f"[WARN] Hot Layer stimato in ~{_estimate_tokens(content)} token "
+                f"(> {HOT_LAYER_WARN_TOKENS}). Considerare un index gerarchico."
+            )
         return content

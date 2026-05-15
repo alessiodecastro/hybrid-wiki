@@ -23,7 +23,9 @@ python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
 Copy-Item .env.example .env
-# Editare .env e inserire ANTHROPIC_API_KEY e OPENAI_API_KEY
+# Editare .env e inserire AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT,
+# AZURE_OPENAI_DEPLOYMENT (chat) e AZURE_OPENAI_EMBEDDING_DEPLOYMENT (embeddings).
+# Verificare il nome della deployment di embedding nel tuo Azure resource.
 ```
 
 ## Uso
@@ -79,7 +81,7 @@ hybrid-wiki/
 
 ## Note di funzionamento
 
-- **Modelli**: `claude-sonnet-4-6` per la generazione, `text-embedding-3-small` per gli embedding.
+- **Modelli**: tutto su Azure OpenAI. Generazione tramite deployment chat (`gpt-5.1` di default), embedding tramite deployment dedicato (`text-embedding-3-small` di default). Entrambi i nomi sono configurabili via `.env`. Il client usa `max_completion_tokens` (richiesto dalla serie GPT-5).
 - **Persistenza**: ChromaDB persistente in `data/vectors/`. Per resettare il sistema basta cancellare la cartella `data/` (escluso `data/raw/incoming/`).
 - **Audit trail minimo**: ogni query viene loggata in append a `data/query_log.jsonl`.
 - **Contraddizione voluta** nel dataset seed: la data di fondazione della Contea è 1601 in `contea.txt` e 1604 in `consiglio_elrond.txt`. La query relativa (`eval_set.yaml#q09`) verifica che la pipeline esplichi il conflitto invece di nasconderlo.
