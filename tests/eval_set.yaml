@@ -1,0 +1,141 @@
+# Eval set — Walking Skeleton Tolkien
+# Categorie:
+#   wiki     -> sintesi (favorisce indice wiki)
+#   raw      -> dettaglio/citazione testuale (favorisce indice raw)
+#   conflict -> contraddizione voluta tra fonti
+#   relation -> domanda di relazione (favorisce wiki)
+#   gap      -> informazione assente o scarsa (atteso confidence=low)
+
+questions:
+
+  - id: q01
+    category: wiki
+    question: "Chi è Frodo Baggins?"
+    expected_summary: "Hobbit della Contea, nipote/cugino di Bilbo, portatore dell'Anello."
+    expected_sources: [frodo_baggins]
+
+  - id: q02
+    category: wiki
+    question: "Chi è Gandalf il Grigio?"
+    expected_summary: "Mago Istari (Olórin), Maia, inviato a contrastare Sauron."
+    expected_sources: [gandalf]
+
+  - id: q03
+    category: wiki
+    question: "Chi è Aragorn?"
+    expected_summary: "Erede di Isildur, Ramingo del Nord, futuro re Elessar."
+    expected_sources: [aragorn]
+
+  - id: q04
+    category: wiki
+    question: "Cos'è l'Anello Unico?"
+    expected_summary: "Artefatto forgiato da Sauron al Monte Fato per dominare gli altri Anelli."
+    expected_sources: [one_ring]
+
+  - id: q05
+    category: wiki
+    question: "Cos'è Mordor?"
+    expected_summary: "Regione vulcanica sud-orientale, sede di Sauron, circondata da catene montuose."
+    expected_sources: [mordor]
+
+  - id: q06
+    category: raw
+    question: "Quali oggetti porta esattamente Frodo nel suo zaino quando lascia la Contea?"
+    expected_summary: "Anello con catenella, Pungolo, cotta di mithril, lembas, fiala di Galadriel."
+    expected_sources: [frodo_intro]
+
+  - id: q07
+    category: raw
+    question: "Qual è l'iscrizione esatta sull'Anello Unico in lingua nera?"
+    expected_summary: "Ash nazg durbatulûk, ash nazg gimbatul, ash nazg thrakatulûk, agh burzum-ishi krimpatul."
+    expected_sources: [anello_unico]
+
+  - id: q08
+    category: raw
+    question: "In che data fu distrutto l'Anello Unico?"
+    expected_summary: "25 marzo 3019 della Terza Era, alla Crepa del Destino."
+    expected_sources: [monte_fato]
+
+  - id: q09
+    category: conflict
+    question: "In che anno fu fondata la Contea?"
+    expected_summary: "Le fonti divergono: contea.txt indica 1601 T.E.; consiglio_elrond.txt indica 1604 T.E. La risposta deve segnalare il conflitto."
+    expected_sources: [contea, consiglio_elrond]
+
+  - id: q10
+    category: relation
+    question: "Che rapporto c'è tra Aragorn e Gandalf?"
+    expected_summary: "Compagni di viaggio nella Compagnia dell'Anello; entrambi membri del Consiglio di Elrond; alleati contro Sauron."
+    expected_sources: [aragorn, gandalf, council_of_elrond]
+
+  - id: q11
+    category: relation
+    question: "Qual è il legame tra Frodo e Sam?"
+    expected_summary: "Sam è giardiniere e compagno fedele di Frodo, lo segue fino al Monte Fato."
+    expected_sources: [frodo_baggins, sam_intro]
+
+  - id: q12
+    category: wiki
+    question: "Cos'è il Monte Fato?"
+    expected_summary: "Vulcano attivo al centro di Gorgoroth, sede della forgiatura e distruzione dell'Anello."
+    expected_sources: [mount_doom, monte_fato]
+
+  - id: q13
+    category: raw
+    question: "Quanti giorni durò il viaggio di Boromir da Gondor a Granburrone?"
+    expected_summary: "110 giorni."
+    expected_sources: [consiglio_elrond]
+
+  - id: q14
+    category: raw
+    question: "Chi sono i tre ceppi originari degli hobbit della Contea?"
+    expected_summary: "Harfoots, Stoors, Fallohides."
+    expected_sources: [contea]
+
+  - id: q15
+    category: wiki
+    question: "Da quale ordine proviene Gandalf?"
+    expected_summary: "Istari, ordine di cinque stregoni inviati nella Terza Era; in origine Maia di nome Olórin."
+    expected_sources: [gandalf]
+
+  - id: q16
+    category: raw
+    question: "Quanto è alto il Monte Fato sopra la pianura?"
+    expected_summary: "Circa 4500 piedi (~1370 metri)."
+    expected_sources: [monte_fato]
+
+  - id: q17
+    category: relation
+    question: "Chi partecipò al Consiglio di Elrond?"
+    expected_summary: "Elrond, Elrohir, Glorfindel, Galdor, Legolas, Gimli e Glóin, Boromir, Aragorn, Gandalf, Frodo, Bilbo, Sam."
+    expected_sources: [council_of_elrond]
+
+  - id: q18
+    category: gap
+    question: "Cosa sappiamo su Sauron in dettaglio?"
+    expected_summary: "Informazioni limitate (citato come forgiatore dell'Anello, signore di Mordor) ma nessuna pagina entità dedicata. Confidence attesa: low, con segnalazione di gap."
+    expected_sources: []
+
+  - id: q19
+    category: raw
+    question: "Quali nuovi oggetti sono stati acquisiti dal Mathom-house di Michel Delving?"
+    expected_summary: "Una pipa di radica, un manico d'ombrello in osso di balena, una scatola di bottoni di madreperla."
+    expected_sources: [lettera_routine]
+
+  - id: q20
+    category: wiki
+    question: "Chi è Samwise Gamgee?"
+    expected_summary: "Hobbit della Contea, giardiniere di Bag End, compagno fedele di Frodo nel viaggio verso Mordor."
+    expected_sources: [sam_intro]
+
+  - id: q21
+    category: raw
+    question: "Come si chiama la spada riforgiata di Aragorn?"
+    expected_summary: "Andúril, 'Fiamma dell'Ovest', dai frammenti di Narsil."
+    expected_sources: [aragorn_intro]
+
+  - id: q22
+    category: relation
+    question: "Da chi è composta la Compagnia dell'Anello?"
+    expected_summary: "Nove membri: Frodo, Sam, Merry, Pipino, Gandalf, Aragorn, Boromir, Legolas, Gimli."
+    expected_sources: [council_of_elrond]
