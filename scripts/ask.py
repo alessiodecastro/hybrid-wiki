@@ -47,7 +47,12 @@ def _print_result(question: str, result: dict) -> None:
     default=None,
     help="Esegue tutte le domande dell'eval set YAML.",
 )
-def main(question: str | None, eval_path: str | None):
+@click.option(
+    "--domain", default=None,
+    help="Filtra il retrieval a un singolo dominio (es. tolkien, asimov). "
+         "Le pagine wiki '_mixed' vengono comunque incluse.",
+)
+def main(question: str | None, eval_path: str | None, domain: str | None):
     """Pone una domanda alla knowledge base."""
     # Una sola istanza di pipeline anche in modalità batch: i client
     # vengono inizializzati una volta sola.
@@ -56,12 +61,16 @@ def main(question: str | None, eval_path: str | None):
     if eval_path:
         # Modalità batch: scorri tutte le domande dell'eval set.
         # Output side-by-side: risposta del sistema + attesa dichiarata.
+        # Il --domain (se passato) si applica a TUTTE le domande dell'eval.
         with open(eval_path, "r", encoding="utf-8") as f:
             eval_data = yaml.safe_load(f)
         items = eval_data.get("questions", [])
         for item in items:
             q = item["question"]
-            result = pipeline.ask(q)
+            # Ogni item può sovrascrivere il dominio (utile per eval
+            # set cross-dominio dove ogni domanda ha il suo scope).
+            item_domain = item.get("domain", domain)
+            result = pipeline.ask(q, domain=item_domain)
             _print_result(q, result)
             click.echo(f"Atteso: {item.get('expected_summary', '(n/a)')}")
             click.echo(f"Sorgenti attese: {item.get('expected_sources', [])}")
@@ -72,7 +81,7 @@ def main(question: str | None, eval_path: str | None):
 
     if not question:
         raise click.UsageError("Specificare una domanda oppure --eval <file.yaml>")
-    result = pipeline.ask(question)
+    result = pipeline.ask(question, domain=domain)
     _print_result(question, result)
     # Summary token della singola query — utile per spot-check di costo.
     click.echo(pipeline.tracker.format_session_summary())

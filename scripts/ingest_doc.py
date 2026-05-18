@@ -19,7 +19,7 @@ import click
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.ingest import IngestPipeline
-from src.config import VALID_LEVELS, VALID_SUBTYPES
+from src.config import VALID_LEVELS, VALID_SUBTYPES, DEFAULT_DOMAIN
 
 
 @click.command()
@@ -43,14 +43,19 @@ from src.config import VALID_LEVELS, VALID_SUBTYPES
     type=click.Choice(sorted(VALID_SUBTYPES)),
     help="Suggerimento per il subtype dell'entità principale (solo L2).",
 )
-def main(file_path: str, title: str, level: str, subtype: str | None):
+@click.option(
+    "--domain", default=DEFAULT_DOMAIN,
+    help=f"Etichetta di dominio (default: {DEFAULT_DOMAIN}). Stringa libera, "
+         "abilita il filtro --domain in ask.py.",
+)
+def main(file_path: str, title: str, level: str, subtype: str | None, domain: str):
     """Ingestione di un singolo documento nella knowledge base."""
-    click.echo(f"-> Ingest [{level}] {title}  (file={file_path})")
+    click.echo(f"-> Ingest [{level}] {title}  (file={file_path}, domain={domain})")
     # Inizializzazione pipeline = creazione client LLM/embedder + connessione
     # ChromaDB. Cost-effective per ingest singolo; per batch si preferirà
     # uno script dedicato che riusa la pipeline.
     pipeline = IngestPipeline()
-    result = pipeline.ingest(file_path, title=title, level=level, subtype=subtype)
+    result = pipeline.ingest(file_path, title=title, level=level, subtype=subtype, domain=domain)
     click.echo(f"   doc_id     : {result['doc_id']}")
     click.echo(f"   wiki pages : {', '.join(result['wiki_pages']) if result['wiki_pages'] else '(nessuna)'}")
     click.echo("OK")

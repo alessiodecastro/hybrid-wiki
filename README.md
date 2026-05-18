@@ -30,7 +30,30 @@ Copy-Item .env.example .env
 
 ## Uso
 
-### Ingest dei 10 documenti seed
+### Bulk ingest da manifest YAML
+
+Per corpus di dimensioni significative (>10 documenti) usa il bulk ingest:
+
+```powershell
+python scripts/ingest_folder.py --manifest data/raw/incoming/manifest_tolkien.yaml
+python scripts/ingest_folder.py --manifest data/raw/incoming/manifest_tolkien.yaml --dry-run    # piano senza chiamate API
+python scripts/ingest_folder.py --manifest data/raw/incoming/manifest_tolkien.yaml --force      # re-ingesta anche i doc già presenti
+```
+
+Il manifest dichiara `defaults` (es. dominio e livello) + lista `documents` con override puntuali. Idempotente per default: skippa i documenti già ingestati riconoscendoli da `(source_filename, domain)`.
+
+### Domini multipli
+
+Aggiungi documenti di un nuovo dominio con `--domain` (in `ingest_doc.py`) o nel campo `domain` del manifest. Poi filtra le query:
+
+```powershell
+python scripts/ask.py "Chi è il protagonista?" --domain tolkien
+python scripts/ask.py "Chi è il protagonista?" --domain asimov
+```
+
+Le pagine wiki che aggregano sorgenti di domini diversi assumono `domain=_mixed` e sono incluse in tutti i filtri.
+
+### Ingest dei 10 documenti seed (singoli, per riferimento)
 
 ```powershell
 python scripts/ingest_doc.py --file data/raw/incoming/frodo_intro.txt        --title "Frodo Baggins — introduzione"    --level L2 --subtype character
@@ -71,10 +94,12 @@ python scripts/lint.py
 Ogni invocazione di `ingest_doc.py` e `ask.py` stampa un riepilogo dei token spesi nella sessione (breakdown per fase). Il dettaglio completo viene loggato in append a `data/token_log.jsonl`. Per analisi cumulative:
 
 ```powershell
-python scripts/tokens.py                       # report totale
-python scripts/tokens.py --phase ingest        # solo ingest (tutti i sotto-step)
-python scripts/tokens.py --phase query:llm     # solo la sintesi finale
-python scripts/tokens.py --since 24h           # ultime 24 ore
+python scripts/tokens.py                                # report totale
+python scripts/tokens.py --phase ingest                 # solo ingest (tutti i sotto-step)
+python scripts/tokens.py --phase query:llm              # solo la sintesi finale
+python scripts/tokens.py --since 24h                    # ultime 24 ore
+python scripts/tokens.py --csv tokens.csv               # esporta record raw in CSV (1 riga per chiamata)
+python scripts/tokens.py --csv-summary by_phase.csv     # esporta aggregato per fase (per grafici scaling)
 ```
 
 Le fasi tracciate:

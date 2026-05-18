@@ -80,6 +80,13 @@ WIKI_COLLECTION = "wiki_pages"
 VALID_LEVELS = {"L0", "L1", "L2"}
 VALID_SUBTYPES = {"character", "place", "artifact", "event", "book"}
 
+# Dominio di default per i documenti ingestati senza override esplicito.
+# Tenuto come default e non come whitelist: i domini sono stringhe libere
+# (es. "tolkien", "asimov", "work_notes") e si aggiungono nel manifest.
+# Etichetta speciale per pagine wiki costruite da sorgenti di domini diversi.
+DEFAULT_DOMAIN = "tolkien"
+MIXED_DOMAIN = "_mixed"
+
 # Crea le directory necessarie all'import. Idempotente: exist_ok=True evita
 # errori se il filesystem è già popolato (caso comune in pilot).
 for d in (RAW_DIR, INCOMING_DIR, WIKI_DIR, VECTORS_DIR, SCHEMA_DIR):

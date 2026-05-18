@@ -13,8 +13,15 @@ Esempi:
 
     # solo le ultime 24 ore
     python scripts/tokens.py --since 24h
+
+    # esporta i record filtrati in CSV (uno per chiamata API)
+    python scripts/tokens.py --csv tokens.csv
+
+    # esporta l'aggregato per fase in CSV (per grafici di scaling)
+    python scripts/tokens.py --csv-summary by_phase.csv
 """
 
+import csv
 import sys
 import json
 import re
@@ -121,12 +128,70 @@ def _print_table(title: str, rows: list[dict], key_col: str) -> None:
         )
 
 
+def _export_records_csv(records: list[dict], out_path: Path) -> None:
+    """Esporta i record filtrati come CSV (una riga per chiamata API).
+
+    Schema fisso: rende il file importabile direttamente in Excel/pandas
+    senza dover negoziare gli header. Il campo `extra` viene serializzato
+    come JSON inline per non perdere informazioni (es. n_items per le
+    batch embeddings) ma resta una stringa per semplificare l'import.
+    """
+    fields = [
+        "timestamp", "phase", "operation", "model",
+        "prompt_tokens", "completion_tokens", "cached_tokens", "total_tokens",
+        "extra",
+    ]
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        for r in records:
+            writer.writerow({
+                "timestamp": r.get("timestamp", ""),
+                "phase": r.get("phase", ""),
+                "operation": r.get("operation", ""),
+                "model": r.get("model", ""),
+                "prompt_tokens": r.get("prompt_tokens", 0),
+                "completion_tokens": r.get("completion_tokens", 0),
+                "cached_tokens": r.get("cached_tokens", 0),
+                "total_tokens": r.get("total_tokens", 0),
+                "extra": json.dumps(r.get("extra", {}), ensure_ascii=False) if r.get("extra") else "",
+            })
+
+
+def _export_summary_csv(records: list[dict], out_path: Path, group_by: str) -> None:
+    """Esporta l'aggregato per chiave come CSV (una riga per gruppo).
+
+    Args:
+        group_by: campo di raggruppamento ("phase", "operation", "model").
+    """
+    rows = _aggregate(records, group_by)
+    fields = [group_by, "calls", "prompt_tokens", "completion_tokens", "cached_tokens", "total_tokens"]
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        for r in rows:
+            writer.writerow({k: r.get(k, 0) for k in fields})
+
+
 @click.command()
 @click.option("--phase", "phase_prefix", default=None, help="Filtra per prefisso fase (es. 'ingest', 'query:llm').")
 @click.option("--since", "since_spec", default=None, help="Finestra temporale: es. 30m, 24h, 7d.")
 @click.option("--log", "log_path", type=click.Path(), default=None, help="Path alternativo al log JSONL.")
-def main(phase_prefix: str | None, since_spec: str | None, log_path: str | None):
-    """Stampa il report cumulativo del consumo token."""
+@click.option("--csv", "csv_path", type=click.Path(), default=None, help="Esporta i record filtrati in CSV (uno per chiamata).")
+@click.option(
+    "--csv-summary", "csv_summary_path", type=click.Path(), default=None,
+    help="Esporta l'aggregato per fase in CSV (utile per grafici di scaling).",
+)
+def main(
+    phase_prefix: str | None,
+    since_spec: str | None,
+    log_path: str | None,
+    csv_path: str | None,
+    csv_summary_path: str | None,
+):
+    """Stampa il report cumulativo del consumo token, con export CSV opzionale."""
     path = Path(log_path) if log_path else TOKEN_LOG_PATH
     since = _parse_since(since_spec)
 
@@ -140,6 +205,15 @@ def main(phase_prefix: str | None, since_spec: str | None, log_path: str | None)
         click.echo(f"Filtro fase       : {phase_prefix}*")
     if since:
         click.echo(f"Filtro temporale  : da {since.isoformat(timespec='seconds')}")
+
+    # Export CSV: eseguiti prima del report a schermo, così se l'output
+    # è verboso (>200 record) l'utente vede subito conferma del salvataggio.
+    if csv_path:
+        _export_records_csv(filtered, Path(csv_path))
+        click.echo(f"CSV record salvato in: {csv_path} ({len(filtered)} righe)")
+    if csv_summary_path:
+        _export_summary_csv(filtered, Path(csv_summary_path), group_by="phase")
+        click.echo(f"CSV summary salvato in: {csv_summary_path}")
 
     if not filtered:
         return

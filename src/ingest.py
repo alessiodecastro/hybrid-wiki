@@ -26,6 +26,7 @@ from pathlib import Path
 from .config import (
     AGENTS_MD_PATH, CHUNK_SIZE_WORDS, CHUNK_OVERLAP_WORDS,
     RAW_COLLECTION, WIKI_COLLECTION, VALID_LEVELS, TOKEN_LOG_PATH,
+    DEFAULT_DOMAIN, MIXED_DOMAIN,
 )
 from .stores import RawStore, WikiStore, VectorDB
 from .embeddings import Embedder
@@ -136,7 +137,14 @@ class IngestPipeline:
     # ------------------------------------------------------------------
     # API pubblica
     # ------------------------------------------------------------------
-    def ingest(self, file_path: str | Path, title: str, level: str, subtype: str | None = None) -> dict:
+    def ingest(
+        self,
+        file_path: str | Path,
+        title: str,
+        level: str,
+        subtype: str | None = None,
+        domain: str = DEFAULT_DOMAIN,
+    ) -> dict:
         """Ingesta un documento. Punto di ingresso unico per tutti i livelli.
 
         Args:
@@ -145,9 +153,12 @@ class IngestPipeline:
             level: "L0" | "L1" | "L2".
             subtype: opzionale, suggerisce all'estrazione entità il tipo
                 principale (character/place/...). Usato solo in L2.
+            domain: etichetta di dominio per il documento. Propaga ai
+                chunk raw, alla source page e alle entity pages. Permette
+                filtri query-time multi-dominio.
 
         Returns:
-            Dict con doc_id assegnato, livello, e pagine wiki toccate.
+            Dict con doc_id assegnato, livello, dominio, e pagine wiki toccate.
 
         Raises:
             ValueError: se il livello è invalido o il file è vuoto.
@@ -166,7 +177,7 @@ class IngestPipeline:
             "title": title,
             "source": str(path.name),
             "level": level,
-            "domain": "tolkien",
+            "domain": domain,
             "ingested_at": datetime.now().isoformat(timespec="seconds"),
         }
         if subtype:
@@ -180,7 +191,7 @@ class IngestPipeline:
         #    Questo è il punto chiave del "principio non negoziabile".
         #    Solo embedding API; fase taggata per il tracker.
         with self.tracker.phase(f"ingest:{level.lower()}:raw_index"):
-            self._index_raw(doc_id, title, body)
+            self._index_raw(doc_id, title, body, domain)
 
         touched_pages: list[str] = []
 
@@ -191,15 +202,15 @@ class IngestPipeline:
             pass
         elif level == "L1":
             with self.tracker.phase("ingest:l1:source_page"):
-                source_page = self._make_source_page(doc_id, title, body)
+                source_page = self._make_source_page(doc_id, title, body, domain)
             touched_pages.append(source_page)
         elif level == "L2":
             with self.tracker.phase("ingest:l2:source_page"):
-                source_page = self._make_source_page(doc_id, title, body)
+                source_page = self._make_source_page(doc_id, title, body, domain)
             touched_pages.append(source_page)
             # _integrate_entities internamente apre fasi annidate per
             # identify / create / merge.
-            entity_pages = self._integrate_entities(doc_id, title, body, hint_subtype=subtype)
+            entity_pages = self._integrate_entities(doc_id, title, body, hint_subtype=subtype, domain=domain)
             touched_pages.extend(entity_pages)
 
         # 4. Hot Layer: rebuild solo se la wiki è cambiata. Per L0
@@ -208,24 +219,27 @@ class IngestPipeline:
             with self.tracker.phase("ingest:hot_layer_rebuild"):
                 self.hot.rebuild()
 
-        return {"doc_id": doc_id, "level": level, "wiki_pages": touched_pages}
+        return {"doc_id": doc_id, "level": level, "domain": domain, "wiki_pages": touched_pages}
 
     # ------------------------------------------------------------------
     # Helper privati
     # ------------------------------------------------------------------
-    def _index_raw(self, doc_id: str, title: str, body: str) -> None:
+    def _index_raw(self, doc_id: str, title: str, body: str, domain: str) -> None:
         """Chunka il body e popola la collection raw_chunks.
 
         Ogni chunk ha id deterministico `{doc_id}__chunk_{NNN}` così che
         un re-ingest dello stesso doc_id (caso raro ma possibile in dev)
         produca upsert in-place invece di duplicati.
+
+        Il `domain` viene propagato nei metadati di ogni chunk: abilita
+        il filtro `where={"domain": ...}` lato query.
         """
         chunks = chunk_text(body)
         if not chunks:
             return
         ids = [f"{doc_id}__chunk_{i:03d}" for i in range(len(chunks))]
         metas = [
-            {"doc_id": doc_id, "title": title, "chunk_idx": i, "kind": "raw"}
+            {"doc_id": doc_id, "title": title, "chunk_idx": i, "kind": "raw", "domain": domain}
             for i in range(len(chunks))
         ]
         # Singola chiamata batch all'API embeddings: massimizza throughput
@@ -239,6 +253,9 @@ class IngestPipeline:
         Strategia: delete + upsert. Pulisce eventuali vettori obsoleti
         legati a una versione precedente della stessa pagina (succede
         nel ciclo di merge L2).
+
+        Il `domain` viene letto dal frontmatter (popolato/aggiornato dai
+        metodi di creazione/merge): le pagine miste hanno domain=MIXED_DOMAIN.
         """
         fm, body = self.wiki.get(page_id)
         # L'embedding è calcolato sul body completo prefisso dal page_id:
@@ -249,15 +266,17 @@ class IngestPipeline:
             "type": fm.get("type", ""),
             "subtype": fm.get("subtype", "") or "",
             "kind": "wiki",
+            "domain": fm.get("domain", DEFAULT_DOMAIN),
         }
         self.vdb.delete(WIKI_COLLECTION, [page_id])
         self.vdb.add(WIKI_COLLECTION, [page_id], [emb], [body], [meta])
 
-    def _make_source_page(self, doc_id: str, title: str, body: str) -> str:
+    def _make_source_page(self, doc_id: str, title: str, body: str, domain: str) -> str:
         """Genera la pagina source per un documento (L1 e L2).
 
         La pagina source è la sintesi 1:1 di un singolo documento raw.
         Funge da "ponte" tra raw e wiki: l'audit trail della sintesi.
+        Eredita il `domain` dal documento sorgente.
 
         Returns:
             page_id della pagina creata.
@@ -266,7 +285,7 @@ class IngestPipeline:
         # Il system prompt include AGENTS.md per garantire coerenza tra
         # tutte le sintesi (tono, citazioni, struttura).
         system = (
-            "Sei un curatore del companion wiki Tolkien. Produci una sintesi narrativa "
+            "Sei un curatore di un companion wiki di lettura. Produci una sintesi narrativa "
             "in italiano del documento sotto, strutturata in tre sezioni Markdown: "
             "## Overview, ## Dettagli, ## Citazioni notevoli. "
             "Mantieni un tono enciclopedico in terza persona. "
@@ -282,6 +301,7 @@ class IngestPipeline:
             "subtype": "",
             "tags": ["source"],
             "sources": [doc_id],
+            "domain": domain,
             "last_updated": date.today().isoformat(),
             "confidence": "medium",  # default per le sintesi: l'LLM può aver omesso dettagli
             "stale": False,
@@ -340,7 +360,7 @@ class IngestPipeline:
             clean.append({"id": eid, "subtype": sub, "summary": ent.get("summary", "")})
         return clean
 
-    def _integrate_entities(self, doc_id: str, title: str, body: str, hint_subtype: str | None) -> list[str]:
+    def _integrate_entities(self, doc_id: str, title: str, body: str, hint_subtype: str | None, domain: str) -> list[str]:
         """Per ogni entità identificata: crea o aggiorna la pagina entity.
 
         Returns:
@@ -358,14 +378,23 @@ class IngestPipeline:
             if self.wiki.exists(page_id):
                 with self.tracker.phase("ingest:l2:entity_merge"):
                     merged = self._merge_entity_page(page_id, doc_id, title, body)
+                # Dominio della pagina aggiornato: se il nuovo dominio
+                # differisce dal corrente, segna la pagina come "_mixed"
+                # (sorgenti multi-dominio). Permette al filtro query-time
+                # di scegliere se includerla.
+                existing_fm, _ = self.wiki.get(page_id)
+                current_domain = existing_fm.get("domain", DEFAULT_DOMAIN)
+                page_domain = current_domain if current_domain == domain else MIXED_DOMAIN
             else:
                 with self.tracker.phase("ingest:l2:entity_create"):
                     merged = self._create_entity_page(page_id, subtype, doc_id, title, body)
+                page_domain = domain
             # Metadati aggiornati a ogni passaggio: importa che sources sia
             # cumulativo (vedi WikiStore.update_with_merge).
             extra_meta = {
                 "type": "entity",
                 "subtype": subtype,
+                "domain": page_domain,
                 "last_updated": date.today().isoformat(),
                 "stale": False,
                 "title": page_id.replace("_", " ").title(),

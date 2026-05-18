@@ -24,7 +24,7 @@ from datetime import datetime
 from .config import (
     AGENTS_MD_PATH, QUERY_LOG_PATH, TOKEN_LOG_PATH,
     RAW_COLLECTION, WIKI_COLLECTION,
-    WIKI_TOP_K, RAW_TOP_K,
+    WIKI_TOP_K, RAW_TOP_K, MIXED_DOMAIN,
 )
 from .stores import WikiStore, VectorDB
 from .embeddings import Embedder
@@ -164,8 +164,16 @@ class QueryPipeline:
         self.hot = HotLayer(self.wiki, self.llm)
         self.agents_md = _load_agents()
 
-    def ask(self, question: str) -> dict:
+    def ask(self, question: str, domain: str | None = None) -> dict:
         """Esegue la pipeline completa per una singola domanda.
+
+        Args:
+            question: la domanda in linguaggio naturale.
+            domain: opzionale. Se presente, filtra il retrieval ai
+                soli chunk/pagine di quel dominio (più "_mixed" per il
+                wiki, che può contenere informazioni rilevanti anche se
+                aggregate da più domini). Se None, nessun filtro: il
+                retrieval considera tutto il corpus.
 
         Side effect: appende un record nell'audit log.
 
@@ -178,11 +186,23 @@ class QueryPipeline:
         # (sempre 1 chiamata) dalla generazione finale.
         with self.tracker.phase("query:embedding"):
             q_emb = self.embedder.embed(question)
+        # Filtri ChromaDB: applicati lato vector DB così che top-k operi
+        # già sul sottoinsieme rilevante (evita post-filter che ridurrebbe
+        # arbitrariamente i risultati utili).
+        raw_where: dict | None = None
+        wiki_where: dict | None = None
+        if domain:
+            # Raw: filtro stretto sul dominio richiesto.
+            raw_where = {"domain": domain}
+            # Wiki: include anche le pagine "_mixed" perché un'entità
+            # condivisa tra domini può comunque essere rilevante (es. un
+            # personaggio nominato in più corpus).
+            wiki_where = {"domain": {"$in": [domain, MIXED_DOMAIN]}}
         # Il retrieval su ChromaDB non consuma token (è solo similarity
         # search locale), quindi qui non c'è fase token-tracking. Resta
         # la fase logica "retrieval" per coerenza concettuale.
-        wiki_hits = self.vdb.query(WIKI_COLLECTION, q_emb, WIKI_TOP_K)
-        raw_hits = self.vdb.query(RAW_COLLECTION, q_emb, RAW_TOP_K)
+        wiki_hits = self.vdb.query(WIKI_COLLECTION, q_emb, WIKI_TOP_K, where=wiki_where)
+        raw_hits = self.vdb.query(RAW_COLLECTION, q_emb, RAW_TOP_K, where=raw_where)
 
         hot_layer = self.hot.load()
 
