@@ -150,6 +150,10 @@ def main(manifest: str, force: bool, dry_run: bool):
         existing = _existing_sources(pipeline.raw)
 
     ok = skipped = failed = 0
+    # Traccia se almeno un ingest ha rimandato il rebuild dell'Hot Layer:
+    # in tal caso va eseguito UNA volta sola alla fine del batch. Eseguirlo
+    # per ogni documento è O(pagine_totali) × N → O(N^2) sul corpus.
+    needs_hot_layer_rebuild = False
     for entry in resolved:
         marker = f"[{entry['level']:<2}] {entry['domain']:<15} {entry['source_name']}"
 
@@ -179,7 +183,12 @@ def main(manifest: str, force: bool, dry_run: bool):
                 level=entry["level"],
                 subtype=entry["subtype"],
                 domain=entry["domain"],
+                # Deferral: il rebuild dell'Hot Layer è rimandato a fine
+                # batch. Risparmio che cresce quadraticamente col corpus.
+                defer_hot_layer=True,
             )
+            if result.get("hot_layer_deferred"):
+                needs_hot_layer_rebuild = True
             wp = ", ".join(result["wiki_pages"]) if result["wiki_pages"] else "(nessuna)"
             click.echo(f"OK    {marker}  doc_id={result['doc_id']}  wiki=[{wp}]")
             ok += 1
@@ -190,6 +199,12 @@ def main(manifest: str, force: bool, dry_run: bool):
             if click.get_current_context().obj and click.get_current_context().obj.get("verbose"):
                 traceback.print_exc()
             failed += 1
+
+    # Un solo rebuild dell'Hot Layer per l'intero batch, se necessario.
+    if pipeline is not None and not dry_run and needs_hot_layer_rebuild:
+        click.echo()
+        click.echo("Rebuild Hot Layer (una volta, fine batch)...")
+        pipeline.rebuild_hot_layer()
 
     click.echo()
     click.echo(f"=== BATCH SUMMARY ===")

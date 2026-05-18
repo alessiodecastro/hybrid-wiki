@@ -1,7 +1,10 @@
 # Hybrid Wiki RAG — Walking Skeleton
 
 Versione minima funzionante del sistema descritto in `../hybrid-wiki-rag-design.md`.
-Dominio: companion wiki di lettura sull'opera di Tolkien.
+Companion wiki di lettura **multi-corpus**: il motore è dominio-agnostico, ogni
+documento porta un tag `domain`. Corpora seed inclusi: `tolkien` (legendarium)
+e `asimov` (Ciclo della Fondazione). Le regole operative sono in
+`schema/AGENTS.md` (v0.2, dominio-agnostico).
 
 ## Cosa fa
 
@@ -9,7 +12,8 @@ Dominio: companion wiki di lettura sull'opera di Tolkien.
 - **Doppio indice** (raw + wiki) su ChromaDB locale.
 - **Query** multi-indice con orientamento dal Hot Layer e risoluzione conflitti.
 - **Hot Layer** minimo (overview + index) rigenerato dopo ogni ingest L1/L2.
-- **AGENTS.md v0** come contratto operativo letto in ogni chiamata LLM.
+- **AGENTS.md v0.2** (dominio-agnostico) come contratto operativo letto in ogni chiamata LLM.
+- **Multi-dominio**: tag `domain` per documento, filtro `--domain` in query, isolamento dei corpora.
 
 ## Cosa NON fa ancora (per design)
 
@@ -41,6 +45,8 @@ python scripts/ingest_folder.py --manifest data/raw/incoming/manifest_tolkien.ya
 ```
 
 Il manifest dichiara `defaults` (es. dominio e livello) + lista `documents` con override puntuali. Idempotente per default: skippa i documenti già ingestati riconoscendoli da `(source_filename, domain)`.
+
+Il bulk ingest **rimanda il rebuild dell'Hot Layer a fine batch** (un solo rebuild invece di uno per documento): il rebuild è O(pagine_totali), eseguirlo per ogni doc renderebbe il costo del batch O(N²). `ingest_doc.py` (documento singolo) ricostruisce invece subito, come prima.
 
 ### Domini multipli
 
@@ -123,9 +129,9 @@ hybrid-wiki/
 │   ├── raw/      # documenti originali (immutabili)
 │   ├── wiki/     # pagine sintetizzate + HOT_LAYER.md
 │   └── vectors/  # ChromaDB (creato a runtime)
-├── schema/AGENTS.md
-├── scripts/      # CLI (ingest_doc, ask, lint)
-└── tests/eval_set.yaml
+├── schema/AGENTS.md          # contratto operativo dominio-agnostico (v0.2)
+├── scripts/      # CLI: ingest_doc, ingest_folder, ask, lint, tokens
+└── tests/        # eval_set.yaml (tolkien) + eval_set_crossdomain.yaml
 ```
 
 ## Note di funzionamento
@@ -133,7 +139,11 @@ hybrid-wiki/
 - **Modelli**: tutto su Azure OpenAI. Generazione tramite deployment chat (`gpt-5.1` di default), embedding tramite deployment dedicato (`text-embedding-3-small` di default). Entrambi i nomi sono configurabili via `.env`. Il client usa `max_completion_tokens` (richiesto dalla serie GPT-5).
 - **Persistenza**: ChromaDB persistente in `data/vectors/`. Per resettare il sistema basta cancellare la cartella `data/` (escluso `data/raw/incoming/`).
 - **Audit trail minimo**: ogni query viene loggata in append a `data/query_log.jsonl`.
-- **Contraddizione voluta** nel dataset seed: la data di fondazione della Contea è 1601 in `contea.txt` e 1604 in `consiglio_elrond.txt`. La query relativa (`eval_set.yaml#q09`) verifica che la pipeline esplichi il conflitto invece di nasconderlo.
+- **Contraddizioni volute** nei dataset seed (test della conflict resolution):
+  - `tolkien`: fondazione della Contea, 1601 in `contea.txt` vs 1604 in `consiglio_elrond.txt` (`eval_set.yaml#q09`).
+  - `asimov`: popolazione di Trantor, ~40 mld in `trantor.txt` vs ~45 mld in `impero_galattico.txt` (`eval_set_crossdomain.yaml#x05`).
+- **Stress tassonomia**: `psicostoria` e `fondazione` (corpus asimov) non rientrano nei `subtype` standard (character/place/artifact/event/book). La pipeline crea comunque la pagina entity con `subtype: ""` invece di forzare un tipo errato (vedi AGENTS.md, "Limite noto della tassonomia").
+- **Isolamento domini**: una pagina wiki che aggrega sorgenti di domini diversi assume `domain: _mixed`; il filtro `--domain X` include `X` + `_mixed`.
 
 ## Roadmap successiva
 

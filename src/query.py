@@ -47,6 +47,14 @@ REGOLE DI RISOLUZIONE CONFLITTI (sezione 6.2 del design):
 Se WIKI e RAW divergono su un fatto, NON nascondere il conflitto: esplicita
 "secondo [[wiki_page]]… ; secondo il documento [[doc_id]]…" e indica quale
 prevale secondo le regole.
+
+CONFLITTO RAW-vs-RAW (due documenti grezzi che divergono sullo stesso fatto):
+le regole sopra disambiguano solo WIKI-vs-RAW. Se a divergere sono DUE fonti
+RAW (es. due documenti che danno un numero diverso) e nessuna è chiaramente
+più recente o più autorevole per provenienza, NON sceglierne arbitrariamente
+una: riporta ENTRAMBI i valori con le rispettive citazioni, dichiara il
+conflitto irrisolto, e abbassa la confidence ad al massimo "medium"
+(o "low" se il fatto è centrale per la domanda).
 """.strip()
 
 
@@ -164,6 +172,22 @@ class QueryPipeline:
         self.hot = HotLayer(self.wiki, self.llm)
         self.agents_md = _load_agents()
 
+    def _corpus_domains(self) -> set[str]:
+        """Insieme dei domini presenti nel corpus (scan frontmatter wiki).
+
+        Solo filesystem, nessun costo token. Usato per rilevare se il
+        corpus è multi-dominio e quindi una query senza filtro rischia la
+        "dominanza silenziosa" (caso x08: una domanda generica risponde da
+        un solo corpus senza segnalare che ne esistono altri).
+        """
+        domains: set[str] = set()
+        for pid in self.wiki.list():
+            fm, _ = self.wiki.get(pid)
+            d = fm.get("domain")
+            if d and d != MIXED_DOMAIN:
+                domains.add(d)
+        return domains
+
     def ask(self, question: str, domain: str | None = None) -> dict:
         """Esegue la pipeline completa per una singola domanda.
 
@@ -222,13 +246,42 @@ class QueryPipeline:
         allowed_wiki = [w for w in allowed_wiki if w]
         allowed_raw = [r for r in allowed_raw if r]
 
+        # Policy multi-corpus (fix caso x08: dominanza silenziosa).
+        # Si attiva SOLO quando non è stato applicato un filtro --domain
+        # e il corpus contiene più di un dominio. Costa solo uno scan
+        # filesystem, nessun token aggiuntivo se non il blocco di prompt.
+        domain_policy = ""
+        if not domain:
+            corpus_domains = self._corpus_domains()
+            if len(corpus_domains) > 1:
+                retrieved_domains = sorted({
+                    (h.get("metadata") or {}).get("domain")
+                    for h in (wiki_hits + raw_hits)
+                    if (h.get("metadata") or {}).get("domain")
+                })
+                others = sorted(corpus_domains - set(retrieved_domains))
+                domain_policy = (
+                    "POLICY MULTI-CORPUS (nessun filtro dominio applicato):\n"
+                    f"- Il corpus contiene più corpora distinti: {sorted(corpus_domains)}.\n"
+                    f"- Il contesto retrieved copre i domini: {retrieved_domains or '(nessuno)'}.\n"
+                    "- Se la domanda è generica e il contesto copre PIÙ domini: struttura "
+                    "la risposta per dominio (sezioni separate, una per corpus) e NON "
+                    "fonderli; cap confidence a 'medium'.\n"
+                    "- Se il contesto copre UN SOLO dominio ma il corpus ne contiene altri "
+                    f"({others or 'nessun altro'}): rispondi per quel dominio MA dichiara "
+                    "esplicitamente che la risposta copre solo quel corpus e che gli altri "
+                    "corpora potrebbero contenere una risposta diversa; cap confidence a "
+                    "'medium', salvo che la domanda nomini esplicitamente entità/termini "
+                    "univoci di quel dominio.\n\n"
+                )
+
         # Il system prompt è la "configurazione runtime" della pipeline:
         # contiene la strategia, le regole di conflitto, il contratto
         # operativo e il Hot Layer. Volutamente lungo: questi sono i
         # vincoli che il modello deve avere sotto gli occhi prima di
         # generare la risposta.
         system = (
-            "Sei l'assistente del companion wiki Tolkien. Rispondi a domande dell'utente "
+            "Sei l'assistente di un companion wiki di lettura multi-corpus. Rispondi a domande dell'utente "
             "usando il Hot Layer per orientarti e i risultati del retrieval doppio (wiki + raw).\n\n"
             "STRATEGIA:\n"
             "1. Orientati nel Hot Layer per capire quali pagine sono rilevanti.\n"
@@ -237,6 +290,7 @@ class QueryPipeline:
             "4. Applica le regole di risoluzione conflitti.\n"
             "5. Cita SEMPRE le sorgenti effettivamente usate.\n"
             "6. Se la risposta non è derivabile, dillo esplicitamente con confidence=low e segnala il gap.\n\n"
+            + domain_policy +
             # Lo "scan obbligatorio" forza il modello a fare una passata
             # ATTIVA sui frammenti per cercare discrepanze. Senza questo
             # vincolo, il modello tende a fidarsi del primo risultato

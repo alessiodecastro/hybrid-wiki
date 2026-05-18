@@ -126,17 +126,18 @@ class HotLayer:
         if not entries or self.llm is None:
             # Fallback deterministico: usato in cold start (wiki vuota) o in
             # test senza LLM disponibile.
-            return ("Il sistema contiene pagine wiki sul dominio Tolkien. "
+            return ("Il sistema contiene pagine wiki di uno o più corpora di lettura. "
                     "L'index sottostante elenca le entità disponibili.")
         summary_input = "\n".join(
             f"- {e['id']} [{e['type']}/{e['subtype']}]: {e['description']}" for e in entries
         )
         system = (
-            "Sei l'orchestratore di un companion wiki sul mondo di Tolkien. "
+            "Sei l'orchestratore di un companion wiki di lettura multi-corpus. "
             "Scrivi una overview in italiano di 2-3 paragrafi (max 200 parole) che descriva "
-            "lo stato corrente della knowledge base: di cosa parla, quali entità copre, "
-            "dove ci sono lacune evidenti. Tono enciclopedico, terza persona. "
-            "Nessun preambolo, solo il testo."
+            "lo stato corrente della knowledge base: quali corpora/domini sono presenti, "
+            "quali entità copre, dove ci sono lacune evidenti. Se sono presenti più "
+            "domini, tienili distinti nella descrizione. Tono enciclopedico, terza "
+            "persona. Nessun preambolo, solo il testo."
         )
         user = f"Pagine wiki esistenti:\n{summary_input}"
         try:
@@ -167,7 +168,7 @@ class HotLayer:
                 "Vedi `schema/AGENTS.md` per regole operative e convenzioni di naming.\n"
             )
         content = (
-            f"# Hot Layer — Companion Wiki Tolkien\n\n"
+            f"# Hot Layer — Companion Wiki di Lettura\n\n"
             f"_Aggiornato: {date.today().isoformat()}_\n\n"
             f"## Overview\n\n{overview}\n\n"
             f"## Index ({len(entries)} pagine)\n{index_md}\n"

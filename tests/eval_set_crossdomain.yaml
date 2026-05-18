@@ -1,0 +1,102 @@
+# Eval set CROSS-DOMINIO (Tolkien + Asimov).
+# Presuppone entrambi i corpus ingestati:
+#   python scripts/ingest_folder.py --manifest data/raw/incoming/manifest_tolkien.yaml
+#   python scripts/ingest_folder.py --manifest data/raw/incoming/asimov/manifest_asimov.yaml
+#
+# Eseguire con:
+#   python scripts/ask.py --eval tests/eval_set_crossdomain.yaml
+#
+# Il campo `domain` per item sovrascrive il filtro: domande con domain
+# impostato testano l'ISOLAMENTO; domande senza domain testano la
+# CONTAMINAZIONE cross-dominio (cosa recupera il sistema senza scope).
+#
+# Categorie:
+#   isolation   -> stessa domanda, dominio diverso: risposte devono divergere
+#   contamination -> nessun filtro: si osserva se mescola i due mondi
+#   conflict    -> contraddizione intra-dominio (Trantor 40 vs 45 mld)
+#   taxonomy    -> entità fuori da VALID_SUBTYPES (psicostoria, fondazione)
+#   crossref    -> domanda comparativa esplicita tra i due domini
+
+questions:
+
+  - id: x01
+    category: isolation
+    question: "Chi è il protagonista e qual è la sua missione?"
+    domain: tolkien
+    expected_summary: "Frodo (portatore dell'Anello) o Aragorn — mondo Tolkien. NON deve citare Hari Seldon."
+    expected_sources: [frodo_baggins, aragorn]
+
+  - id: x02
+    category: isolation
+    question: "Chi è il protagonista e qual è la sua missione?"
+    domain: asimov
+    expected_summary: "Hari Seldon, fondatore della psicostoria e del Piano Seldon. NON deve citare Frodo."
+    expected_sources: [hari_seldon]
+
+  - id: x03
+    category: isolation
+    question: "Descrivi la capitale e il suo punto debole."
+    domain: asimov
+    expected_summary: "Trantor, ecumenopoli, dipendente dall'import di cibo da 20 mondi agricoli."
+    expected_sources: [trantor]
+
+  - id: x04
+    category: isolation
+    question: "Qual è la fortezza del nemico principale?"
+    domain: tolkien
+    expected_summary: "Barad-dûr a Mordor (Sauron). NON deve citare il Mulo."
+    expected_sources: [mordor, sauron]
+
+  - id: x05
+    category: conflict
+    question: "Quanti abitanti ha Trantor al suo apice?"
+    domain: asimov
+    expected_summary: "Conflitto voluto: trantor.txt dice ~40 miliardi, impero_galattico.txt dice ~45 miliardi. Deve esplicitare entrambe."
+    expected_sources: [trantor, impero_galattico]
+
+  - id: x06
+    category: taxonomy
+    question: "Cos'è la psicostoria e su quali assiomi si fonda?"
+    domain: asimov
+    expected_summary: "Disciplina predittiva statistica; 2 assiomi (popolazione vasta; inconsapevolezza). Verificare come è stata classificata la pagina entity (subtype non standard)."
+    expected_sources: [psicostoria]
+
+  - id: x07
+    category: taxonomy
+    question: "Cos'è la Fondazione e qual è il suo vero scopo?"
+    domain: asimov
+    expected_summary: "Organizzazione su Terminus; pretesto enciclopedia, scopo reale psicostorico. Entità senza subtype standard."
+    expected_sources: [fondazione, terminus]
+
+  - id: x08
+    category: contamination
+    question: "Chi è il protagonista e qual è la sua missione?"
+    # nessun domain: il sistema considera entrambi i corpus
+    expected_summary: "Senza scope il retrieval mescola Tolkien e Asimov. Atteso: confidence medium/low e/o risposta che distingue i due mondi. Si OSSERVA il grado di contaminazione."
+    expected_sources: []
+
+  - id: x09
+    category: contamination
+    question: "Chi guida la lotta contro il male nascosto?"
+    expected_summary: "Domanda ambigua cross-mondo (Gandalf vs Seconda Fondazione). Si osserva se il sistema confonde i domini."
+    expected_sources: []
+
+  - id: x10
+    category: crossref
+    question: "Confronta il ruolo di Hari Seldon con quello di Gandalf come figure-guida."
+    expected_summary: "Domanda comparativa esplicita. Lo skeleton NON ha synthesis pages: atteso un tentativo di sintesi con confidence bassa o gap segnalato — è il segnale che servono synthesis (fase Scaling)."
+    expected_sources: [hari_seldon, gandalf]
+
+  - id: x11
+    category: isolation
+    question: "Qual è il punto debole della previsione/del piano?"
+    domain: asimov
+    expected_summary: "Il Mulo: mutante individuale non previsto dalla psicostoria (assunzione statistica)."
+    expected_sources: [il_mulo, psicostoria]
+
+  - id: x12
+    category: isolation
+    question: "Cosa c'è scritto sull'oggetto del potere?"
+    domain: tolkien
+    expected_summary: "Iscrizione in lingua nera sull'Anello Unico. Dominio Tolkien, nessuna interferenza Asimov."
+    expected_sources: [anello_unico, one_ring]

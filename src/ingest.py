@@ -25,7 +25,7 @@ from pathlib import Path
 
 from .config import (
     AGENTS_MD_PATH, CHUNK_SIZE_WORDS, CHUNK_OVERLAP_WORDS,
-    RAW_COLLECTION, WIKI_COLLECTION, VALID_LEVELS, TOKEN_LOG_PATH,
+    RAW_COLLECTION, WIKI_COLLECTION, VALID_LEVELS, VALID_SUBTYPES, TOKEN_LOG_PATH,
     DEFAULT_DOMAIN, MIXED_DOMAIN,
 )
 from .stores import RawStore, WikiStore, VectorDB
@@ -144,6 +144,7 @@ class IngestPipeline:
         level: str,
         subtype: str | None = None,
         domain: str = DEFAULT_DOMAIN,
+        defer_hot_layer: bool = False,
     ) -> dict:
         """Ingesta un documento. Punto di ingresso unico per tutti i livelli.
 
@@ -156,9 +157,17 @@ class IngestPipeline:
             domain: etichetta di dominio per il documento. Propaga ai
                 chunk raw, alla source page e alle entity pages. Permette
                 filtri query-time multi-dominio.
+            defer_hot_layer: se True, NON ricostruisce il Hot Layer al
+                termine di questo ingest. Usato dal bulk ingest: il rebuild
+                è O(pagine_totali) e va eseguito UNA volta a fine batch
+                (vedi rebuild_hot_layer), non per ogni documento — altrimenti
+                il costo cresce quadraticamente col corpus. Il chiamante è
+                responsabile di invocare rebuild_hot_layer() alla fine.
 
         Returns:
-            Dict con doc_id assegnato, livello, dominio, e pagine wiki toccate.
+            Dict con doc_id, livello, dominio, pagine wiki toccate e flag
+            hot_layer_deferred (utile al chiamante per sapere se deve
+            ancora ricostruire).
 
         Raises:
             ValueError: se il livello è invalido o il file è vuoto.
@@ -215,11 +224,35 @@ class IngestPipeline:
 
         # 4. Hot Layer: rebuild solo se la wiki è cambiata. Per L0
         #    non c'è nulla da riflettere nell'index.
+        #    defer_hot_layer=True: il bulk ingest salta il rebuild qui e lo
+        #    fa una sola volta a fine batch (rebuild O(pagine) × N doc
+        #    diventa O(N^2) se eseguito per ogni documento).
+        hot_layer_deferred = False
         if touched_pages:
-            with self.tracker.phase("ingest:hot_layer_rebuild"):
-                self.hot.rebuild()
+            if defer_hot_layer:
+                hot_layer_deferred = True
+            else:
+                with self.tracker.phase("ingest:hot_layer_rebuild"):
+                    self.hot.rebuild()
 
-        return {"doc_id": doc_id, "level": level, "domain": domain, "wiki_pages": touched_pages}
+        return {
+            "doc_id": doc_id,
+            "level": level,
+            "domain": domain,
+            "wiki_pages": touched_pages,
+            "hot_layer_deferred": hot_layer_deferred,
+        }
+
+    def rebuild_hot_layer(self) -> None:
+        """Ricostruisce il Hot Layer una volta sola.
+
+        Pensato per essere chiamato dal bulk ingest al termine del batch,
+        quando tutti i documenti sono stati processati con
+        defer_hot_layer=True. Idempotente: ricostruisce sempre da zero
+        leggendo lo stato corrente della wiki.
+        """
+        with self.tracker.phase("ingest:hot_layer_rebuild"):
+            self.hot.rebuild()
 
     # ------------------------------------------------------------------
     # Helper privati
@@ -311,28 +344,91 @@ class IngestPipeline:
         self._index_wiki_page(page_id)
         return page_id
 
-    def _identify_entities(self, doc_id: str, title: str, body: str, hint_subtype: str | None) -> list[dict]:
+    def _entity_inventory(self, domain: str) -> str:
+        """Costruisce l'inventario delle entità già esistenti nel dominio.
+
+        Serve a dare a `_identify_entities` la visione di cosa esiste già,
+        così che il modello RIUSI gli id esistenti invece di crearne
+        varianti (the_shire vs shire, orodruin vs mount_doom, ...).
+
+        Filtra: solo pagine `type: entity` (no source_*), del dominio
+        corrente o `_mixed` (entità condivise tra corpora). Ogni riga
+        riporta id + subtype + un breve descrittore, indispensabile per
+        far riconoscere al modello i sinonimi (es. "Orodruin" = mount_doom).
+        """
+        lines = []
+        for pid in self.wiki.list():
+            if pid.startswith("source_"):
+                continue
+            fm, pbody = self.wiki.get(pid)
+            if fm.get("type") != "entity":
+                continue
+            pdom = fm.get("domain", DEFAULT_DOMAIN)
+            if pdom != domain and pdom != MIXED_DOMAIN:
+                continue
+            sub = fm.get("subtype") or "-"
+            first = next(
+                (l.strip() for l in pbody.splitlines() if l.strip() and not l.startswith("#")),
+                "",
+            )
+            descr = (first[:90] + "…") if len(first) > 90 else first
+            lines.append(f"- {pid} [{sub}] {descr}")
+        if not lines:
+            return "(nessuna entità esistente in questo dominio: è il primo documento)"
+        return "\n".join(sorted(lines))
+
+    def _identify_entities(self, doc_id: str, title: str, body: str, hint_subtype: str | None, domain: str) -> list[dict]:
         """Chiede all'LLM di estrarre le entità rilevanti dal documento.
 
-        Output forzato a JSON per parsing affidabile. Il prompt è esplicito
-        sul fatto di filtrare le menzioni di passaggio: vogliamo le entità
-        "trattate", non semplicemente citate. Questo è un trade-off:
-        riduce il rumore ma può perdere dettagli rilevanti per il merge
-        (vedi caso della contraddizione 1601 vs 1604 sulla fondazione
-        della Contea nei documenti seed).
+        Output forzato a JSON per parsing affidabile. Il prompt:
+        1. Mostra l'inventario delle entità già esistenti (stesso dominio)
+           e impone il RIUSO dell'id esatto se l'entità esiste già — anche
+           con nome alternativo, sinonimo, singolare/plurale, articolo.
+           Questo previene la frammentazione (osservata: 21 doc -> 72
+           pagine wiki, con duplicati tipo mount_doom/orodruin).
+        2. Alza la soglia di rilevanza: solo entità trattate in modo
+           sostanziale, mai menzioni di passaggio.
         """
         hint = (
             f"\nIl curatore suggerisce che l'entità principale è di tipo: {hint_subtype}."
             if hint_subtype else ""
         )
+        inventory = self._entity_inventory(domain)
         system = (
-            "Sei l'estrattore di entità del companion wiki Tolkien. "
-            "Identifica le entità rilevanti citate nel documento. "
+            f"Sei l'estrattore di entità di un companion wiki di lettura. "
+            f"Il documento appartiene al dominio/corpus '{domain}': non confondere "
+            f"le sue entità con quelle di altri corpus.\n\n"
+            f"=== ENTITÀ GIÀ ESISTENTI NEL DOMINIO '{domain}' ===\n"
+            f"{inventory}\n"
+            f"=== FINE INVENTARIO ===\n\n"
+            "REGOLA DI RIUSO (tassativa): se un'entità del documento corrisponde "
+            "a una già presente nell'inventario, DEVI riusare il suo id ESATTO. "
+            "Vale anche se nel documento compare con nome diverso: sinonimo, "
+            "nome in altra lingua, variante con/senza articolo, singolare/plurale. "
+            "Esempi di errori DA NON fare: creare 'shire' se esiste 'the_shire'; "
+            "creare 'orodruin' se esiste 'mount_doom' (stessa entità, nome Sindarin); "
+            "creare 'seldon_crises' se esiste 'seldon_crisis'. Nel dubbio, riusa.\n\n"
+            "SOGLIA DI RILEVANZA: crea/segnala un'entità SOLO se è trattata in modo "
+            "sostanziale (almeno 2-3 frasi di contenuto specifico su di essa). "
+            "Oggetti, luoghi o personaggi nominati una sola volta di sfuggita NON "
+            "sono entità: ignorali. Meglio poche entità solide che molte marginali.\n\n"
+            "UNIFICAZIONE INTRA-DOCUMENTO: se nello STESSO documento la stessa "
+            "entità compare con nomi diversi (sinonimo, nome in altra lingua, "
+            "sigla, con/senza articolo, singolare/plurale), emetti UN SOLO id. "
+            "CATEGORIA vs ISTANZE: se il documento descrive una categoria con più "
+            "istanze (es. 'le Crisi Seldon' con la crisi degli Enciclopedisti, dei "
+            "Mercanti, ecc.), crea UNA SOLA pagina per la categoria — NON una pagina "
+            "per istanza — salvo che una singola istanza abbia ≥3 frasi di "
+            "trattazione autonoma e indipendente.\n\n"
             "Rispondi SOLO con JSON valido nel formato:\n"
             '{"entities": [{"id": "snake_case_en", "type": "entity", "subtype": "character|place|artifact|event|book", "summary": "1-2 frasi"}]}'
-            "\n- id: slug inglese in snake_case (es. frodo_baggins, one_ring, council_of_elrond)."
-            "\n- subtype: uno tra character, place, artifact, event, book."
-            "\n- Massimo 5 entità, solo quelle veramente trattate dal documento (non semplici menzioni di passaggio)."
+            "\n- id: slug SEMPRE in INGLESE, snake_case (anche se il contenuto è "
+            "in italiano: 'primary_radiant' non 'radiante_primario'). Se l'entità "
+            "è nell'inventario, USA QUELL'id esatto; altrimenti coniane uno nuovo."
+            "\n- subtype: uno tra character, place, artifact, event, book. Se l'entità è "
+            "un concetto/disciplina/organizzazione che non rientra in questi tipi, usa "
+            'subtype "" (stringa vuota) anziché forzare un tipo errato.'
+            "\n- Massimo 4 entità: solo quelle centrali per il documento."
             f"{hint}\n\nAGENTS.md:\n{self.agents_md}"
         )
         user = f"Documento (id={doc_id}, titolo={title}):\n\n{body}"
@@ -353,9 +449,15 @@ class IngestPipeline:
         seen = set()
         for ent in entities:
             eid = ent.get("id")
-            sub = ent.get("subtype")
-            if not eid or not sub or eid in seen:
+            # subtype può essere "" (concetti/organizzazioni fuori tassonomia):
+            # NON è più un campo obbligatorio. Solo eid è discriminante.
+            sub = ent.get("subtype") or ""
+            if not eid or eid in seen:
                 continue
+            # Se il modello inventa un subtype non in whitelist, lo
+            # normalizziamo a "" anziché propagare un valore non valido.
+            if sub and sub not in VALID_SUBTYPES:
+                sub = ""
             seen.add(eid)
             clean.append({"id": eid, "subtype": sub, "summary": ent.get("summary", "")})
         return clean
@@ -367,7 +469,7 @@ class IngestPipeline:
             Lista dei page_id toccati (creati o aggiornati).
         """
         with self.tracker.phase("ingest:l2:identify_entities"):
-            entities = self._identify_entities(doc_id, title, body, hint_subtype)
+            entities = self._identify_entities(doc_id, title, body, hint_subtype, domain)
         touched: list[str] = []
         for ent in entities:
             page_id = ent["id"]
@@ -377,7 +479,7 @@ class IngestPipeline:
             # il merge include la pagina esistente in input, è più caro.
             if self.wiki.exists(page_id):
                 with self.tracker.phase("ingest:l2:entity_merge"):
-                    merged = self._merge_entity_page(page_id, doc_id, title, body)
+                    merged = self._merge_entity_page(page_id, doc_id, title, body, domain)
                 # Dominio della pagina aggiornato: se il nuovo dominio
                 # differisce dal corrente, segna la pagina come "_mixed"
                 # (sorgenti multi-dominio). Permette al filtro query-time
@@ -387,7 +489,7 @@ class IngestPipeline:
                 page_domain = current_domain if current_domain == domain else MIXED_DOMAIN
             else:
                 with self.tracker.phase("ingest:l2:entity_create"):
-                    merged = self._create_entity_page(page_id, subtype, doc_id, title, body)
+                    merged = self._create_entity_page(page_id, subtype, doc_id, title, body, domain)
                 page_domain = domain
             # Metadati aggiornati a ogni passaggio: importa che sources sia
             # cumulativo (vedi WikiStore.update_with_merge).
@@ -407,11 +509,13 @@ class IngestPipeline:
             touched.append(page_id)
         return touched
 
-    def _create_entity_page(self, page_id: str, subtype: str, doc_id: str, title: str, body: str) -> str:
+    def _create_entity_page(self, page_id: str, subtype: str, doc_id: str, title: str, body: str, domain: str) -> str:
         """Genera ex-novo una pagina entity dal documento sorgente."""
+        subtype_label = subtype or "concetto/organizzazione (fuori tassonomia standard)"
         system = (
-            f"Sei un curatore del companion wiki Tolkien. Crea una NUOVA pagina enciclopedica "
-            f"per l'entità '{page_id}' (tipo: {subtype}) basandoti sul documento fornito. "
+            f"Sei un curatore di un companion wiki di lettura, corpus '{domain}'. "
+            f"Crea una NUOVA pagina enciclopedica "
+            f"per l'entità '{page_id}' (tipo: {subtype_label}) basandoti sul documento fornito. "
             "Struttura in markdown:\n"
             "# <nome leggibile>\n\n## Panoramica\n\n## Dettagli\n\n## Relazioni\n\n## Domande aperte\n\n"
             "Italiano, tono enciclopedico, terza persona. "
@@ -421,7 +525,7 @@ class IngestPipeline:
         user = f"Documento sorgente (id={doc_id}, titolo={title}):\n\n{body}"
         return self.llm.complete(system=system, user=user, max_tokens=1500)
 
-    def _merge_entity_page(self, page_id: str, doc_id: str, title: str, body: str) -> str:
+    def _merge_entity_page(self, page_id: str, doc_id: str, title: str, body: str, domain: str) -> str:
         """Fonde un nuovo documento in una pagina entity esistente.
 
         Operazione delicata: deve preservare le informazioni preesistenti
@@ -433,7 +537,8 @@ class IngestPipeline:
         existing_fm, existing_body = self.wiki.get(page_id)
         existing_sources = existing_fm.get("sources") or []
         system = (
-            f"Sei un curatore del companion wiki Tolkien. Aggiorna la pagina esistente '{page_id}' "
+            f"Sei un curatore di un companion wiki di lettura, corpus '{domain}'. "
+            f"Aggiorna la pagina esistente '{page_id}' "
             "integrando le informazioni del nuovo documento. Regole:\n"
             "- Mantieni la struttura: # titolo, ## Panoramica, ## Dettagli, ## Relazioni, ## Domande aperte.\n"
             "- Non rimuovere informazioni già presenti se restano valide.\n"
