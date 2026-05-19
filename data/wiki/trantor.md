@@ -1,7 +1,7 @@
 ---
 id: trantor
 sources:
-- trantor_20260518142857
+- trantor_20260518190139
 type: entity
 subtype: place
 domain: asimov
@@ -16,7 +16,7 @@ type: entity
 subtype: place
 domain: asimov
 tags: [pianeta, capitale_imperiale, fondazione, seconda_fondazione]
-sources: [trantor_20260518142857]
+sources: [trantor_20260518190139]
 last_updated: 2026-05-18
 confidence: high
 stale: false
@@ -27,27 +27,33 @@ title: Trantor
 
 ## Panoramica
 
-Trantor è il pianeta-capitale dell'Impero Galattico nel Ciclo della Fondazione di Isaac Asimov, situato il più vicino possibile al centro gravitazionale della Galassia e sede del governo imperiale per oltre dodicimila anni, durante i quali amministra un impero esteso a venticinque milioni di pianeti abitati [[trantor_20260518142857]]. È una gigantesca ecumenopoli che, al suo apice, ospita circa 40 miliardi di abitanti, quasi tutti impiegati nell'amministrazione imperiale [[trantor_20260518142857]]. Dopo il cosiddetto "Grande Sacco", che segna la fine effettiva dell'Impero, il pianeta viene devastato e riconvertito in mondo rurale spopolato, diventando il luogo segreto della Seconda Fondazione, identificato con il criptico "Star's End" di Hari Seldon [[trantor_20260518142857]].
+Trantor è il pianeta-capitale dell'Impero Galattico nel Ciclo della Fondazione di Isaac Asimov, situato il più vicino possibile al centro gravitazionale della Galassia. Da questo mondo l’Impero amministra venticinque milioni di pianeti abitati per un periodo di oltre dodicimila anni. [[trantor_20260518190139]]
 
 ## Dettagli
 
-Trantor occupa una posizione strategica "il più vicino possibile al centro gravitazionale della Galassia", elemento che ne sottolinea il ruolo simbolico e pratico di fulcro dell'Impero Galattico [[trantor_20260518142857]]. Da questo pianeta viene amministrato un impero che comprende venticinque milioni di mondi abitati, in un arco temporale di oltre dodicimila anni, indicando una straordinaria continuità istituzionale e burocratica [[trantor_20260518142857]].
+Trantor è descritto come una “ecumenopoli”: l’intera superficie del pianeta, circa centonovanta milioni di chilometri quadrati, è ricoperta da una città continua, sigillata sotto cupole metalliche. Non esistono spazi aperti, con l’eccezione del palazzo imperiale e dell’annessa Università Galattica. [[trantor_20260518190139]]
 
-Dal punto di vista urbanistico, Trantor è descritto come una "ecumenopoli": l'intera superficie del pianeta, pari a circa centonovanta milioni di chilometri quadrati, è ricoperta da una città continua [[trantor_20260518142857]]. Questa città è sigillata sotto cupole metalliche che coprono il pianeta, eliminando di fatto gli spazi aperti, con l'eccezione del palazzo imperiale e dell'annessa Università Galattica, che costituiscono un'area scoperta particolare all'interno di un mondo altrimenti completamente chiuso e artificiale [[trantor_20260518142857]].
+Al culmine del suo sviluppo, Trantor ospita circa quaranta miliardi di abitanti, in gran parte impiegati nell’amministrazione imperiale. [[trantor_20260518190139]]
 
-Al suo apice demografico, Trantor ospita circa 40 miliardi di abitanti, la maggioranza dei quali è impiegata in funzioni legate all'amministrazione imperiale, a conferma della vocazione del pianeta come centro burocratico e politico più che produttivo [[trantor_20260518142857]]. Questa specializzazione estrema rende il pianeta non autosufficiente: Trantor dipende interamente dalle importazioni alimentari, che provengono da venti mondi agricoli vicini tramite una rete logistica definita enorme e fragile [[trantor_20260518142857]].
+Il pianeta non è autosufficiente: dipende integralmente dall’importazione di cibo da venti mondi agricoli vicini, collegati da una vasta rete logistica. Questa dipendenza strutturale rende Trantor vulnerabile: l’interruzione dei rifornimenti alimentari equivarrebbe a condannarlo alla carestia. [[trantor_20260518190139]]
 
-La dipendenza alimentare costituisce il principale punto debole strutturale di Trantor e, per estensione, dell'intero Impero: interrompere o bloccare i rifornimenti significa condannare il pianeta alla carestia [[trantor_20260518142857]]. L'osservazione di questa vulnerabilità, unita alla percezione della rigidità burocratica che caratterizza la società trantoriana, contribuisce in modo decisivo alla formulazione da parte di Hari Seldon delle previsioni psicostoriche sul crollo dell'Impero [[trantor_20260518142857]].
+Il “Grande Sacco” di Trantor, avvenuto circa due secoli e mezzo dopo la fondazione della Fondazione, determina la devastazione del pianeta e la fine effettiva dell’Impero Galattico. Le cupole vengono squarciate e i sopravvissuti riconvertono le superfici metalliche in campi coltivati, avviando una trasformazione verso un’economia agricola e un mondo rurale spopolato. [[trantor_20260518190139]]
 
-Il "Grande Sacco" di Trantor avviene circa due secoli e mezzo dopo la fondazione della Fondazione e rappresenta il momento in cui questa vulnerabilità si traduce in catastrofe: il pianeta viene devastato, le cupole metalliche vengono squarciate, e la struttura urbana che definiva l'ecumenopoli viene profondamente compromessa [[trantor_20260518142857]]. I sopravvissuti sono costretti a riconvertire le "terre metalliche" — la superficie prima coperta di metallo e strutture urbane — in campi coltivati, segnando un ritorno a un'economia agricola su un mondo precedentemente quasi interamente dedicato alla burocrazia e all'amministrazione [[trantor_20260518142857]].
-
-In seguito al Sacco, Trantor diviene un mondo rurale spopolato, ben lontano dalla densità urbana e dalla centralità politica che lo caratterizzavano in epoca imperiale [[trantor_20260518142857]]. Tra le rovine della Biblioteca Galattica, residuo della precedente era di grandezza, viene stabilito il vero centro della Seconda Fondazione, trasformando Trantor da capitale visibile dell'Impero a centro nascosto di un potere intellettuale e psicostorico [[trantor_20260518142857]].
+Dopo il Sacco, tra le rovine della Biblioteca Galattica su Trantor si nasconde il vero centro della Seconda Fondazione, identificato come il luogo cripticamente indicato da Hari Seldon con il nome di “Star’s End”. [[trantor_20260518190139]]
 
 ## Relazioni
 
-- **Impero Galattico**: Trantor è il pianeta-capitale e il centro amministrativo dell'Impero, da cui vengono governati venticinque milioni di pianeti per oltre dodicimila anni [[trantor_20260518142857]].
-- **Mondi agricoli vicini**: venti pianeti agricoli forniscono a Trantor tutto il cibo necessario alla sopravvivenza, creando una relazione di dipendenza vitale e una rete logistica enorme e vulnerabile [[trantor_20260518142857]].
-- **Hari Seldon**: il matematico vive e lavora a lungo su Trantor; l'osservazione diretta della rigidità burocratica e della vulnerabilità strutturale del pianeta contribuisce alla nascita delle sue previsioni psicostoriche sul crollo dell'Impero [[trantor_20260518142857]].
-- **Fondazione**: il "Grande Sacco" di Trantor ha luogo circa due secoli e mezzo dopo la fondazione della Fondazione ed è considerato il momento della fine effettiva dell'Impero Galattico [[trantor_20260518142857]].
-- **Seconda Fondazione**: dopo il Sacco, il vero centro della Seconda Fondazione si stabilisce su Trantor, nascosto tra le rovine della Biblioteca Galattica [[trantor_20260518142857]].
-- **"Star's End"**: Trantor viene identificato come il luogo che
+- Impero Galattico: Trantor è la capitale politica e amministrativa dell’Impero per oltre dodicimila anni, da cui vengono governati venticinque milioni di pianeti abitati. [[trantor_20260518190139]]
+- Hari Seldon: vive e lavora a lungo su Trantor; l’osservazione della rigidità burocratica e della vulnerabilità strutturale del pianeta contribuisce allo sviluppo delle previsioni psicostoriche sul crollo dell’Impero. [[trantor_20260518190139]]
+- Fondazione: il “Grande Sacco” di Trantor si colloca circa due secoli e mezzo dopo la fondazione della Fondazione e ne segna, a livello galattico, la fase in cui il crollo dell’Impero diventa realtà consolidata. [[trantor_20260518190139]]
+- Seconda Fondazione: il vero centro della Seconda Fondazione è nascosto su Trantor, tra le rovine della Biblioteca Galattica, corrispondendo al luogo indicato da Seldon come “Star’s End”. [[trantor_20260518190139]]
+- Mondi agricoli: Trantor dipende dall’importazione di cibo da venti mondi agricoli vicini, collegati da una rete logistica su cui si regge la sopravvivenza del pianeta. [[trantor_20260518190139]]
+- Università Galattica: unica area aperta insieme al palazzo imperiale, collocata sulla superficie di Trantor all’interno dell’ecumenopoli. [[trantor_20260518190139]]
+- Biblioteca Galattica: le sue rovine, dopo il Sacco, ospitano il centro segreto della Seconda Fondazione. [[trantor_20260518190139]]
+
+## Domande aperte
+
+- Quali sono i dettagli storici e politici che portarono precisamente al “Grande Sacco” di Trantor? [[trantor_20260518190139]]
+- In che modo l’organizzazione logistica dei venti mondi agricoli era strutturata per sostenere Trantor e l’Impero? [[trantor_20260518190139]]
+- Quali trasformazioni sociali e culturali avvengono su Trantor nel passaggio da ecumenopoli imperiale a mondo rurale spopolato? [[trantor_20260518190139]]
+- In che modo la presenza della Seconda Fondazione su Trantor influenza la storia successiva della Galassia? [[trantor_20260518190139]]

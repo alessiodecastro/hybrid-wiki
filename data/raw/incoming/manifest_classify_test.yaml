@@ -1,0 +1,7 @@
+# data/raw/incoming/manifest_classify_test.yaml
+# base_dir relativo a questa dir: i seed sono in incoming/tolkien/.
+base_dir: tolkien
+defaults: { domain: tolkien }
+documents:
+  - { file: frodo_intro.txt,     title: "Frodo Baggins" }       # atteso: QUEUE (L2 → review)
+  - { file: lettera_routine.txt, title: "Nota Mathom-house" }   # atteso: auto-ingest L0 high

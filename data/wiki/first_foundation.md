@@ -1,10 +1,7 @@
 ---
 id: first_foundation
 sources:
-- hari_seldon_20260518142641
-- terminus_20260518143006
-- le_crisi_seldon_20260518143119
-- la_fondazione_20260518143320
+- terminus_20260518190241
 type: entity
 subtype: ''
 domain: asimov
@@ -18,12 +15,8 @@ id: first_foundation
 type: entity
 subtype: ""
 domain: asimov
-tags: [fondazione, organizzazione, psicostoria, piano_seldon]
-sources:
-  - hari_seldon_20260518142641
-  - terminus_20260518143006
-  - le_crisi_seldon_20260518143119
-  - la_fondazione_20260518143320
+tags: [fondazioni, organizzazioni, psicostoria, piano_seldon]
+sources: [terminus_20260518190241]
 last_updated: 2026-05-18
 confidence: high
 stale: false
@@ -34,34 +27,30 @@ title: Prima Fondazione
 
 ## Panoramica
 
-La Prima Fondazione è una delle due Fondazioni previste dal "Piano Seldon", concepito da [[hari_seldon_20260518142641]] per ridurre il periodo di barbarie seguito al crollo dell'Impero Galattico da trentamila a mille anni. È ufficialmente istituita sul pianeta Terminus, nell'anno 12.069 dell'Era Galattica, con lo scopo dichiarato di compilare una enciclopedia universale del sapere umano, l'Enciclopedia Galattica; in realtà l'enciclopedia costituisce un pretesto politico e il vero obiettivo, dettato dalla psicostoria, è preservare e accelerare la rinascita della civiltà galattica dopo il crollo dell'Impero. [[hari_seldon_20260518142641]] [[terminus_20260518143006]] [[la_fondazione_20260518143320]]
-
-Nel quadro del Piano, la Prima Fondazione è il polo "palese" e operativo, destinato a sviluppare scienza, tecnologia, potere politico ed economico, reagendo alle successive Crisi Seldon che ne determinano l’evoluzione istituzionale e strategica. Essa rappresenta il nucleo attorno a cui Hari Seldon prevede sorgerà il Secondo Impero Galattico entro mille anni dal crollo del primo. [[hari_seldon_20260518142641]] [[terminus_20260518143006]] [[le_crisi_seldon_20260518143119]] [[la_fondazione_20260518143320]]
+La Prima Fondazione è l’organizzazione scientifica e politica istituita da Hari Seldon sul pianeta Terminus come fulcro visibile del Piano Seldon, con il compito di attraversare una serie di crisi storiche guidate dalla psicostoria e di trasformarsi progressivamente in potenza dominante della periferia galattica.[[terminus_20260518190241]]
 
 ## Dettagli
 
-La Prima Fondazione viene stabilita "ufficialmente" sul pianeta Terminus, ai margini dell'Impero Galattico, come parte del progetto enciclopedico che funge da copertura politica al vero obiettivo psicostorico di Hari Seldon. Terminus è descritto come il mondo abitabile più periferico e isolato dell'intera Galassia, situato all'estremo margine di una spirale galattica e lontanissimo da Trantor. [[hari_seldon_20260518142641]] [[terminus_20260518143006]] [[la_fondazione_20260518143320]]
+La fondazione della Prima Fondazione avviene ufficialmente nell’anno 12.069 dell’Era Galattica, quando Hari Seldon stabilisce la propria iniziativa sul pianeta Terminus, scelto appositamente per la sua posizione estrema e isolata ai margini della Galassia.[[terminus_20260518190241]] Terminus è descritto come il mondo abitabile più periferico e privo di risorse significative, condizione che rende la Fondazione strutturalmente dipendente dallo sviluppo di scienza, tecnologia e abilità politica come strumenti principali di sopravvivenza e influenza.[[terminus_20260518190241]]
 
-L'insediamento della Fondazione è reso possibile dall'esito del processo per tradimento intentato a Seldon dalla Commissione di Pubblica Salvezza: per evitare la condanna a morte, Seldon negozia l'esilio della propria équipe, composta da centomila persone, proprio su Terminus. L'arrivo di questa comunità segna di fatto l'avvio operativo della Prima Fondazione. [[hari_seldon_20260518142641]]
+Un elemento centrale del funzionamento della Prima Fondazione è la Cripta del Tempo (Time Vault), situata su Terminus, in cui Seldon ha registrato messaggi olografici programmati per apparire in corrispondenza delle “Crisi Seldon”.[[terminus_20260518190241]] Ogni comparsa del simulacro di Seldon conferma alla Fondazione che la crisi appena vissuta era prevista e che il corso della storia rimane allineato con la traiettoria pianificata dalla psicostoria.[[terminus_20260518190241]]
 
-La scelta di Terminus è coerente con il disegno psicostorico: il pianeta è privo di metalli pesanti, non dispone di risorse minerarie significative né di pianeti gemelli, e l'unica città è Terminus City, sviluppata attorno al complesso dell'Enciclopedia. Questa condizione di indigenza, combinata con l'isolamento galattico e con l'assenza iniziale di difese militari, costringe la Fondazione a sviluppare scienza, tecnologia e abilità politica come strumenti primari di sopravvivenza e di espansione della propria influenza. [[terminus_20260518143006]] [[la_fondazione_20260518143320]]
+La Prima Fondazione attraversa diverse fasi istituzionali e di governo, che costituiscono risposte “obbligate” a specifiche Crisi Seldon: inizialmente il Consiglio degli Enciclopedisti, poi i Sindaci di Terminus, in seguito i Principi Mercanti.[[terminus_20260518190241]] Ciascuna di queste forme di governo rappresenta un adattamento funzionale alla situazione storica prevista, e contribuisce alla trasformazione della Fondazione da enclave scientifica relativamente fragile a potenza di primo piano.
 
-Sul pianeta che ospita la Prima Fondazione si trova la Cripta del Tempo (Time Vault), una camera in cui Hari Seldon ha registrato messaggi olografici da riprodurre in date predeterminate, in corrispondenza delle "Crisi Seldon". Ogni apparizione del simulacro di Seldon conferma alla Fondazione che la crisi appena attraversata era prevista e che la traiettoria storica resta quella pianificata dalla psicostoria. [[hari_seldon_20260518142641]] [[terminus_20260518143006]] [[le_crisi_seldon_20260518143119]]
+Nel corso del tempo la Prima Fondazione diviene la potenza dominante della periferia galattica, estendendo la propria influenza attraverso fasi distinte: prima con un’egemonia di tipo religioso, poi commerciale, quindi tecnologico‑militare.[[terminus_20260518190241]] Questo sviluppo graduale corrisponde alla strategia implicita del Piano Seldon, in cui il controllo delle conoscenze e delle tecnologie sostituisce la forza bruta resasi impossibile dalla povertà originaria del pianeta sede.
 
-Le Crisi Seldon sono punti critici nella storia della Fondazione in cui le scelte disponibili si riducono progressivamente fino a una sola via d'uscita possibile, quella già prevista dalla psicostoria. Il meccanismo è deterministico dal punto di vista storico‑statistico, ma vissuto come libero dai protagonisti, che agiscono senza conoscere i dettagli del Piano. Per questo Seldon insiste sulla necessità che la popolazione ignori il contenuto del Piano. [[le_crisi_seldon_20260518143119]]
-
-Nel corso del tempo, la Prima Fondazione attraversa diverse fasi di organizzazione e governo su Terminus: prima il Consiglio degli Enciclopedisti, poi i Sindaci e infine i Principi Mercanti. Ciascuna di queste forme di governo viene presentata come risposta "obbligata" o funzionale a specifiche Crisi Seldon, segnando l'evoluzione politica e strutturale della Fondazione. [[terminus_20260518143006]] [[le_crisi_seldon_20260518143119]] [[la_fondazione_20260518143320]]
-
-Le prime crisi che scandiscono la storia della Prima Fondazione includono: la crisi degli Enciclopedisti, che comporta il passaggio del potere ai Sindaci (con la figura di Salvor Hardin); la crisi religioso‑politica legata ai Quattro Regni, durante la quale i Sindaci di Terminus sfruttano la superiorità tecnologica e una religione artificiale costruita attorno alla scienza per dominare i regni vicini; la crisi commerciale dei Principi Mercanti (Hober Mallow), in cui la Fondazione si afferma come potenza commerciale utilizzando commercio e ricatto economico; e la crisi imperiale che coinvolge il generale Bel Riose. Questi passaggi consolidano progressivamente il ruolo della Fondazione come potenza regionale prima religiosa, poi commerciale e infine tecnologico‑militare. [[le_crisi_seldon_20260518143119]] [[terminus_20260518143006]] [[la_fondazione_20260518143320]]
-
-Nel periodo dei Principi Mercanti, la Fondazione fa proprio il principio secondo cui "la violenza è l'ultimo rifugio degli incapaci", privilegiando l'uso della pressione economica e del controllo tecnologico rispetto allo scontro militare diretto. [[la_fondazione_20260518143320]]
-
-La sequenza predeterminata delle Crisi Seldon si interrompe con l'avvento del Mulo: in corrispondenza di una crisi attesa, il messaggio di Seldon risulta completamente fuori bersaglio, perché la psicostoria non aveva previsto l’emergere di un mutante individuale. Questo episodio mostra che il Piano della Prima Fondazione funziona solo finché valgono gli assiomi statistici su cui si basa, e che una variabile eccezionale può temporaneamente invalidarlo. Il Mulo riesce a sottomettere temporaneamente la Fondazione, mettendo in pericolo l'intero Piano. [[le_crisi_seldon_20260518143119]] [[la_fondazione_20260518143320]]
-
-Grazie alle trasformazioni politiche e alle risposte successive alle crisi, la Prima Fondazione diventa progressivamente la potenza dominante della periferia galattica, espandendo dapprima la propria influenza in forma religiosa, poi commerciale e, infine, tecnologico‑militare. Questo sviluppo conferma il ruolo della Fondazione come nucleo organizzato capace di attraversare e orientare il periodo di caos successivo al crollo imperiale, riducendone la durata complessiva secondo le previsioni del Piano Seldon. [[hari_seldon_20260518142641]] [[terminus_20260518143006]] [[le_crisi_seldon_20260518143119]] [[la_fondazione_20260518143320]]
-
-La Prima Fondazione è pensata come uno dei due poli del Piano Seldon, collocata a uno dei "due estremi opposti della Galassia". Essa costituisce il fulcro visibile e palese del Piano, in contrapposizione alla Seconda Fondazione, che ne rappresenta il centro segreto e occulto. [[hari_seldon_20260518142641]] [[terminus_20260518143006]] [[la_fondazione_20260518143320]]
+Pur essendo “il fulcro visibile” del Piano Seldon, la Prima Fondazione non coincide con il centro segreto di tale Piano, che è invece la Seconda Fondazione, deliberatamente nascosta “all’altro estremo”.[[terminus_20260518190241]] La consapevolezza (parziale o presunta) di questa duplicità fa parte della cornice narrativa entro cui opera la Prima Fondazione.
 
 ## Relazioni
 
-- **Hari
+- **Terminus** — Pianeta su cui Hari Seldon stabilisce ufficialmente la Prima Fondazione nell’anno 12.069 dell’Era Galattica; sede della Cripta del Tempo e centro operativo dell’organizzazione nelle sue varie fasi di sviluppo.[[terminus_20260518190241]]
+- **Hari Seldon** — Ideatore del Piano Seldon e fondatore della Prima Fondazione; registra nella Cripta del Tempo i messaggi olografici destinati ad apparire nelle Crisi Seldon, fungendo da guida postuma per l’evoluzione della Fondazione.[[terminus_20260518190241]]
+- **Crisi Seldon** — Momenti critici della storia galattica in cui la Prima Fondazione si trova di fronte a scelte obbligate; le fasi di governo (Consiglio degli Enciclopedisti, Sindaci, Principi Mercanti) sono descritte come risposte determinate a tali crisi.[[terminus_20260518190241]]
+- **Cripta del Tempo (Time Vault)** — Struttura su Terminus contenente i messaggi olografici di Seldon; le sue apparizioni confermano alla Prima Fondazione la correttezza del percorso storico intrapreso.[[terminus_20260518190241]]
+- **Seconda Fondazione** — Centro segreto del Piano Seldon, tenuto nascosto e collocato “all’altro estremo” rispetto alla Fondazione palese di Terminus; la contrapposizione tra Prima e Seconda Fondazione costituisce uno dei motori narrativi principali della saga.[[terminus_20260518190241]]
+
+## Domande aperte
+
+- I criteri psicostorici precisi che hanno portato alla scelta delle diverse fasi di governo (Enciclopedisti, Sindaci, Principi Mercanti) non sono esplicitati nel dettaglio nel documento disponibile.[[terminus_20260518190241]]
+- Le modalità concrete con cui la Prima Fondazione passa da egemonia religiosa a predominio commerciale e poi tecnologico‑militare non sono descritte, ma solo indicate come tappe successive.[[terminus_20260518190241]]
+- Il rapporto operativo tra Prima Fondazione e Seconda Fondazione, oltre alla loro contrapposizione generale, non viene chiarito nel testo fornito.[[terminus_20260518190241]]

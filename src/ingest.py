@@ -26,7 +26,7 @@ from pathlib import Path
 from .config import (
     AGENTS_MD_PATH, CHUNK_SIZE_WORDS, CHUNK_OVERLAP_WORDS,
     RAW_COLLECTION, WIKI_COLLECTION, VALID_LEVELS, VALID_SUBTYPES, TOKEN_LOG_PATH,
-    DEFAULT_DOMAIN, MIXED_DOMAIN,
+    DEFAULT_DOMAIN, MIXED_DOMAIN, ENTITY_INVENTORY_CAP, ENTITY_SHORTLIST_K,
 )
 from .stores import RawStore, WikiStore, VectorDB
 from .embeddings import Embedder
@@ -243,6 +243,78 @@ class IngestPipeline:
             "hot_layer_deferred": hot_layer_deferred,
         }
 
+    def promote(self, doc_id: str, new_level: str, defer_hot_layer: bool = False) -> dict:
+        """Promozione/riclassificazione retroattiva di un documento esistente.
+
+        Caso d'uso (§6.1 "promozione retroattiva"): un documento ingestato
+        come L0 si rivela strategico → va portato a L1/L2 senza re-ingestarlo
+        da zero. Il raw è immutabile e GIÀ presente: NON si ricrea il doc_id,
+        NON si ri-salva il body, NON si ri-embeddano i chunk raw (esistono).
+        Si eseguono solo gli step wiki del nuovo livello.
+
+        L'unico aggiornamento al raw store è il metadato `level` (è
+        annotazione di classificazione/provenienza, non contenuto): si
+        riscrive lo stesso body con `level` aggiornato + `promoted_from`/
+        `promoted_at` per audit. L'immutabilità riguarda il TESTO, non la
+        classificazione, che il design prevede esplicitamente evolva.
+
+        Args:
+            doc_id: documento già nel RawStore.
+            new_level: livello target (L0/L1/L2).
+            defer_hot_layer: come in ingest(); per uso batch.
+
+        Returns:
+            {doc_id, level, domain, wiki_pages, hot_layer_deferred}.
+        """
+        if new_level not in VALID_LEVELS:
+            raise ValueError(f"Livello invalido: {new_level}. Ammessi: {VALID_LEVELS}")
+        if not self.raw.exists(doc_id):
+            raise ValueError(f"doc_id non presente nel raw store: {doc_id}")
+
+        fm, body = self.raw.get(doc_id)
+        title = fm.get("title", doc_id)
+        domain = fm.get("domain", DEFAULT_DOMAIN)
+        subtype = fm.get("subtype")
+        old_level = fm.get("level", "?")
+
+        # Aggiorna SOLO il metadato di classificazione (body invariato).
+        new_meta = {k: v for k, v in fm.items() if k != "id"}
+        new_meta["level"] = new_level
+        new_meta["promoted_from"] = old_level
+        new_meta["promoted_at"] = datetime.now().isoformat(timespec="seconds")
+        self.raw.save(doc_id, body, new_meta)
+
+        # Step wiki del nuovo livello (raw GIÀ indicizzato: si salta).
+        touched_pages: list[str] = []
+        if new_level == "L0":
+            pass
+        elif new_level == "L1":
+            with self.tracker.phase("promote:l1:source_page"):
+                touched_pages.append(self._make_source_page(doc_id, title, body, domain))
+        elif new_level == "L2":
+            with self.tracker.phase("promote:l2:source_page"):
+                touched_pages.append(self._make_source_page(doc_id, title, body, domain))
+            touched_pages.extend(
+                self._integrate_entities(doc_id, title, body, hint_subtype=subtype, domain=domain)
+            )
+
+        hot_layer_deferred = False
+        if touched_pages:
+            if defer_hot_layer:
+                hot_layer_deferred = True
+            else:
+                with self.tracker.phase("promote:hot_layer_rebuild"):
+                    self.hot.rebuild()
+
+        return {
+            "doc_id": doc_id,
+            "level": new_level,
+            "promoted_from": old_level,
+            "domain": domain,
+            "wiki_pages": touched_pages,
+            "hot_layer_deferred": hot_layer_deferred,
+        }
+
     def rebuild_hot_layer(self) -> None:
         """Ricostruisce il Hot Layer una volta sola.
 
@@ -344,19 +416,24 @@ class IngestPipeline:
         self._index_wiki_page(page_id)
         return page_id
 
-    def _entity_inventory(self, domain: str) -> str:
-        """Costruisce l'inventario delle entità già esistenti nel dominio.
+    @staticmethod
+    def _entity_line(pid: str, fm: dict, body: str) -> str:
+        """Riga di inventario: id + subtype + descrittore breve dal body."""
+        sub = fm.get("subtype") or "-"
+        first = next(
+            (l.strip() for l in body.splitlines() if l.strip() and not l.startswith("#")),
+            "",
+        )
+        descr = (first[:90] + "…") if len(first) > 90 else first
+        return f"- {pid} [{sub}] {descr}"
 
-        Serve a dare a `_identify_entities` la visione di cosa esiste già,
-        così che il modello RIUSI gli id esistenti invece di crearne
-        varianti (the_shire vs shire, orodruin vs mount_doom, ...).
+    def _collect_entity_pages(self, domain: str) -> dict[str, tuple[dict, str]]:
+        """Mappa pid -> (frontmatter, body) delle pagine entity del dominio.
 
-        Filtra: solo pagine `type: entity` (no source_*), del dominio
-        corrente o `_mixed` (entità condivise tra corpora). Ogni riga
-        riporta id + subtype + un breve descrittore, indispensabile per
-        far riconoscere al modello i sinonimi (es. "Orodruin" = mount_doom).
+        Filtra: solo `type: entity` (no source_*), dominio corrente o
+        `_mixed` (entità condivise tra corpora).
         """
-        lines = []
+        pages: dict[str, tuple[dict, str]] = {}
         for pid in self.wiki.list():
             if pid.startswith("source_"):
                 continue
@@ -366,18 +443,80 @@ class IngestPipeline:
             pdom = fm.get("domain", DEFAULT_DOMAIN)
             if pdom != domain and pdom != MIXED_DOMAIN:
                 continue
-            sub = fm.get("subtype") or "-"
-            first = next(
-                (l.strip() for l in pbody.splitlines() if l.strip() and not l.startswith("#")),
-                "",
-            )
-            descr = (first[:90] + "…") if len(first) > 90 else first
-            lines.append(f"- {pid} [{sub}] {descr}")
-        if not lines:
-            return "(nessuna entità esistente in questo dominio: è il primo documento)"
-        return "\n".join(sorted(lines))
+            pages[pid] = (fm, pbody)
+        return pages
 
-    def _identify_entities(self, doc_id: str, title: str, body: str, hint_subtype: str | None, domain: str) -> list[dict]:
+    def _entity_inventory(self, domain: str, query_embedding: list[float] | None = None) -> str:
+        """Inventario delle entità esistenti, da iniettare in _identify_entities.
+
+        Serve a far RIUSARE al modello gli id esistenti invece di crearne
+        varianti (the_shire vs shire, orodruin vs mount_doom, ...).
+
+        Due modalità (debito noto §11.1: l'inventario piatto è O(N) e satura
+        il contesto oltre ~ENTITY_INVENTORY_CAP entità):
+
+        - PIATTA (n <= cap, oppure nessun query_embedding): lista completa.
+          Comportamento storico, retro-compatibile.
+        - GERARCHICA (n > cap): SCHELETRO aggregato per subtype (conteggi +
+          pochi esemplari, dà consapevolezza dello spazio) + SHORTLIST
+          semantica delle K entità più affini al documento (recall mirato,
+          O(K) indipendente da N). La shortlist usa il vettore della source
+          page già creata (nessun embedding aggiuntivo).
+        """
+        pages = self._collect_entity_pages(domain)
+        if not pages:
+            return "(nessuna entità esistente in questo dominio: è il primo documento)"
+
+        # Modalità piatta: sotto soglia o senza query vector disponibile.
+        if len(pages) <= ENTITY_INVENTORY_CAP or query_embedding is None:
+            lines = [self._entity_line(pid, fm, body) for pid, (fm, body) in pages.items()]
+            return "\n".join(sorted(lines))
+
+        # --- Modalità gerarchica ---
+        # 1. Scheletro: per subtype, conteggio + fino a 3 esemplari.
+        by_sub: dict[str, list[str]] = {}
+        for pid, (fm, _b) in pages.items():
+            by_sub.setdefault(fm.get("subtype") or "-", []).append(pid)
+        skeleton_lines = ["SCHELETRO (panoramica aggregata — lo spazio entità è più ampio della shortlist):"]
+        for sub in sorted(by_sub):
+            ids = sorted(by_sub[sub])
+            esempi = ", ".join(ids[:3])
+            piu = f" … (+{len(ids) - 3})" if len(ids) > 3 else ""
+            skeleton_lines.append(f"- [{sub}] {len(ids)} entità: {esempi}{piu}")
+
+        # 2. Shortlist semantica: K entità più vicine al documento.
+        #    Filtro ChromaDB: solo entity, dominio o _mixed.
+        where = {
+            "$and": [
+                {"domain": {"$in": [domain, MIXED_DOMAIN]}},
+                {"type": "entity"},
+            ]
+        }
+        hits = self.vdb.query(WIKI_COLLECTION, query_embedding, ENTITY_SHORTLIST_K, where=where)
+        short_lines = []
+        for h in hits:
+            pid = (h.get("metadata") or {}).get("page_id") or h["id"]
+            if pid in pages:
+                fm, body = pages[pid]
+                short_lines.append(self._entity_line(pid, fm, body))
+        shortlist = "\n".join(short_lines) if short_lines else "(nessuna entità affine)"
+
+        return (
+            "\n".join(skeleton_lines)
+            + f"\n\nSHORTLIST (le {len(short_lines)} entità esistenti più affini a questo documento — "
+            "controlla QUI prima di coniare un id nuovo):\n"
+            + shortlist
+        )
+
+    def _identify_entities(
+        self,
+        doc_id: str,
+        title: str,
+        body: str,
+        hint_subtype: str | None,
+        domain: str,
+        query_embedding: list[float] | None = None,
+    ) -> list[dict]:
         """Chiede all'LLM di estrarre le entità rilevanti dal documento.
 
         Output forzato a JSON per parsing affidabile. Il prompt:
@@ -388,12 +527,16 @@ class IngestPipeline:
            pagine wiki, con duplicati tipo mount_doom/orodruin).
         2. Alza la soglia di rilevanza: solo entità trattate in modo
            sostanziale, mai menzioni di passaggio.
+
+        query_embedding: usato dall'inventario in modalità gerarchica per
+        recuperare la shortlist semantica (vedi _entity_inventory). Se None
+        l'inventario resta in modalità piatta.
         """
         hint = (
             f"\nIl curatore suggerisce che l'entità principale è di tipo: {hint_subtype}."
             if hint_subtype else ""
         )
-        inventory = self._entity_inventory(domain)
+        inventory = self._entity_inventory(domain, query_embedding=query_embedding)
         system = (
             f"Sei l'estrattore di entità di un companion wiki di lettura. "
             f"Il documento appartiene al dominio/corpus '{domain}': non confondere "
@@ -408,6 +551,14 @@ class IngestPipeline:
             "Esempi di errori DA NON fare: creare 'shire' se esiste 'the_shire'; "
             "creare 'orodruin' se esiste 'mount_doom' (stessa entità, nome Sindarin); "
             "creare 'seldon_crises' se esiste 'seldon_crisis'. Nel dubbio, riusa.\n\n"
+            "INVENTARIO POSSIBILMENTE PARZIALE: su corpus ampi l'inventario può "
+            "mostrare solo uno SCHELETRO aggregato + una SHORTLIST delle entità più "
+            "affini, non l'elenco completo. Quindi: (a) controlla SEMPRE la shortlist "
+            "prima di coniare un id; (b) se un'entità non è in shortlist ma è di un "
+            "tipo presente nello scheletro, è plausibile che esista già: usa un id "
+            "CANONICO e prevedibile (nome proprio inglese, snake_case, senza articolo "
+            "né plurale), NON una variante stilistica. Questo minimizza i duplicati "
+            "che la pipeline di consolidazione dovrà poi unire.\n\n"
             "SOGLIA DI RILEVANZA: crea/segnala un'entità SOLO se è trattata in modo "
             "sostanziale (almeno 2-3 frasi di contenuto specifico su di essa). "
             "Oggetti, luoghi o personaggi nominati una sola volta di sfuggita NON "
@@ -468,8 +619,20 @@ class IngestPipeline:
         Returns:
             Lista dei page_id toccati (creati o aggiornati).
         """
+        # Query vector per la shortlist semantica dell'inventario gerarchico.
+        # Riuso del vettore della source page (creata e embeddata appena prima
+        # in _make_source_page): zero embedding aggiuntivo nel caso normale.
+        # Fallback: embed di titolo + incipit se il vettore non è recuperabile.
+        with self.tracker.phase("ingest:l2:inventory_retrieval"):
+            q_emb = self.vdb.get_embedding(WIKI_COLLECTION, f"source_{doc_id}")
+            if q_emb is None:
+                head = " ".join(body.split()[:300])
+                q_emb = self.embedder.embed(f"{title}\n\n{head}")
+
         with self.tracker.phase("ingest:l2:identify_entities"):
-            entities = self._identify_entities(doc_id, title, body, hint_subtype, domain)
+            entities = self._identify_entities(
+                doc_id, title, body, hint_subtype, domain, query_embedding=q_emb
+            )
         touched: list[str] = []
         for ent in entities:
             page_id = ent["id"]

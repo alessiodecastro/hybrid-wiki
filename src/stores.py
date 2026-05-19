@@ -136,6 +136,45 @@ class WikiStore:
             out.append(p.stem)
         return sorted(out)
 
+    def delete_page(self, page_id: str) -> bool:
+        """Elimina il file di una pagina wiki. Usato dalla consolidazione
+        lint (§6.3) per rimuovere una pagina alias dopo il merge nel
+        canonical. Rifiuta esplicitamente i file RESERVED.
+
+        Returns:
+            True se il file esisteva ed è stato rimosso.
+        """
+        if page_id in self.RESERVED:
+            raise ValueError(f"Rifiuto di eliminare una pagina riservata: {page_id}")
+        path = self._path(page_id)
+        if not path.exists():
+            return False
+        path.unlink()
+        return True
+
+    def rewrite_links(self, old_id: str, new_id: str) -> list[str]:
+        """Riscrive i wikilink [[old_id]] -> [[new_id]] in TUTTE le pagine.
+
+        Necessario dopo un merge di consolidazione: gli inbound link verso
+        la pagina alias eliminata vanno reindirizzati al canonical, altrimenti
+        restano riferimenti rotti.
+
+        Returns:
+            Lista dei page_id modificati (per audit/report).
+        """
+        if old_id == new_id:
+            return []
+        old_tok = f"[[{old_id}]]"
+        new_tok = f"[[{new_id}]]"
+        changed = []
+        for pid in self.list():
+            fm, body = self.get(pid)
+            if old_tok in body:
+                self.save(pid, body.replace(old_tok, new_tok),
+                          {k: v for k, v in fm.items() if k != "id"})
+                changed.append(pid)
+        return changed
+
     def update_with_merge(
         self,
         page_id: str,
@@ -271,3 +310,19 @@ class VectorDB:
     def count(self, collection: str) -> int:
         """Numero di vettori nella collection. Usato dal lint per diagnostica."""
         return self._coll(collection).count()
+
+    def get_embedding(self, collection: str, id_: str) -> list[float] | None:
+        """Recupera il vettore già memorizzato per un id.
+
+        Usato dall'inventario gerarchico (§11.1): permette di riutilizzare
+        l'embedding della source page appena creata come query vector per
+        la shortlist semantica, evitando una chiamata embedding aggiuntiva.
+
+        Returns:
+            Il vettore, o None se l'id non esiste o non ha embedding.
+        """
+        res = self._coll(collection).get(ids=[id_], include=["embeddings"])
+        embs = res.get("embeddings")
+        if embs is not None and len(embs) and embs[0] is not None:
+            return list(embs[0])
+        return None

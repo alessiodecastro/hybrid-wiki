@@ -1,7 +1,7 @@
 ---
 id: hari_seldon
 sources:
-- hari_seldon_20260518142641
+- hari_seldon_20260518190004
 type: entity
 subtype: character
 domain: asimov
@@ -15,8 +15,8 @@ id: hari_seldon
 type: entity
 subtype: character
 domain: asimov
-tags: [psicostoria, fondazione, impero_galattico]
-sources: [hari_seldon_20260518142641]
+tags: [psicostoria, fondazione, impero_galattico, trantor, terminus]
+sources: [hari_seldon_20260518190004]
 last_updated: 2026-05-18
 confidence: high
 stale: false
@@ -27,34 +27,34 @@ title: Hari Seldon
 
 ## Panoramica
 
-Hari Seldon è il matematico centrale del Ciclo della Fondazione di Isaac Asimov e l’ideatore della psicostoria, disciplina che consente di prevedere statisticamente il comportamento di grandi masse umane su scala galattica [[hari_seldon_20260518142641]]. È riconosciuto come il principale artefice del “Piano Seldon” e come uno dei più grandi pianificatori della storia umana [[hari_seldon_20260518142641]].
+Hari Seldon è il personaggio centrale del Ciclo della Fondazione di Isaac Asimov, matematico e fondatore della psicostoria, disciplina statistica in grado di prevedere il comportamento di grandi masse umane su scala galattica.[[hari_seldon_20260518190004]] È considerato il più grande pianificatore della storia umana e l’artefice del Piano Seldon, strategia a lunghissimo termine per abbreviare l’era di barbarie successiva al crollo dell’Impero Galattico.[[hari_seldon_20260518190004]]
 
 ## Dettagli
 
-Hari Seldon nasce nell’anno 11.988 dell’Era Galattica sul pianeta Helicon [[hari_seldon_20260518142641]]. Trascorre tuttavia gran parte della sua vita su Trantor, il pianeta-capitale dell’Impero Galattico, dove ricopre il ruolo di professore di matematica all’Università di Streeling [[hari_seldon_20260518142641]].
+Hari Seldon nasce nell’anno 11.988 dell’Era Galattica sul pianeta Helicon.[[hari_seldon_20260518190004]] Trascorre la maggior parte della sua vita su Trantor, capitale dell’Impero Galattico, dove diviene professore di matematica all’Università di Streeling.[[hari_seldon_20260518190004]]
 
-Attraverso l’elaborazione dei modelli della psicostoria, Seldon giunge alla previsione che l’Impero Galattico, nonostante l’apparente stabilità ed eternità, è destinato a crollare entro cinque secoli [[hari_seldon_20260518142641]]. Secondo i suoi calcoli, tale crollo dovrebbe essere seguito da un periodo di circa trentamila anni di barbarie prima dell’emergere di un Secondo Impero Galattico [[hari_seldon_20260518142641]].
+Seldon sviluppa la psicostoria come disciplina matematica capace di prevedere statisticamente il comportamento di grandi masse di popolazione a scala galattica.[[hari_seldon_20260518190004]] Applicando i modelli psicostorici all’Impero Galattico, giunge alla previsione del suo crollo entro cinque secoli e a una successiva fase di trentamila anni di barbarie prima della nascita di un Secondo Impero.[[hari_seldon_20260518190004]]
 
-Per ridurre questa fase oscura da trentamila a mille anni, Seldon elabora il “Piano Seldon”, che prevede la creazione di due Fondazioni collocate “ai due estremi opposti della Galassia” [[hari_seldon_20260518142641]]. La Prima Fondazione viene ufficialmente istituita sul pianeta Terminus con il pretesto di compilare l’Enciclopedia Galattica, una enciclopedia universale del sapere umano, che funge da copertura politica al progetto di Seldon [[hari_seldon_20260518142641]].
+Per ridurre questa fase oscura da trentamila a mille anni, Seldon elabora il Piano Seldon, che prevede la creazione di due Fondazioni poste ai due estremi opposti della Galassia.[[hari_seldon_20260518190004]] La Prima Fondazione viene ufficialmente istituita sul pianeta Terminus con il pretesto della compilazione dell’Enciclopedia Galattica, un’enciclopedia universale del sapere umano.[[hari_seldon_20260518190004]]
 
-Le sue analisi vengono considerate sediziose dalle autorità imperiali, e Seldon viene processato per tradimento dalla Commissione di Pubblica Salvezza [[hari_seldon_20260518142641]]. Evita la condanna a morte negoziando l’esilio della propria équipe, composta da centomila persone, sul pianeta Terminus, dove la Prima Fondazione prende forma operativa [[hari_seldon_20260518142641]].
+Accusato di tradimento dalla Commissione di Pubblica Salvezza, Seldon evita la condanna a morte negoziando l’esilio della propria équipe di centomila persone su Terminus.[[hari_seldon_20260518190004]] Muore nell’anno 12.069 E.G., poco dopo l’insediamento della Fondazione.[[hari_seldon_20260518190004]]
 
-Seldon muore nell’anno 12.069 E.G., poco dopo l’insediamento della Fondazione su Terminus [[hari_seldon_20260518142641]]. Nonostante la morte, continua a esercitare un’influenza decisiva grazie a registrazioni olografiche del suo simulacro, custodite nella Cripta del Tempo di Terminus: esse vengono programmaticamente rese visibili in corrispondenza di ogni “Crisi Seldon”, momenti critici in cui le scelte fondamentali della Fondazione risultano già previste, entro certi limiti, dalla psicostoria [[hari_seldon_20260518142641]].
+La sua influenza continua dopo la morte tramite registrazioni olografiche conservate nella Cripta del Tempo di Terminus: queste apparizioni del suo simulacro si attivano in occasione di ogni Crisi Seldon, momenti critici della storia della Fondazione in cui le scelte fondamentali sono già state previste dalla psicostoria.[[hari_seldon_20260518190004]]
 
-Seldon è soprannominato “Raven” Seldon (“il Corvo”) per il carattere funesto delle sue profezie sul crollo dell’Impero [[hari_seldon_20260518142641]]. Il suo motto implicito, che attraversa l’intera saga, distingue tra la prevedibilità della storia delle masse e la non prevedibilità delle azioni dei singoli individui; è proprio quest’ultima imprevedibilità a costituire il punto debole strutturale del suo Piano [[hari_seldon_20260518142641]].
+Seldon è ricordato come “Raven” Seldon (“il Corvo”), epiteto legato alle sue profezie funeste, e come il più grande pianificatore della storia umana.[[hari_seldon_20260518190004]] Un suo motto implicito attraversa l’intera saga: la storia delle masse è prevedibile, quella dei singoli individui no; proprio l’imprevedibilità individuale rappresenta il principale punto debole del Piano Seldon.[[hari_seldon_20260518190004]]
 
 ## Relazioni
 
-- **Psicostoria** – Seldon è il fondatore e principale sviluppatore della psicostoria, disciplina matematica su cui si basa l’intero Piano Seldon [[hari_seldon_20260518142641]].
-- **Impero Galattico** – Le sue previsioni riguardano direttamente il destino dell’Impero Galattico, che egli considera destinato al crollo entro cinque secoli [[hari_seldon_20260518142641]].
-- **Prima Fondazione** – Ideatore della Prima Fondazione, fondata su Terminus sotto la copertura del progetto dell’Enciclopedia Galattica; la Fondazione è lo strumento principale per ridurre l’era di barbarie [[hari_seldon_20260518142641]].
-- **Seconda Fondazione (non nominata esplicitamente)** – Il Piano Seldon contempla due Fondazioni situate ai due estremi della Galassia; il testo non fornisce dettagli ulteriori sulla seconda [[hari_seldon_20260518142641]].
-- **Enciclopedia Galattica** – Il progetto enciclopedico è il pretesto ufficiale con cui Seldon ottiene l’istituzione della Prima Fondazione e l’esilio su Terminus [[hari_seldon_20260518142641]].
-- **Commissione di Pubblica Salvezza** – Organo che lo processa per tradimento e con cui Seldon negozia la commutazione della condanna in esilio per sé e per la propria équipe di centomila persone [[hari_seldon_20260518142641]].
-- **Cripta del Tempo di Terminus** – Luogo in cui sono conservate le registrazioni olografiche di Seldon, programmate per apparire in corrispondenza delle Crisi Seldon [[hari_seldon_20260518142641]].
-- **Crisi Seldon** – Momenti di svolta storica per la Fondazione, in cui il simulacro di Seldon fornisce indicazioni già incorporate nel Piano sulla base della psicostoria [[hari_seldon_20260518142641]].
-- **Soprannome “Raven Seldon”** – Denominazione che riflette la percezione di Seldon come portatore di annunci catastrofici, legati al crollo dell’Impero [[hari_seldon_20260518142641]].
-
-## Domande aperte
-
-- La natura e la localizzazione esatta della seconda Fondazione, solo implicitamente menzionata, non sono specificate nel documento [[hari_seldon_202605
+- **Impero Galattico**: Seldon vive e lavora al centro dell’Impero, su Trantor, e le sue previsioni riguardano direttamente il crollo dell’Impero stesso e le sue conseguenze.[[hari_seldon_20260518190004]]
+- **Trantor**: pianeta-capitale dell’Impero Galattico dove Seldon trascorre gran parte della sua vita e dove insegna matematica all’Università di Streeling.[[hari_seldon_20260518190004]]
+- **Helicon**: pianeta natale di Hari Seldon.[[hari_seldon_20260518190004]]
+- **Università di Streeling**: istituzione accademica di Trantor presso cui Seldon è professore di matematica.[[hari_seldon_20260518190004]]
+- **Psicostoria**: disciplina matematica fondata e sviluppata da Seldon, strumento centrale delle sue previsioni storiche e del Piano Seldon.[[hari_seldon_20260518190004]]
+- **Piano Seldon**: progetto strategico ideato da Seldon per ridurre il periodo di barbarie da trentamila a mille anni tramite la creazione di due Fondazioni.[[hari_seldon_20260518190004]]
+- **Prima Fondazione / Fondazione su Terminus**: comunità scientifica insediata su Terminus, costituita dall’équipe di Seldon (circa centomila persone) e ufficialmente incaricata di compilare l’Enciclopedia Galattica.[[hari_seldon_20260518190004]]
+- **Seconda Fondazione**: organizzazione prevista dal Piano Seldon come seconda Fondazione, situata all’estremo opposto della Galassia (localizzazione non specificata nel documento).[[hari_seldon_20260518190004]]
+- **Terminus**: pianeta su cui viene stabilita la Prima Fondazione e luogo dell’esilio negoziato da Seldon; sede della Cripta del Tempo e delle apparizioni olografiche di Seldon stesso.[[hari_seldon_20260518190004]]
+- **Enciclopedia Galattica**: progetto enciclopedico che funge da copertura ufficiale per l’istituzione della Prima Fondazione.[[hari_seldon_20260518190004]]
+- **Commissione di Pubblica Salvezza**: organo imperiale che processa Seldon per tradimento; con essa Seldon negozia l’esilio su Terminus.[[hari_seldon_20260518190004]]
+- **Crisi Seldon**: momenti critici nella storia della Fondazione in cui si attivano le registrazioni olografiche di Seldon nella Cripta del Tempo.[[hari_seldon_20260518190004]]
+- **Cripta del Tempo**: luogo su Terminus in cui sono

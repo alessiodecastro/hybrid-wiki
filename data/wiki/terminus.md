@@ -1,7 +1,7 @@
 ---
 id: terminus
 sources:
-- terminus_20260518143006
+- terminus_20260518190241
 type: entity
 subtype: place
 domain: asimov
@@ -15,8 +15,8 @@ id: terminus
 type: entity
 subtype: place
 domain: asimov
-tags: [pianeta, fondazione, piano_seldon, era_galattica]
-sources: [terminus_20260518143006]
+tags: [pianeta, fondazione, piano_seldon]
+sources: [terminus_20260518190241]
 last_updated: 2026-05-18
 confidence: high
 stale: false
@@ -27,30 +27,41 @@ title: Terminus
 
 ## Panoramica
 
-Terminus è un pianeta periferico della Galassia, situato all’estremo margine di una spirale galattica e descritto come il mondo abitabile più isolato dell’intera Galassia, molto lontano da Trantor.[[terminus_20260518143006]]  
-Nel 12.069 dell’Era Galattica diventa la sede ufficiale della Prima Fondazione voluta da Hari Seldon ed è il fulcro visibile del Piano Seldon.[[terminus_20260518143006]]
+Terminus è il pianeta su cui Hari Seldon stabilisce ufficialmente la Prima Fondazione nell’anno 12.069 dell’Era Galattica, divenendo il fulcro visibile del Piano Seldon e il principale centro di potere della periferia galattica nel corso della saga della Fondazione. [[terminus_20260518190241]]
 
 ## Dettagli
 
-Terminus è scelto da Hari Seldon proprio per la sua marginalità e povertà: non possiede metalli pesanti, non ha pianeti gemelli né risorse minerarie rilevanti.[[terminus_20260518143006]] L’unica città presente sul pianeta è Terminus City, sviluppata attorno al complesso dell’Enciclopedia.[[terminus_20260518143006]]
+Terminus è collocato all’estremo margine di una spirale galattica ed è descritto come il mondo abitabile più periferico e isolato dell’intera Galassia, molto lontano dal pianeta-capitale Trantor. [[terminus_20260518190241]]
 
-Questa condizione di indigenza è funzionale al disegno psicostorico: privo di risorse naturali significative e di difese militari tradizionali, il pianeta è costretto a sviluppare scienza, tecnologia e abilità politica come strumenti primari di sopravvivenza e di espansione.[[terminus_20260518143006]]
+La scelta di Terminus come sede della Prima Fondazione è motivata proprio dalla sua marginalità e povertà: il pianeta non possiede metalli pesanti, non ha pianeti gemelli né risorse minerarie significative e ospita un’unica città, Terminus City, sviluppatasi attorno al complesso dell’Enciclopedia. [[terminus_20260518190241]]
 
-Sul pianeta è collocata la Cripta del Tempo (Time Vault), una camera in cui Hari Seldon ha registrato messaggi olografici da attivare in date prestabilite, in corrispondenza delle “Crisi Seldon”.[[terminus_20260518143006]] A ogni apparizione, il simulacro di Seldon conferma alla popolazione e ai dirigenti della Fondazione che la crisi affrontata rientrava nelle previsioni e che la traiettoria storica rimane conforme al Piano.[[terminus_20260518143006]]
+Questa condizione di indigenza non è casuale, ma parte integrante del disegno psicostorico di Hari Seldon: privo di risorse naturali e di difese materiali, il pianeta è costretto a sviluppare scienza, tecnologia e abilità politica come uniche “armi” di sopravvivenza e di espansione. [[terminus_20260518190241]]
 
-Nel corso del tempo, Terminus attraversa diverse fasi di governo: dapprima il Consiglio degli Enciclopedisti, quindi i Sindaci e infine i Principi Mercanti, ognuna configurata come risposta obbligata a specifiche Crisi Seldon.[[terminus_20260518143006]] Attraverso queste trasformazioni istituzionali e strategiche, il pianeta si afferma progressivamente come potenza dominante della periferia galattica, espandendo la propria influenza in fasi successive di tipo prima religioso, poi commerciale, infine tecnologico-militare.[[terminus_20260518143006]]
+Sul pianeta è situata la Cripta del Tempo (Time Vault), una camera in cui Seldon ha registrato messaggi olografici destinati a essere riprodotti in date predeterminate, in corrispondenza delle diverse Crisi Seldon. Le apparizioni olografiche del simulacro di Seldon confermano periodicamente alla popolazione di Terminus e alla Fondazione che le crisi appena attraversate erano previste e che l’evoluzione storica segue ancora la rotta pianificata. [[terminus_20260518190241]]
+
+Politicamente, Terminus attraversa diverse fasi di governo: dapprima il Consiglio degli Enciclopedisti, quindi il regime dei Sindaci e infine il dominio dei Principi Mercanti. Ogni forma di governo rappresenta una risposta obbligata a specifiche Crisi Seldon e risulta funzionale alla progressiva trasformazione del ruolo del pianeta nella Galassia. [[terminus_20260518190241]]
+
+Nel corso del tempo Terminus diventa la potenza dominante della periferia galattica, espandendo la propria influenza in tre fasi principali: prima attraverso una sfera di influenza religiosa, poi mediante il controllo commerciale e infine attraverso una supremazia tecnologico-militare. [[terminus_20260518190241]]
+
+Pur essendo il centro operativo e simbolico del Piano Seldon, Terminus non coincide con il suo “centro segreto”, che è la Seconda Fondazione, deliberatamente nascosta “all’altro estremo”. [[terminus_20260518190241]]
 
 ## Relazioni
 
-- **Hari Seldon**: è il fondatore della Prima Fondazione su Terminus e l’ideatore del Piano Seldon che determina la scelta del pianeta, la presenza della Cripta del Tempo e le linee di sviluppo storico-politico della società terminusiana.[[terminus_20260518143006]]
-- **Prima Fondazione**: Terminus ne è la sede ufficiale fin dalla fondazione, fungendo da base operativa e da centro politico, scientifico e tecnologico.[[terminus_20260518143006]]
-- **Cripta del Tempo (Time Vault)**: struttura situata su Terminus, contenente i messaggi olografici pre-registrati da Seldon, che si attivano in corrispondenza delle Crisi Seldon.[[terminus_20260518143006]]
-- **Crisi Seldon**: eventi storici critici durante i quali vengono riprodotti i messaggi della Cripta del Tempo; ogni crisi determina o giustifica una nuova fase di governo su Terminus (Consiglio degli Enciclopedisti, Sindaci, Principi Mercanti).[[terminus_20260518143006]]
-- **Trantor**: pianeta da cui Terminus è geograficamente e politicamente lontanissimo; tale distanza enfatizza la natura periferica e isolata di Terminus nella Galassia.[[terminus_20260518143006]]
-- **Seconda Fondazione**: pur essendo Terminus il fulcro visibile del Piano Seldon, la Seconda Fondazione costituisce il centro segreto del Piano, “all’altro estremo” rispetto a Terminus; la contrapposizione tra la Fondazione palese di Terminus e quella occulta è un motore narrativo centrale.[[terminus_20260518143006]]
+- **Hari Seldon**: è lo psicostorico che sceglie Terminus come sede della Prima Fondazione e vi collega la Cripta del Tempo, strumentale all’attuazione del Piano Seldon. [[terminus_20260518190241]]
+- **Prima Fondazione**: ha sede su Terminus, dove viene ufficialmente stabilita nell’anno 12.069 dell’Era Galattica; la storia politica e l’ascesa del pianeta coincidono con l’evoluzione della Fondazione stessa. [[terminus_20260518190241]]
+- **Trantor**: Terminus è descritto come “lontanissimo” da Trantor, in posizione opposta nella Galassia rispetto al centro imperiale. [[terminus_20260518190241]]
+- **Terminus City**: unica città del pianeta, sviluppata attorno al complesso dell’Enciclopedia. [[terminus_20260518190241]]
+- **Enciclopedia**: complesso attorno al quale si organizza Terminus City; costituisce il nucleo iniziale dell’insediamento. [[terminus_20260518190241]]
+- **Cripta del Tempo (Time Vault)**: installazione situata su Terminus, contenente i messaggi olografici preregistrati di Hari Seldon, attivati in corrispondenza delle Crisi Seldon. [[terminus_20260518190241]]
+- **Crisi Seldon**: momenti storici critici per cui sono previste apparizioni olografiche di Seldon nella Cripta del Tempo; le diverse forme di governo di Terminus costituiscono risposte a queste crisi. [[terminus_20260518190241]]
+- **Consiglio degli Enciclopedisti**: prima fase di governo di Terminus, collegata alla gestione iniziale del progetto enciclopedico. [[terminus_20260518190241]]
+- **Sindaci**: seconda fase di governo del pianeta, emergente in risposta a una specifica fase del Piano Seldon. [[terminus_20260518190241]]
+- **Principi Mercanti**: terza fase di governo, legata all’espansione commerciale e politico-militare della Fondazione con centro a Terminus. [[terminus_20260518190241]]
+- **Seconda Fondazione**: costituisce il “centro segreto” del Piano Seldon, in contrapposizione alla Fondazione palese con sede su Terminus; è indicata come collocata “all’altro estremo”. [[terminus_20260518190241]]
 
 ## Domande aperte
 
-- Quali sono nel dettaglio le trasformazioni politiche e istituzionali che accompagnano il passaggio da Enciclopedisti a Sindaci e poi a Principi Mercanti su Terminus, oltre alla loro funzione come “risposte obbligate” alle Crisi Seldon?[[terminus_20260518143006]]
-- In che modo concreto la povertà di risorse e l’assenza di metalli pesanti influiscono sull’urbanistica, sull’economia e sulla vita quotidiana degli abitanti di Terminus oltre alla spinta verso scienza e tecnologia?[[terminus_20260518143006]]
-- Qual è la natura precisa della collocazione della Seconda Fondazione “all’altro estremo” rispetto a Terminus e come questa simmetria spaziale si riflette nella dinamica tra Fondazione palese e Fondazione occulta?[[terminus_20260518143006]]
+- La localizzazione precisa di Terminus nella Galassia, oltre alla sua posizione “all’estremo margine di una spirale galattica”, non è dettagliata nel documento. [[terminus_20260518190241]]
+- La struttura interna, l’organizzazione sociale e le istituzioni specifiche di Terminus City oltre al ruolo di centro dell’Enciclopedia non sono descritte. [[terminus_20260518190241]]
+- Il ruolo esatto e le modalità operative di ciascuna fase di governo (Consiglio degli Enciclopedisti, Sindaci, Principi Mercanti) sono solo indicate a grandi linee come risposte alle Crisi Seldon, senza ulteriori particolari. [[terminus_20260518190241]]
+- La natura precisa dell’influenza religiosa, commerciale e tecnologico-militare

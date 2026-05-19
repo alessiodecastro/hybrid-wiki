@@ -1,7 +1,7 @@
 ---
 id: eriador
 sources:
-- la_contea_20260518142028
+- la_contea_20260518185545
 type: entity
 subtype: place
 domain: tolkien
@@ -16,7 +16,7 @@ type: entity
 subtype: place
 domain: tolkien
 tags: [regione, terra_di_mezzo]
-sources: [la_contea_20260518142028]
+sources: [la_contea_20260518185545]
 last_updated: 2026-05-18
 confidence: high
 stale: false
@@ -27,21 +27,18 @@ title: Eriador
 
 ## Panoramica
 
-L’Eriador è una regione del nord-ovest della Terra di Mezzo, all’interno della quale si trova la Contea abitata dagli hobbit. In passato almeno una sua parte faceva parte del regno di Arnor, poi decaduto. [[la_contea_20260518142028]]
+Eriador è una vasta regione geografica all’interno della quale si trova la Contea, situata nel suo settore nord‑occidentale. [[la_contea_20260518185545]]  
 
 ## Dettagli
 
-La Contea è descritta come situata nel nord‑ovest dell’Eriador, indicando che questa regione copre un’area geografica abbastanza ampia, al cui interno possono esistere vari regni o suddivisioni politiche. [[la_contea_20260518142028]]
-
-L’Eriador comprende territori che furono un tempo sotto l’autorità del regno di Arnor, il che suggerisce una sovrapposizione tra entità politiche (il regno) e geografiche (la regione). [[la_contea_20260518142028]]
+La Contea è descritta come «la regione abitata dagli hobbit nel nord‑ovest dell'Eriador», il che implica che Eriador costituisce un’area più ampia che include almeno il territorio del vecchio regno di Arnor e, al suo interno, la Contea. [[la_contea_20260518185545]]
 
 ## Relazioni
 
-- **Contea (The Shire)** – Regione abitata dagli hobbit, situata nel nord‑ovest dell’Eriador. [[la_contea_20260518142028]]
-- **Arnor** – L’Eriador comprende territori che “un tempo furono il regno di Arnor”; una parte dell’Eriador coincide quindi con l’area dell’antico regno. [[la_contea_20260518142028]]
+- **Contea (The Shire)** – La Contea occupa il nord‑ovest dell’Eriador. [[la_contea_20260518185545]]  
+- **Arnor** – Eriador comprende territori che un tempo facevano parte del regno di Arnor; la Contea è esplicitamente indicata come parte di ciò che fu il regno di Arnor, situato in Eriador. [[la_contea_20260518185545]]
 
 ## Domande aperte
 
-- Estensione precisa dell’Eriador oltre la posizione della Contea.
-- Confini geografici definiti (monti, fiumi, mari) della regione.
-- Altre regioni, città o popolazioni comprese nell’Eriador oltre alla Contea.
+- L’estensione precisa e i confini geografici complessivi dell’Eriador non sono specificati nella fonte. [[la_contea_20260518185545]]  
+- Non sono indicati altri insediamenti o regioni presenti in Eriador oltre alla Contea (nel suo settore nord‑occidentale). [[la_contea_20260518185545]]

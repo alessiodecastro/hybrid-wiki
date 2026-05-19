@@ -1,7 +1,7 @@
 ---
 id: narsil
 sources:
-- aragorn_introduzione_20260518141730
+- aragorn_introduzione_20260518185319
 type: entity
 subtype: artifact
 domain: tolkien
@@ -15,8 +15,8 @@ id: narsil
 type: entity
 subtype: artifact
 domain: tolkien
-tags: [spada, casa_di_elendil, cimelio]
-sources: [aragorn_introduzione_20260518141730]
+tags: [spada, casa_di_elendil]
+sources: [aragorn_introduzione_20260518185319]
 last_updated: 2026-05-18
 confidence: high
 stale: false
@@ -27,28 +27,28 @@ title: Narsil
 
 ## Panoramica
 
-Narsil è una spada leggendaria appartenente alla Casa di Elendil. È nota in particolare per essere l’arma che troncò l’Anello dalla mano di Sauron ed è considerata uno dei principali cimeli dinastici degli eredi di Isildur. I suoi frammenti vengono conservati a Granburrone fino alla riforgiatura nella spada Andúril, “Fiamma dell’Ovest”. [[aragorn_introduzione_20260518141730]]
+Narsil è la spada appartenuta alla Casa di Elendil, nota soprattutto per essere l’arma con cui venne troncato l’Anello dalla mano di Sauron. In epoca successiva ai fatti dell’Ultima Alleanza se ne conservano i frammenti, considerati fra i principali cimeli ereditari del lignaggio di Isildur e degli eredi di Elendil. [[aragorn_introduzione_20260518185319]]
 
 ## Dettagli
 
-Narsil viene ricordata come la spada che troncò l’Anello dalla mano di Sauron, atto che determina la sconfitta del Signore Oscuro alla fine della Seconda Era. [[aragorn_introduzione_20260518141730]]
+Nella Terza Era Narsil non esiste più come spada integra: se ne conservano solo i frammenti, custoditi come reliquie della Casa di Elendil. Quando Aragorn II, erede legittimo di Isildur, viene messo al corrente della propria identità, fra i cimeli che riceve vi sono proprio i “frammenti di Narsil”. [[aragorn_introduzione_20260518185319]]
 
-Al tempo della giovinezza di Aragorn II la spada non è più integra: se ne conservano soltanto i frammenti, custoditi a Granburrone come parte dei cimeli della Casa di Elendil. Quando Aragorn apprende la propria identità di erede di Isildur, riceve anche “i frammenti di Narsil” come uno dei segni materiali della sua discendenza regale, insieme ad altri oggetti dinastici. [[aragorn_introduzione_20260518141730]]
+La spada è ricordata in modo particolare per un atto storico decisivo: è definita “la spada che troncò l’Anello dalla mano di Sauron”, indicando che fu l’arma materiale impiegata per separare l’Anello dal suo portatore. [[aragorn_introduzione_20260518185319]]
 
-In seguito, a Granburrone, questi frammenti vengono riforgiati in una nuova spada, Andúril, “Fiamma dell’Ovest”, che rappresenta la continuità fra l’eredità antica di Narsil e la missione di Aragorn durante la Guerra dell’Anello. [[aragorn_introduzione_20260518141730]]
+Durante la permanenza di Aragorn a Granburrone, i frammenti di Narsil vengono riforgiati, dando origine a una nuova spada, Andúril, detta “Fiamma dell’Ovest”. Da questo momento l’identità funzionale di Narsil come arma operativa sembra cessare, venendo assorbita nell’arma riforgiata. [[aragorn_introduzione_20260518185319]]
 
 ## Relazioni
 
-- **Casa di Elendil**: Narsil è esplicitamente indicata come parte dei “cimeli della Casa di Elendil”, insieme all’Anello di Barahir e allo scettro di Annúminas. [[aragorn_introduzione_20260518141730]]
-- **Aragorn II**: i frammenti di Narsil vengono consegnati ad Aragorn quando egli conosce la propria vera identità; la spada diventa così uno dei simboli della sua regalità e del suo legame con gli antichi re. [[aragorn_introduzione_20260518141730]]
-- **Isildur**: Narsil è la spada che troncò l’Anello dalla mano di Sauron, atto compiuto da Isildur o collegato direttamente alla sua figura; la spada è quindi strettamente associata al suo nome e alla sua eredità. [[aragorn_introduzione_20260518141730]]
-- **Sauron**: la funzione storica di Narsil è definita dal gesto con cui l’Anello viene tagliato dalla mano di Sauron, contribuendo alla sua caduta. [[aragorn_introduzione_20260518141730]]
-- **Anello Unico**: Narsil è l’arma che separa l’Anello dalla mano di Sauron, momento cruciale nella storia dell’Anello stesso. [[aragorn_introduzione_20260518141730]]
-- **Andúril**: i frammenti di Narsil vengono riforgiati in Andúril, nuova spada portata da Aragorn; esiste quindi una continuità diretta di materiale e di simbolo tra le due armi. [[aragorn_introduzione_20260518141730]]
-- **Granburrone (Rivendell)**: i frammenti di Narsil si trovano a Granburrone, dove sono custoditi fino alla riforgiatura. [[aragorn_introduzione_20260518141730]]
+- **Casa di Elendil**: Narsil è uno dei principali cimeli della Casa di Elendil, trasmesso agli eredi legittimi di questo lignaggio. [[aragorn_introduzione_20260518185319]]
+- **Isildur**: la spada è legata a Isildur in quanto arma con cui fu troncato l’Anello dalla mano di Sauron; Isildur è l’antenato tramite cui Aragorn eredita il diritto alla spada. [[aragorn_introduzione_20260518185319]]
+- **Aragorn II**: riceve i frammenti di Narsil fra i cimeli della propria casata al momento in cui apprende la sua vera identità di erede di Isildur. [[aragorn_introduzione_20260518185319]]
+- **Sauron**: Narsil è l’arma specificamente ricordata per avere troncato l’Anello dalla mano di Sauron. [[aragorn_introduzione_20260518185319]]
+- **L’Anello**: la spada è definita come l’arma che materialmente recise l’Anello dalla mano di Sauron. [[aragorn_introduzione_20260518185319]]
+- **Andúril**: la nuova spada di Aragorn, “Fiamma dell’Ovest”, nasce dalla riforgiatura dei frammenti di Narsil, e ne rappresenta la continuazione in forma rinnovata. [[aragorn_introduzione_20260518185319]]
+- **Granburrone (Rivendell)**: è il luogo in cui i frammenti di Narsil vengono riforgiati in Andúril. [[aragorn_introduzione_20260518185319]]
 
 ## Domande aperte
 
-- Il documento non specifica in quali circostanze precise Narsil sia stata spezzata.
-- Non viene descritto l’aspetto fisico di Narsil (forma, decorazioni, eventuali iscrizioni).
-- Non è indicato chi materialmente riforgia i frammenti di Narsil in Andúril, né i dettagli del processo di riforgiatura. [[aragorn_introduzione_20260518141730]]
+- Non è specificata l’epoca esatta in cui Narsil si spezza, né le circostanze precise del suo danneggiamento.
+- Il documento non fornisce dettagli sull’aspetto originario di Narsil né sulle sue eventuali proprietà particolari, oltre al ruolo svolto contro Sauron.
+- Non viene indicato chi materialmente esegua la riforgiatura di Narsil a Granburrone, né con quali tecniche o accorgimenti speciali. [[aragorn_introduzione_20260518185319]]

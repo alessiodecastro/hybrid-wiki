@@ -75,6 +75,15 @@ Soglia di entità: una cosa diventa pagina solo se **trattata in modo
 sostanziale** (≥2-3 frasi specifiche). Le menzioni di passaggio non sono
 entità.
 
+**Inventario parziale a grande scala.** Oltre una soglia di entità
+l'inventario mostrato non è l'elenco completo ma uno *scheletro* aggregato
+per tipo + una *shortlist* delle entità più affini al documento. Se
+un'entità non compare in shortlist ma il suo tipo è presente nello
+scheletro, è probabile che esista già: usare un `entity_id` **canonico e
+prevedibile** (nome proprio inglese, snake_case, senza articolo né
+plurale), mai una variante stilistica. Eventuali duplicati residui sono
+gestiti dalla pipeline di consolidazione (lint, §6.3).
+
 ## Frontmatter wiki obbligatorio
 
 ```yaml

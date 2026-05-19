@@ -89,11 +89,35 @@ python scripts/ask.py "Quali oggetti porta Frodo quando lascia la Contea?"
 python scripts/ask.py --eval tests/eval_set.yaml
 ```
 
-### Health check manuale
+### Classificazione L0/L1/L2 assistita
 
 ```powershell
-python scripts/lint.py
+# proposta read-only
+python scripts/classify.py --file data/raw/incoming/frodo_intro.txt --title "Frodo Baggins" --domain tolkien
+# proposta + accoda per review
+python scripts/classify.py --file ... --title "..." --domain ... --enqueue
+python scripts/classify.py --review            # mostra la coda
+# l'umano edita review_queue.yaml (approved_level: L0|L1|L2|reject), poi:
+python scripts/classify.py --confirm           # ingesta gli approvati + active learning
 ```
+
+Nel manifest del bulk ingest il campo `level` è ora **opzionale**: se omesso, il documento viene classificato. Gate (§6.1): regole deterministiche o L0/L1 ad alta confidence → ingest automatico; L2 o confidence bassa → coda di review umana (mai auto-ingest di un L2). Audit retroattivo:
+
+```powershell
+python scripts/lint.py --audit-l0                          # ri-classifica i doc L0, segnala candidati promozione
+python scripts/classify.py --promote <doc_id> --level L2   # promozione retroattiva human-gated (visti i candidati)
+```
+
+### Lint: health check e consolidazione duplicati
+
+```powershell
+python scripts/lint.py                          # health check read-only (default)
+python scripts/lint.py --detect-duplicates      # FASE 1: report cluster duplicati/alias (read-only)
+# rivedere data/lint/consolidation_report.yaml, mettere approved: true sui cluster giusti
+python scripts/lint.py --apply-consolidation    # FASE 2: applica i soli cluster approvati
+```
+
+La consolidazione (§6.3 del design) è **a due fasi con conferma umana**: detect produce un report YAML, l'umano approva, apply esegue i merge. Reversibile: la wiki è in git + `data/lint/applied_merges.jsonl` conserva lo snapshot integrale di ogni alias eliminato.
 
 ### Report consumo token
 

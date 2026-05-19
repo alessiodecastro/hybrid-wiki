@@ -48,7 +48,28 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.ingest import IngestPipeline
 from src.stores import RawStore
-from src.config import VALID_LEVELS, VALID_SUBTYPES, DEFAULT_DOMAIN
+from src.classifier import LevelClassifier, enqueue_review
+from src.config import (
+    VALID_LEVELS, VALID_SUBTYPES, DEFAULT_DOMAIN, CLASSIFIER_AUTO_CONFIDENCE,
+)
+
+
+def _auto_ingest_ok(res: dict) -> bool:
+    """Gate (§6.1): decide se una proposta di livello può essere ingestata
+    automaticamente o deve passare per la review umana.
+
+    Asimmetria voluta: un L2 (costoso, alto impatto) o qualunque proposta
+    sotto la confidence-soglia va SEMPRE in coda. Solo le regole
+    deterministiche e gli L0/L1 ad alta confidence sono auto-ingestati —
+    sbagliare verso il basso è il rischio grave, sbagliare verso l'alto
+    qui significherebbe solo spreco, che evitiamo accodando.
+    """
+    if res.get("rule_applied"):
+        return True
+    return (
+        res.get("level") in ("L0", "L1")
+        and res.get("confidence") == CLASSIFIER_AUTO_CONFIDENCE
+    )
 
 
 def _existing_sources(raw_store: RawStore) -> set[tuple[str, str]]:
@@ -74,14 +95,15 @@ def _resolve_entry(entry: dict, defaults: dict, base_dir: Path) -> dict:
     Ritorna un dict normalizzato pronto per pipeline.ingest().
     """
     merged = {**defaults, **{k: v for k, v in entry.items() if v is not None}}
-    required = ("file", "title", "level")
+    # `level` ora OPZIONALE: se assente verrà classificato (assistito).
+    required = ("file", "title")
     missing = [k for k in required if not merged.get(k)]
     if missing:
         raise ValueError(f"Manifest entry incompleto: mancano {missing}. Entry={entry!r}")
 
-    level = merged["level"]
-    if level not in VALID_LEVELS:
-        raise ValueError(f"Livello invalido '{level}'. Ammessi: {VALID_LEVELS}")
+    level = merged.get("level")  # può essere None → classificazione
+    if level is not None and level not in VALID_LEVELS:
+        raise ValueError(f"Livello invalido '{level}'. Ammessi: {VALID_LEVELS} (oppure ometterlo per classificare)")
 
     subtype = merged.get("subtype")
     if subtype and subtype not in VALID_SUBTYPES:
@@ -91,7 +113,7 @@ def _resolve_entry(entry: dict, defaults: dict, base_dir: Path) -> dict:
     return {
         "file_path": file_path,
         "title": merged["title"],
-        "level": level,
+        "level": level,  # None = da classificare
         "subtype": subtype,
         "domain": merged.get("domain", DEFAULT_DOMAIN),
         "source_name": Path(merged["file"]).name,
@@ -149,13 +171,16 @@ def main(manifest: str, force: bool, dry_run: bool):
         pipeline = IngestPipeline()
         existing = _existing_sources(pipeline.raw)
 
-    ok = skipped = failed = 0
+    ok = skipped = failed = queued = 0
+    # Classificatore lazy: creato solo se almeno un entry ha level assente.
+    classifier: LevelClassifier | None = None
     # Traccia se almeno un ingest ha rimandato il rebuild dell'Hot Layer:
     # in tal caso va eseguito UNA volta sola alla fine del batch. Eseguirlo
     # per ogni documento è O(pagine_totali) × N → O(N^2) sul corpus.
     needs_hot_layer_rebuild = False
     for entry in resolved:
-        marker = f"[{entry['level']:<2}] {entry['domain']:<15} {entry['source_name']}"
+        lvl_disp = entry["level"] if entry["level"] else "??"
+        marker = f"[{lvl_disp:<2}] {entry['domain']:<15} {entry['source_name']}"
 
         # Check idempotenza.
         key = (entry["source_name"], entry["domain"])
@@ -165,7 +190,8 @@ def main(manifest: str, force: bool, dry_run: bool):
             continue
 
         if dry_run:
-            click.echo(f"PLAN  {marker}  title={entry['title']!r}")
+            plan = entry["level"] or "CLASSIFY"
+            click.echo(f"PLAN  [{plan}] {entry['domain']} {entry['source_name']}  title={entry['title']!r}")
             ok += 1
             continue
 
@@ -175,6 +201,37 @@ def main(manifest: str, force: bool, dry_run: bool):
             click.echo(f"MISS  {marker}  (file non trovato: {entry['file_path']})", err=True)
             failed += 1
             continue
+
+        # Classificazione assistita: level assente → l'LLM propone, poi
+        # il gate decide se auto-ingestare o accodare per review umana.
+        if entry["level"] is None:
+            if classifier is None:
+                classifier = LevelClassifier(tracker=pipeline.tracker)
+            body = entry["file_path"].read_text(encoding="utf-8").strip()
+            res = classifier.classify(
+                title=entry["title"], body=body,
+                domain=entry["domain"], source_name=entry["source_name"],
+            )
+            origin = "REGOLA" if res["rule_applied"] else "LLM"
+            if _auto_ingest_ok(res):
+                entry["level"] = res["level"]
+                marker = f"[{res['level']:<2}] {entry['domain']:<15} {entry['source_name']}"
+                click.echo(f"CLASS {marker}  -> {res['level']}/{res['confidence']} ({origin}) auto-ingest")
+            else:
+                enqueue_review({
+                    "file": str(entry["file_path"]),
+                    "title": entry["title"],
+                    "domain": entry["domain"],
+                    "proposed_level": res["level"],
+                    "confidence": res["confidence"],
+                    "rationale": res["rationale"],
+                    "source": res["source"],
+                    "approved_level": None,
+                })
+                click.echo(f"QUEUE {marker}  proposto {res['level']}/{res['confidence']} ({origin}) "
+                           f"→ review umana (classify.py --review)")
+                queued += 1
+                continue
 
         try:
             result = pipeline.ingest(
@@ -210,6 +267,7 @@ def main(manifest: str, force: bool, dry_run: bool):
     click.echo(f"=== BATCH SUMMARY ===")
     click.echo(f"OK      : {ok}")
     click.echo(f"SKIPPED : {skipped}")
+    click.echo(f"QUEUED  : {queued} (in review_queue.yaml — classify.py --review/--confirm)")
     click.echo(f"FAILED  : {failed}")
     if pipeline is not None and not dry_run:
         click.echo(pipeline.tracker.format_session_summary())

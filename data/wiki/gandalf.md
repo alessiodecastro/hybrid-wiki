@@ -1,7 +1,7 @@
 ---
 id: gandalf
 sources:
-- gandalf_introduzione_20260518141633
+- gandalf_introduzione_20260518185232
 type: entity
 subtype: character
 domain: tolkien
@@ -15,8 +15,8 @@ id: gandalf
 type: entity
 subtype: character
 domain: tolkien
-tags: [istari, maia, stregone, terza_era]
-sources: [gandalf_introduzione_20260518141633]
+tags: [istari, maia, stregone, terra_di_mezzo]
+sources: [gandalf_introduzione_20260518185232]
 last_updated: 2026-05-18
 confidence: high
 stale: false
@@ -27,42 +27,34 @@ title: Gandalf
 
 ## Panoramica
 
-Gandalf è uno dei cinque Istari, un ordine di stregoni inviati nella Terra di Mezzo intorno all’anno 1000 della Terza Era con il compito di contrastare Sauron. In origine è il Maia Olórin, del seguito di Manwë e Varda, formato da Nienna alla compassione e alla pazienza. Nella Terra di Mezzo si presenta come un vecchio dalla lunga barba grigia, con cappello a punta, bastone e mantello grigio, ed è noto come “Gandalf il Grigio”. [[gandalf_introduzione_20260518141633]]
+Gandalf è uno dei cinque Istari, un ordine di stregoni inviati nella Terra di Mezzo intorno all'anno 1000 della Terza Era con lo scopo di contrastare Sauron.[[gandalf_introduzione_20260518185232]] In origine è il Maia Olórin, del seguito di Manwë e Varda, e sulla Terra di Mezzo è noto come “Gandalf il Grigio” per il suo aspetto e il colore del mantello.[[gandalf_introduzione_20260518185232]] Dopo la caduta a Moria e lo scontro con il Balrog di Morgoth, ritorna come “Gandalf il Bianco”, assumendo il ruolo di capo del nuovo ordine dei Saggi al posto di Saruman.[[gandalf_introduzione_20260518185232]]
 
 ## Dettagli
 
-- **Natura e origine**: Gandalf è in origine Olórin, un Maia al servizio di Manwë e Varda. La sua indole è modellata dall’insegnamento di Nienna, che lo istruisce in particolare alla compassione e alla pazienza. [[gandalf_introduzione_20260518141633]]
+Gandalf appartiene all’ordine degli Istari, composto da cinque stregoni, mandato nella Terra di Mezzo specificamente per opporsi a Sauron durante la Terza Era.[[gandalf_introduzione_20260518185232]] Il suo vero nome è Olórin, identificato come un Maia legato alla sfera di Manwë e Varda, e formato da Nienna alla compassione e alla pazienza.[[gandalf_introduzione_20260518185232]]
 
-- **Missione come Istari**: Fa parte dell’ordine dei cinque Istari, inviati nella Terra di Mezzo attorno all’anno 1000 della Terza Era per opporsi alla minaccia di Sauron. [[gandalf_introduzione_20260518141633]]
+Quando agisce nella Terra di Mezzo assume la forma di un vecchio dalla lunga barba grigia, con cappello a punta, bastone e mantello grigio, elementi che motivano l’epiteto “Gandalf il Grigio”.[[gandalf_introduzione_20260518185232]] Tra i diversi popoli assume nomi differenti: gli Elfi lo chiamano Mithrandir, “pellegrino grigio”; i Nani, incluso Thorin Scudodiquercia, lo conoscono come Tharkûn.[[gandalf_introduzione_20260518185232]]
 
-- **Aspetto e epiteti**: Nella Terra di Mezzo assume le sembianze di un anziano con lunga barba grigia, cappello a punta, bastone e mantello grigio, da cui il titolo di “Gandalf il Grigio”. È chiamato Mithrandir (“pellegrino grigio”) dagli Elfi, Tharkûn dai Nani (tra cui Thorin Scudodiquercia) e ha fama nella Contea per i suoi fuochi d’artificio. [[gandalf_introduzione_20260518141633]]
+Nella Contea la sua figura è legata soprattutto alla rarità delle sue visite, ai fuochi d’artificio e a strette relazioni personali con la famiglia Took, e in seguito con Bilbo Baggins.[[gandalf_introduzione_20260518185232]]
 
-- **Attività nella Contea**: È conosciuto nella Contea per le sue rare visite, celebri soprattutto per gli spettacoli di fuochi d’artificio. Intrattiene una relazione di amicizia inizialmente con la famiglia Took e poi con Bilbo Baggins. [[gandalf_introduzione_20260518141633]]
+Dal punto di vista narrativo svolge un ruolo centrale in due fasi distinte: è colui che organizza la spedizione verso Erebor narrata ne “Lo Hobbit” e, decenni più tardi, riconosce nell’anello trovato da Bilbo l’Anello Unico di Sauron.[[gandalf_introduzione_20260518185232]] Questo riconoscimento lo porta a convincere Frodo a lasciare la Contea, a guidarlo fino a Brea e a raggiungerlo poi a Granburrone per prendere parte al Consiglio di Elrond.[[gandalf_introduzione_20260518185232]]
 
-- **Ruolo nelle vicende di Erebor e dell’Anello**: Organizza la spedizione di Erebor narrata ne *Lo Hobbit*. Decenni dopo riconosce che l’anello trovato da Bilbo è l’Anello Unico forgiato da Sauron. A partire da questa scoperta, convince Frodo a lasciare la Contea, lo guida fino a Brea e successivamente lo raggiunge a Granburrone, dove partecipa al Consiglio di Elrond. [[gandalf_introduzione_20260518141633]]
+Nel corso della missione contro Sauron muore combattendo il Balrog di Morgoth sul Ponte di Khazad-dûm, nelle profondità di Moria, evento che segna la transizione dalla sua identità di Gandalf il Grigio a quella di Gandalf il Bianco.[[gandalf_introduzione_20260518185232]] In questa nuova veste diventa capo del nuovo ordine dei Saggi, sostituendo Saruman, caduto in disgrazia.[[gandalf_introduzione_20260518185232]]
 
-- **Morte e trasformazione**: Cade nelle profondità di Moria affrontando il Balrog di Morgoth sul Ponte di Khazad-dûm. In seguito ritorna trasformato in Gandalf il Bianco, divenendo capo del nuovo ordine dei Saggi al posto di Saruman, che è caduto in disgrazia. [[gandalf_introduzione_20260518141633]]
-
-- **Rapporto con i cavalli di Rohan**: È cavaliere di Shadowfax (Brillacrine), signore dei cavalli di Rohan. [[gandalf_introduzione_20260518141633]]
+Gandalf è anche cavaliere di Shadowfax (Brillacrine), descritto come signore dei cavalli di Rohan, segno di un rapporto privilegiato con gli animali e con il regno di Rohan.[[gandalf_introduzione_20260518185232]]
 
 ## Relazioni
 
-- **Istari**: appartiene all’ordine dei cinque Istari inviati contro Sauron. [[gandalf_introduzione_20260518141633]]
-- **Manwë e Varda**: in quanto Maia Olórin, è parte del loro seguito. [[gandalf_introduzione_20260518141633]]
-- **Nienna**: lo addestra alla compassione e alla pazienza. [[gandalf_introduzione_20260518141633]]
-- **Sauron**: avversario principale della missione degli Istari; Gandalf è inviato specificamente per contrastarne il potere. [[gandalf_introduzione_20260518141633]]
-- **Elfi**: lo chiamano Mithrandir. [[gandalf_introduzione_20260518141633]]
-- **Nani (incluso Thorin Scudodiquercia)**: tra i Nani è conosciuto come Tharkûn; è in contatto con Thorin, di cui sostiene la spedizione di Erebor. [[gandalf_introduzione_20260518141633]]
-- **Famiglia Took**: nella Contea è inizialmente amico della famiglia Took. [[gandalf_introduzione_20260518141633]]
-- **Bilbo Baggins**: amico di lunga data; Gandalf organizza la sua partecipazione alla spedizione di Erebor e, decenni dopo, identifica come Anello Unico quello trovato da Bilbo. [[gandalf_introduzione_20260518141633]]
-- **Frodo Baggins**: lo convince ad abbandonare la Contea, lo guida fino a Brea e lo ritrova a Granburrone per il Consiglio di Elrond. [[gandalf_introduzione_20260518141633]]
-- **Saruman**: dopo il ritorno come Gandalf il Bianco, ne prende il posto come capo del nuovo ordine dei Saggi, in seguito alla caduta in disgrazia di Saruman. [[gandalf_introduzione_20260518141633]]
-- **Balrog di Morgoth**: avversario che affronta e contro cui cade sul Ponte di Khazad-dûm. [[gandalf_introduzione_20260518141633]]
-- **Shadowfax (Brillacrine)**: cavallo di cui è cavaliere; Shadowfax è signore dei cavalli di Rohan. [[gandalf_introduzione_20260518141633]]
-- **Rohan**: indirettamente collegato tramite Shadowfax, signore dei cavalli di quella terra. [[gandalf_introduzione_20260518141633]]
-
-## Domande aperte
-
-- Il documento non specifica le modalità precise del ritorno di Gandalf come Gandalf il Bianco, oltre alla trasformazione e al cambiamento di ruolo.
-- Non sono dettagliate le fasi intermedie che portano Gandalf a riconoscere l’anello di Bilbo come Anello Unico.
-- La natura e la struttura del “nuovo
+- **Istari**: Gandalf è uno dei cinque membri di questo ordine di stregoni inviati nella Terra di Mezzo contro Sauron.[[gandalf_introduzione_20260518185232]]
+- **Sauron**: la missione di Gandalf e degli Istari è esplicitamente finalizzata a contrastarlo.[[gandalf_introduzione_20260518185232]]
+- **Manwë e Varda**: Olórin, vera natura di Gandalf, è un Maia del loro seguito.[[gandalf_introduzione_20260518185232]]
+- **Nienna**: è colei che addestra Olórin alla compassione e alla pazienza.[[gandalf_introduzione_20260518185232]]
+- **Elfi**: lo chiamano Mithrandir (“pellegrino grigio”).[[gandalf_introduzione_20260518185232]]
+- **Nani e Thorin Scudodiquercia**: i Nani lo conoscono come Tharkûn; tra questi è specificamente menzionato Thorin Scudodiquercia.[[gandalf_introduzione_20260518185232]]
+- **Famiglia Took**: nella Contea Gandalf è noto per la sua amicizia con questa famiglia.[[gandalf_introduzione_20260518185232]]
+- **Bilbo Baggins**: è suo amico nella Contea; Gandalf organizza la spedizione di Erebor in cui Bilbo ha un ruolo centrale.[[gandalf_introduzione_20260518185232]]
+- **Frodo**: Gandalf riconosce nell’anello di Bilbo l’Anello Unico e convince Frodo a lasciare la Contea, guidandolo fino a Brea e raggiungendolo poi a Granburrone.[[gandalf_introduzione_20260518185232]]
+- **Consiglio di Elrond**: Gandalf vi partecipa dopo aver raggiunto Frodo a Granburrone.[[gandalf_introduzione_20260518185232]]
+- **Balrog di Morgoth**: Gandalf combatte questo Balrog sul Ponte di Khazad-dûm, cadendo nelle profondità di Moria.[[gandalf_introduzione_20260518185232]]
+- **Saruman**: dopo la sua caduta in disgrazia, Gandalf il Bianco assume il ruolo di capo del nuovo ordine dei Saggi al suo posto.[[gandalf_introduzione_20260518185232]]
+- **Shadowfax (Brillacrine)**: Gandalf ne è il cavaliere; Shadowfax è definito sign

@@ -1,8 +1,8 @@
 ---
 id: time_vault
 sources:
-- terminus_20260518143006
-- le_crisi_seldon_20260518143119
+- terminus_20260518190241
+- le_crisi_seldon_20260518190350
 type: entity
 subtype: artifact
 domain: asimov
@@ -16,8 +16,8 @@ id: time_vault
 type: entity
 subtype: artifact
 domain: asimov
-tags: [fondazione, tecnologia, psicostoria]
-sources: [terminus_20260518143006, le_crisi_seldon_20260518143119]
+tags: [fondazione, hari_seldon, crisi_seldon, terminus]
+sources: [terminus_20260518190241, le_crisi_seldon_20260518190350]
 last_updated: 2026-05-18
 confidence: high
 stale: false
@@ -28,36 +28,39 @@ title: Cripta del Tempo (Time Vault)
 
 ## Panoramica
 
-La Cripta del Tempo (Time Vault) è una camera situata sul pianeta [[terminus]], contenente i messaggi olografici preregistrati da Hari Seldon. È uno strumento centrale del Piano Seldon: le sue proiezioni, rese disponibili in date predeterminate, guidano la Prima Fondazione attraverso le successive Crisi Seldon, confermando la correttezza del tracciato storico previsto dalla psicostoria. [[terminus_20260518143006]]
+La Cripta del Tempo (Time Vault) è una camera situata sul pianeta Terminus in cui Hari Seldon ha registrato una serie di messaggi olografici destinati alla Prima Fondazione. I messaggi sono programmati per essere riprodotti in date predeterminate, in corrispondenza delle cosiddette "Crisi Seldon", e hanno la funzione di confermare che lo sviluppo storico segue ancora il Piano Seldon prestabilito.[[terminus_20260518190241]]
 
-A ogni Crisi Seldon corrisponde, su Terminus, l’apertura della Cripta e la comparsa di una registrazione olografica di Seldon, che descrive a posteriori la natura della crisi appena risolta, confermandone l’avvenuta previsione psicostorica. [[le_crisi_seldon_20260518143119]]
+A ogni crisi matura corrisponde, su Terminus, l’apertura della Cripta e la comparsa di una registrazione olografica di Seldon che descrive a posteriori la natura della crisi appena risolta, confermandone la previsione psicostorica.[[le_crisi_seldon_20260518190350]]
 
 ## Dettagli
 
-All’interno della Cripta del Tempo, Hari Seldon ha registrato una serie di messaggi olografici destinati a essere riprodotti solo in momenti specifici, corrispondenti alle cosiddette “Crisi Seldon”. [[terminus_20260518143006]] Ogni apertura della Cripta coincide con il superamento di una di queste crisi e con la divulgazione del relativo messaggio. [[le_crisi_seldon_20260518143119]]
+All’interno della Cripta del Tempo sono conservate registrazioni olografiche di Hari Seldon. Queste registrazioni vengono rese visibili sotto forma di apparizioni del simulacro di Seldon, che si attiva solo in momenti specifici, sincronizzati con le Crisi Seldon.[[terminus_20260518190241]]
 
-Le apparizioni del simulacro di Seldon hanno due funzioni principali:
+Ogni apparizione del simulacro ha un ruolo essenzialmente dichiarativo e diagnostico: Seldon vi comunica alla Fondazione che la crisi appena attraversata era prevista dalla psicostoria e che la "rotta storica" rimane quella pianificata originariamente. La Cripta, dunque, non è un organo di governo diretto, ma uno strumento di legittimazione e verifica del Piano Seldon, rafforzando la fiducia della Fondazione nella correttezza del percorso intrapreso.[[terminus_20260518190241]]
 
-- confermare alla Fondazione che la crisi appena attraversata era stata prevista dalla psicostoria;
-- attestare che la “rotta storica” rimane quella pianificata, rassicurando così la classe dirigente di Terminus sulla validità del Piano Seldon. [[terminus_20260518143006]]
+Le prime aperture della Cripta scandiscono alcune fasi della storia istituzionale della Fondazione: la crisi degli Enciclopedisti, che porta al passaggio di potere ai Sindaci (con la figura di Salvor Hardin), la crisi religioso‑politica con i Quattro Regni, la crisi commerciale dei Principi Mercanti (Hober Mallow) e la crisi imperiale legata al generale Bel Riose. In ciascuno di questi casi il messaggio della Cripta interviene dopo la risoluzione della crisi per sancirne il carattere previsto e “necessario” nel quadro del Piano.[[le_crisi_seldon_20260518190350]]
 
-Dal punto di vista narrativo, il funzionamento della Cripta del Tempo rende visibile il carattere deterministico del Piano Seldon: i leader della Fondazione credono di agire liberamente, ma la registrazione che appare dopo la crisi mostra come il percorso seguito fosse già stato calcolato, pur senza che i protagonisti conoscessero in anticipo i dettagli del Piano. [[le_crisi_seldon_20260518143119]]
-
-La Cripta del Tempo è descritta come una “camera”, il che suggerisce un luogo fisso e specifico all’interno di Terminus, distinto dalle altre strutture del pianeta, pur non essendo fornite ulteriori indicazioni architettoniche o tecniche nel documento. [[terminus_20260518143006]]
+La funzione della Cripta è strettamente connessa al carattere deterministico (ma vissuto come libero dai protagonisti) delle Crisi Seldon: la registrazione non fornisce in anticipo la soluzione, ma certifica che le forze sociali, economiche e politiche hanno spinto la Fondazione verso l’unica via d’uscita compatibile con il Piano, senza che i leader ne conoscessero i dettagli.[[le_crisi_seldon_20260518190350]]
 
 ## Relazioni
 
-- **Hari Seldon**: ideatore del Piano Seldon e autore dei messaggi olografici contenuti nella Cripta del Tempo. [[terminus_20260518143006]]
-- **Prima Fondazione**: destinataria delle proiezioni della Cripta; trae da esse legittimazione e orientamento nelle fasi critiche della propria storia. [[terminus_20260518143006]]
-- **Crisi Seldon**: ciascun messaggio è associato a una specifica crisi, che funge da condizione di attivazione temporale per la riproduzione del simulacro; la Cripta si apre a ogni crisi per mostrare una registrazione che ne riassume la natura a posteriori. [[terminus_20260518143006]][[le_crisi_seldon_20260518143119]]
-- **Terminus**: pianeta che ospita la Cripta del Tempo e sede della Fondazione palese, considerata il fulcro visibile del Piano Seldon. [[terminus_20260518143006]]
-- **Piano Seldon**: la Cripta del Tempo ne è uno degli strumenti operativi fondamentali, utilizzato per monitorare e confermare l’aderenza del corso storico alle previsioni psicostoriche. [[terminus_20260518143006]]
-- **Mulo**: la comparsa del Mulo determina la prima apertura “fallita” della Cripta, in cui il messaggio di Seldon risulta fuori bersaglio rispetto alla crisi in atto, mostrando i limiti del Piano e, per estensione, del dispositivo stesso quando gli assiomi psicostorici non sono più validi. [[le_crisi_seldon_20260518143119]]
+- **Hari Seldon** – Ideatore del Piano Seldon e autore delle registrazioni olografiche contenute nella Cripta del Tempo.[[terminus_20260518190241]]
+- **Terminus** – Pianeta che ospita la Cripta del Tempo; sede ufficiale della Prima Fondazione.[[terminus_20260518190241]]
+- **Prima Fondazione** – Destinataria dei messaggi olografici; riceve dalla Cripta conferma della previsione e gestione delle Crisi Seldon.[[terminus_20260518190241]]
+- **Crisi Seldon** – Momenti storici critici in corrispondenza dei quali vengono riprodotti i messaggi registrati nella Cripta del Tempo; ciascuna apertura della Cripta segna il riconoscimento ufficiale che la crisi è stata superata nella maniera prevista dalla psicostoria.[[terminus_20260518190241]][[le_crisi_seldon_20260518190350]]
+- **Piano Seldon** – Progetto psicostorico complessivo la cui corretta esecuzione è verificata e confermata, a tappe, tramite le apparizioni del simulacro di Seldon nella Cripta.[[terminus_20260518190241]]
+- **Salvor Hardin** – Tra i protagonisti della crisi degli Enciclopedisti, uno dei primi cicli in cui un messaggio della Cripta legittima retrospettivamente il cambio di potere a favore dei Sindaci.[[le_crisi_seldon_20260518190350]]
+- **Hober Mallow** – Figura centrale nella crisi commerciale dei Principi Mercanti, associata a una delle aperture della Cripta e relativa conferma del Piano.[[le_crisi_seldon_20260518190350]]
+- **Bel Riose** – Generale imperiale collegato alla crisi imperiale che precede un’ulteriore apertura della Cripta, in cui Seldon illustra a posteriori la natura dello scontro con l’Impero.[[le_crisi_seldon_20260518190350]]
+- **Il Mulo** – Mutante individuale la cui comparsa determina la prima apertura “fallita” della Cripta, in cui il messaggio di Seldon risulta fuori bersaglio rispetto alla crisi reale, segnalando un temporaneo fallimento del Piano.[[le_crisi_seldon_20260518190350]]
 
 ## Domande aperte
 
-- Qual è il numero totale di messaggi contenuti nella Cripta del Tempo?
-- In che modo è tecnicamente regolata l’apertura temporale dei messaggi (meccanismi di attivazione, sicurezza, accesso)?
-- La Cripta del Tempo contiene solo messaggi legati alle Crisi Seldon o anche altre istruzioni o avvertimenti?
-- Esistono limiti o condizioni in cui la Cripta del Tempo potrebbe non attivarsi, indicando uno scostamento irreversibile dal Piano Seldon?
-- La gestione dell’errore nella crisi del Mulo implica qualche modifica successiva al funzionamento della Cripta (frequenza, contenuti, modalità di apertura)? [[le_crisi_seldon_20260518143119]]
+- Non è specificato quante registrazioni siano contenute complessivamente nella Cripta del Tempo.[[terminus_20260518190241]]
+- Non è descritto il meccanismo tecnico con cui vengono determinate e attivate le date predeterminate delle apparizioni.[[terminus_20260518190241]]
+- Non viene chiarito se, oltre alla conferma della corretta traiettoria storica, le registrazioni contengano anche istruzioni operative dettagliate per la Fondazione.[[terminus_20260518190241]]
+- Non sono esplicitati, nel dettaglio, tutti i cicli storici per i quali la Cripta si apre, al di là degli esempi principali (Enciclopedisti, Quattro Regni, Principi Mercanti, crisi imperiale, crisi del Mulo).[[le_crisi_seldon_20260518190350]]
+
+## Contraddizioni note
+
+Al momento non sono emerse contraddizioni tra le descrizioni disponibili della Cripta del Tempo.

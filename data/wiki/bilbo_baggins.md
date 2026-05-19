@@ -1,11 +1,12 @@
 ---
 id: bilbo_baggins
 sources:
-- frodo_baggins_introduzione_20260518141523
+- frodo_baggins_introduzione_20260518185126
+- frodo_baggins_20260519105332
 type: entity
 subtype: character
 domain: tolkien
-last_updated: '2026-05-18'
+last_updated: '2026-05-19'
 stale: false
 title: Bilbo Baggins
 ---
@@ -15,9 +16,9 @@ id: bilbo_baggins
 type: entity
 subtype: character
 domain: tolkien
-tags: [hobbit, contea, bag_end, baggins_family]
-sources: [frodo_baggins_introduzione_20260518141523]
-last_updated: 2026-05-18
+tags: [hobbit, bag_end, contea, baggins_family]
+sources: [frodo_baggins_introduzione_20260518185126, frodo_baggins_20260519105332]
+last_updated: 2026-05-19
 confidence: high
 stale: false
 title: Bilbo Baggins
@@ -27,29 +28,25 @@ title: Bilbo Baggins
 
 ## Panoramica
 
-Bilbo Baggins è un hobbit della Contea, appartenente alla famiglia Baggins e residente a Bag End. È presentato come cugino di secondo grado di Frodo Baggins e figura centrale nella sua vita, prima come parente più anziano e poi come tutore e benefattore, legato a oggetti chiave della vicenda come l'Anello Unico, la lama elfica Pungolo e una cotta di mithril. [[frodo_baggins_introduzione_20260518141523]]
+Bilbo Baggins è un hobbit della Contea appartenente alla famiglia Baggins e residente a Bag End. È cugino di secondo grado di Frodo Baggins, che adotta come erede, portandolo a vivere con sé a Bag End e inserendolo così stabilmente nel ramo Baggins della famiglia. [[frodo_baggins_introduzione_20260518185126]] [[frodo_baggins_20260519105332]]
 
 ## Dettagli
 
-Bilbo vive a Bag End, la dimora hobbit che in seguito lascerà in eredità a Frodo. [[frodo_baggins_introduzione_20260518141523]]  
+Bilbo risiede a Bag End, una delle più note abitazioni hobbit della Contea, e dispone di una posizione tale da poter adottare Frodo come proprio erede, trasferendolo da Buckland a Bag End. [[frodo_baggins_introduzione_20260518185126]] [[frodo_baggins_20260519105332]]
 
-Bilbo adotta Frodo come erede dopo che questi è cresciuto per un periodo presso i Brandybuck a Buckland, e lo porta a vivere con sé a Bag End. [[frodo_baggins_introduzione_20260518141523]]  
+In occasione del suo centoundicesimo compleanno (111 anni), che coincide con il cinquantesimo compleanno di Frodo, Bilbo lascia a quest’ultimo sia la casa di Bag End sia l’Anello Unico, che in quel momento è considerato solamente un anello di invisibilità. [[frodo_baggins_introduzione_20260518185126]] [[frodo_baggins_20260519105332]]
 
-Nel giorno del suo centoundicesimo compleanno (111 anni), che coincide con il cinquantesimo compleanno di Frodo, Bilbo lascia a quest’ultimo sia Bag End sia l’Anello Unico, che in quel momento è considerato solo un anello di invisibilità. [[frodo_baggins_introduzione_20260518141523]]  
-
-Bilbo è inoltre proprietario originario di almeno due oggetti che diventano cruciali nel viaggio di Frodo: il coltello elfico Pungolo e una cotta di mithril, entrambi da lui donati al cugino. [[frodo_baggins_introduzione_20260518141523]]
+Bilbo ha un ruolo centrale nella formazione di Frodo: gli dona il coltello elfico Pungolo e una cotta di mithril, entrambi oggetti che Frodo porta con sé nel suo viaggio, e alimenta in lui il fascino per il mondo esterno alla Contea. [[frodo_baggins_introduzione_20260518185126]] [[frodo_baggins_20260519105332]]
 
 ## Relazioni
 
-- **Frodo Baggins** – Bilbo è cugino di secondo grado di Frodo, oltre che suo tutore e benefattore: lo adotta come erede, lo porta a Bag End, e più tardi gli lascia in eredità Bag End e l’Anello Unico. Frodo riceve inoltre da lui Pungolo e una cotta di mithril. [[frodo_baggins_introduzione_20260518141523]]
-- **Samwise Gamgee** – Sam è il giardiniere di Bag End, la casa di Bilbo (poi di Frodo). Il legame di Sam con Bag End implica un rapporto di servizio almeno indiretto anche con Bilbo durante il periodo in cui Bilbo vi risiede. [[frodo_baggins_introduzione_20260518141523]]
-- **Anello Unico** – L’Anello che Frodo eredita proviene da Bilbo, che lo possiede prima di lui e lo trasmette come parte dell’eredità. [[frodo_baggins_introduzione_20260518141523]]
-- **Pungolo** – Coltello elfico originariamente appartenente a Bilbo, donato da lui a Frodo. [[frodo_baggins_introduzione_20260518141523]]
-- **Cotta di mithril** – Armatura leggera di grande valore che Bilbo dona a Frodo. [[frodo_baggins_introduzione_20260518141523]]
-- **Bag End** – Dimora hobbit in cui Bilbo vive e che lascia a Frodo come eredità. [[frodo_baggins_introduzione_20260518141523]]
+- **Frodo Baggins** – Cugino di secondo grado e adottato da Bilbo come erede; Bilbo lo porta a vivere a Bag End, gli lascia in eredità Bag End e l’Anello Unico, e gli dona Pungolo e la cotta di mithril. Ha con lui un rapporto profondo e ne influenza la curiosità verso il mondo esterno. [[frodo_baggins_introduzione_20260518185126]] [[frodo_baggins_20260519105332]]
+- **Anello Unico** – Oggetto in possesso di Bilbo, da lui lasciato in eredità a Frodo nel giorno del loro compleanno condiviso; all’epoca è considerato un semplice anello di invisibilità. [[frodo_baggins_introduzione_20260518185126]] [[frodo_baggins_20260519105332]]
+- **Bag End** – Dimora di Bilbo nella Contea, che diviene anche la casa di Frodo quando viene adottato; successivamente è ereditata da Frodo. [[frodo_baggins_introduzione_20260518185126]] [[frodo_baggins_20260519105332]]
+- **Samwise Gamgee** – Giardiniere di Bag End e compagno più fedele di Frodo nel viaggio; la relazione tra Bilbo e Samwise è indiretta, mediata dalla comune connessione con Bag End e con Frodo. [[frodo_baggins_20260519105332]]
 
 ## Domande aperte
 
-- In quali circostanze Bilbo è entrato in possesso dell’Anello Unico prima di lasciarlo a Frodo?
-- Come e quando Bilbo ha ottenuto Pungolo e la cotta di mithril che poi dona a Frodo?
-- Quali aspetti del carattere di Bilbo influenzano l’educazione e la curiosità intellettuale di Frodo oltre a quelli indicati dalla fonte? [[frodo_baggins_introduzione_20260518141523]]
+- Le circostanze precise attraverso cui Bilbo è entrato in possesso dell’Anello Unico non sono descritte nei documenti disponibili. [[frodo_baggins_introduzione_20260518185126]]
+- Non sono fornite informazioni sull’età di Bilbo in altri momenti della sua vita, né sui suoi viaggi precedenti all’adozione di Frodo. [[frodo_baggins_introduzione_20260518185126]]
+- I testi non specificano le motivazioni personali che spingono Bilbo ad adottare Frodo come erede, oltre al legame di parentela e al fatto che Frodo è rimasto orfano. [[frodo_baggins_introduzione_20260518185126]] [[frodo_baggins_20260519105332]]

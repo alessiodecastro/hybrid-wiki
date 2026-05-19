@@ -1,7 +1,7 @@
 ---
 id: primary_radiant
 sources:
-- la_psicostoria_20260518143249
+- la_psicostoria_20260518190534
 type: entity
 subtype: artifact
 domain: asimov
@@ -15,8 +15,8 @@ id: primary_radiant
 type: entity
 subtype: artifact
 domain: asimov
-tags: [psicostoria, piano_seldon, seconda_fondazione]
-sources: [la_psicostoria_20260518143249]
+tags: [psicostoria, piano_seldon, seconda_fondazione, tecnologia_matematica]
+sources: [la_psicostoria_20260518190534]
 last_updated: 2026-05-18
 confidence: high
 stale: false
@@ -27,23 +27,23 @@ title: Radiante Primario
 
 ## Panoramica
 
-Il Radiante Primario è un dispositivo utilizzato nell’ambito della psicostoria per visualizzare i risultati delle previsioni del Piano Seldon. Esso proietta le equazioni psicostoriche, note come “funzioni di Seldon”, costituendo lo strumento di rappresentazione del Piano stesso. [[la_psicostoria_20260518143249]]
+Il Radiante Primario è un dispositivo utilizzato nell’ambito della psicostoria per visualizzare i risultati delle analisi e le equazioni che descrivono il Piano Seldon. Rende tangibili e leggibili le cosiddette “funzioni di Seldon”, cioè le formulazioni matematiche con cui la psicostoria esprime le previsioni sul futuro di vaste popolazioni umane [[la_psicostoria_20260518190534]].
 
 ## Dettagli
 
-Nel Radiante Primario vengono visualizzate le equazioni che descrivono l’evoluzione storica prevista dalla psicostoria, ovvero il Piano Seldon. Le “funzioni di Seldon” proiettate dal dispositivo rappresentano in forma matematica le tendenze future di grandi popolazioni umane. [[la_psicostoria_20260518143249]]
+Il dispositivo ha la funzione specifica di proiettare le equazioni del Piano Seldon, costituendo l’interfaccia principale tra il formalismo matematico della psicostoria e chi è incaricato di interpretarlo [[la_psicostoria_20260518190534]].
 
-La comprensione del contenuto del Radiante Primario richiede competenze altamente specialistiche: solo un numero ristretto di matematici appartenenti alla Seconda Fondazione è in grado di leggere e modificare le funzioni di Seldon proiettate. Questo ne fa un artefatto al tempo stesso tecnico e strategico, centrale nella gestione e nell’eventuale revisione del Piano. [[la_psicostoria_20260518143249]]
+La complessità delle rappresentazioni visualizzate dal Radiante Primario è tale che solo un numero molto limitato di specialisti è in grado di leggerle correttamente. In particolare, si afferma che solo pochi matematici appartenenti alla Seconda Fondazione possiedono le competenze necessarie non solo per interpretare le proiezioni, ma anche per modificarle, intervenendo quindi sulle formulazioni del Piano stesso [[la_psicostoria_20260518190534]].
 
 ## Relazioni
 
-- **Psicostoria**: il Radiante Primario è uno strumento della disciplina psicostorica, poiché serve a visualizzarne i risultati sotto forma di funzioni matematiche. [[la_psicostoria_20260518143249]]
-- **Piano Seldon**: proietta le equazioni del Piano, rendendone percepibile la struttura in termini di “funzioni di Seldon”. [[la_psicostoria_20260518143249]]
-- **Funzioni di Seldon**: queste funzioni costituiscono il contenuto matematico visualizzato dal Radiante Primario. [[la_psicostoria_20260518143249]]
-- **Seconda Fondazione**: solo alcuni matematici di questa organizzazione sono in grado di interpretare e modificare le funzioni proiettate dal Radiante Primario. [[la_psicostoria_20260518143249]]
+- **Psicostoria**: il Radiante Primario è uno strumento operativo della disciplina psicostorica, incaricato di visualizzare i risultati delle sue analisi, cioè le “funzioni di Seldon” [[la_psicostoria_20260518190534]].
+- **Piano Seldon**: le equazioni che descrivono il Piano vengono proiettate dal Radiante Primario; il dispositivo è quindi direttamente collegato alla rappresentazione del Piano e alla sua eventuale revisione [[la_psicostoria_20260518190534]].
+- **Funzioni di Seldon**: il Radiante Primario è il mezzo attraverso cui queste funzioni vengono rese visibili sotto forma di equazioni proiettate [[la_psicostoria_20260518190534]].
+- **Seconda Fondazione**: solo alcuni matematici di questa organizzazione sono in grado di leggere e modificare le equazioni proiettate dal Radiante Primario [[la_psicostoria_20260518190534]].
 
 ## Domande aperte
 
-- Quali sono le caratteristiche tecniche e fisiche del Radiante Primario (dimensioni, tecnologia impiegata, modalità di proiezione)?
-- Esistono altri dispositivi simili al Radiante Primario, o si tratta di un artefatto unico?
-- In che misura le modifiche apportate dalle menti della Seconda Fondazione nel Radiante Primario si traducono in cambiamenti operativi nel Piano Seldon?
+- Qual è la natura tecnica precisa del Radiante Primario (principi di funzionamento, tecnologia impiegata, forma fisica)?
+- In che modo concreto i matematici della Seconda Fondazione modificano le equazioni del Piano attraverso il Radiante Primario?
+- Esistono altri dispositivi simili al Radiante Primario o versioni secondarie/derivate utilizzate per scopi diversi dal Piano Seldon?

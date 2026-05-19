@@ -1,7 +1,7 @@
 ---
 id: rings_of_power
 sources:
-- anello_unico_20260518141902
+- anello_unico_20260518185429
 type: entity
 subtype: artifact
 domain: tolkien
@@ -15,10 +15,10 @@ id: rings_of_power
 type: entity
 subtype: artifact
 domain: tolkien
-tags: [anelli, magia, artefatti, second_age]
-sources: [anello_unico_20260518141902]
+tags: [anelli, magia, sauron, celebrimbor]
+sources: [anello_unico_20260518185429]
 last_updated: 2026-05-18
-confidence: high
+confidence: medium
 stale: false
 title: Anelli del Potere
 ```
@@ -27,26 +27,26 @@ title: Anelli del Potere
 
 ## Panoramica
 
-Gli Anelli del Potere sono una serie di anelli magici forgiati dagli elfi di Eregion su istigazione di Sauron, che agisce sotto mentite spoglie con il nome di Annatar, “Signore dei Doni”. L’Anello Unico è concepito da Sauron come anello separato e superiore, destinato a dominare gli altri Anelli del Potere e i loro portatori.[[anello_unico_20260518141902]]
+Gli Anelli del Potere sono una serie di anelli magici forgiati dagli Elfi di Eregion sotto l’influenza di Sauron, che si presenta come Annatar, “Signore dei Doni”. Tra questi, uno è riservato a Sauron stesso, l’Anello Unico, creato per dominare tutti gli altri Anelli del Potere e diventare l’artefatto centrale della Guerra dell’Anello [[anello_unico_20260518185429]].
 
 ## Dettagli
 
-Durante l’inganno di Eregion, Sauron, celato nella forma benevola di Annatar, persuade il fabbro elfo Celebrimbor a forgiare gli Anelli del Potere, presentandosi come guida e consigliere nella loro realizzazione. Mentre gli anelli vengono creati nelle fucine elfiche, Sauron si riserva per sé la creazione di un anello distinto, forgiato in segreto nelle fucine del Monte Fato (Orodruin).[[anello_unico_20260518141902]]
+Durante l’episodio noto come inganno di Eregion, Sauron, travestito da Annatar, persuade il fabbro elfico Celebrimbor a forgiare gli Anelli del Potere. Mentre gli Elfi lavorano alle loro creazioni, Sauron si riserva per sé un anello distinto, forgiato in segreto nelle fucine del Monte Fato (Orodruin) intorno all’anno 1600 della Seconda Era [[anello_unico_20260518185429]].
 
-La funzione degli Anelli del Potere, per come risulta dal ruolo dell’Anello Unico, è quella di costituire una rete di potere soggetta al controllo del Signore Oscuro: l’Anello Unico è esplicitamente definito come l’anello “che li domina tutti”, il che implica che gli altri Anelli del Potere sono concepiti come oggetti subordinati, suscettibili di essere controllati tramite questo unico artefatto sovraordinato.[[anello_unico_20260518141902]]
+Questo anello segreto, l’Anello Unico, è concepito esplicitamente per “dominarli tutti”, ossia per esercitare controllo sugli altri Anelli del Potere e sui loro portatori. La natura e la funzione degli Anelli del Potere, così come la loro pericolosità, risultano quindi strettamente legate all’esistenza dell’Anello Unico e al piano di Sauron di soggiogare gli altri tramite esso [[anello_unico_20260518185429]].
 
-L’insieme degli Anelli del Potere è dunque legato a un progetto di dominio: mediante l’inganno e la collaborazione con Celebrimbor, Sauron mira a imbrigliare i portatori degli anelli in una rete di soggezione, resa possibile dall’esistenza dell’Anello Unico che funge da centro di controllo dell’intero sistema.[[anello_unico_20260518141902]]
+Il documento non fornisce ulteriori dettagli specifici sui singoli Anelli del Potere diversi dall’Unico (numero, destinazione, singole capacità), ma ne attesta l’origine elfica e la dipendenza occulta dal potere concentrato nell’Anello Unico [[anello_unico_20260518185429]].
 
 ## Relazioni
 
-- **Sauron / Annatar** – È l’ideatore del progetto degli Anelli del Potere; sotto le mentite spoglie di Annatar “Signore dei Doni” convince Celebrimbor a forgiare gli anelli, riservando a sé l’Anello Unico che li domina tutti.[[anello_unico_20260518141902]]
-- **Celebrimbor** – Fabbro elfo di Eregion che, persuaso da Annatar, forgia gli Anelli del Potere nelle sue fucine.[[anello_unico_20260518141902]]
-- **Eregion** – Regione elfica in cui avviene l’inganno attraverso cui Sauron induce gli elfi alla creazione degli Anelli del Potere.[[anello_unico_20260518141902]]
-- **Orodruin (Monte Fato)** – Luogo in cui Sauron forgia separatamente l’Anello Unico, distinto ma funzionalmente centrale rispetto agli altri Anelli del Potere.[[anello_unico_20260518141902]]
-- **[[one_ring]] (Anello Unico)** – L’anello riservato da Sauron per sé, creato per dominare tutti gli altri Anelli del Potere. L’iscrizione sull’Anello Unico esplicita questa funzione di dominio (“Un Anello per domarli...”).[[anello_unico_20260518141902]]
+- **Anello Unico** – Fa parte degli Anelli del Potere, ma è distinto per origine e funzione, essendo stato forgiato da Sauron stesso a Orodruin con lo scopo di dominare tutti gli altri [[anello_unico_20260518185429]].
+- **Sauron / Annatar** – Ispiratore e manipolatore della forgiatura degli Anelli del Potere; sotto le mentite spoglie di Annatar induce Celebrimbor a forgiare gli anelli, mentre riserva per sé l’Unico [[anello_unico_20260518185429]].
+- **Celebrimbor** – Fabbro elfo di Eregion, convinto da Annatar/Sauron a realizzare gli Anelli del Potere, senza rendersi conto che Sauron intende creare un Anello sovraordinato per dominarli [[anello_unico_20260518185429]].
+- **Eregion** – Contesto geografico e culturale dell’inganno: è qui che avviene la persuasione di Celebrimbor e la forgiatura degli Anelli del Potere, mentre l’Unico viene creato separatamente a Orodruin [[anello_unico_20260518185429]].
+- **Orodruin (Monte Fato)** – Luogo in cui Sauron forgia l’Anello Unico, legando così tutti gli Anelli del Potere a un centro di controllo unico; il fuoco di questo monte è l’unico in grado di distruggere l’Unico, e con ciò di interrompere il suo dominio sugli altri [[anello_unico_20260518185429]].
 
 ## Domande aperte
 
-- Il numero esatto e la distribuzione degli Anelli del Potere non sono specificati nel documento di riferimento.
-- Le capacità specifiche dei singoli Anelli del Potere, al di là del loro essere suscettibili al dominio dell’Anello Unico, non vengono descritte.
-- Non è chiarito se tutti gli Anelli del Potere siano stati forgiati direttamente da Celebrimbor o se altri fabbri elfi abbiano partecipato alla loro creazione.
+- Il documento non specifica quanti siano gli Anelli del Potere né come siano ripartiti tra le diverse razze; questi dettagli rimangono esterni alla fonte considerata [[anello_unico_20260518185429]].
+- Non sono descritte proprietà individuali dei singoli anelli (eccetto l’Unico), né se alcune loro capacità derivino direttamente, e in che misura, dal legame con l’Anello Unico [[anello_unico_20260518185429]].
+- Non è chiarito in che modo concreto l’Unico eserciti il dominio sugli altri Anelli del Potere, oltre all’indicazione generale che “li domini tutti” [[anello_unico_20260518185429]].

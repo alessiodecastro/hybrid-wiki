@@ -1,7 +1,7 @@
 ---
 id: shadowfax
 sources:
-- gandalf_introduzione_20260518141633
+- gandalf_introduzione_20260518185232
 type: entity
 subtype: character
 domain: tolkien
@@ -16,7 +16,7 @@ type: entity
 subtype: character
 domain: tolkien
 tags: [cavallo, rohan, istari]
-sources: [gandalf_introduzione_20260518141633]
+sources: [gandalf_introduzione_20260518185232]
 last_updated: 2026-05-18
 confidence: high
 stale: false
@@ -27,20 +27,19 @@ title: Shadowfax
 
 ## Panoramica
 
-Shadowfax (tradotto in italiano come Brillacrine) è il cavallo di cui Gandalf è cavaliere e viene descritto come il signore dei cavalli di Rohan.[[gandalf_introduzione_20260518141633]]  
+Shadowfax (tradotto in italiano come Brillacrine) è il cavallo di cui Gandalf è cavaliere. È descritto come il signore dei cavalli di Rohan, il che lo identifica come un destriero di eccezionale rango tra gli equini del regno dei Rohirrim. [[gandalf_introduzione_20260518185232]]
 
 ## Dettagli
 
-Shadowfax è associato al regno di Rohan attraverso il titolo di “signore dei cavalli di Rohan”, che suggerisce una posizione eminente tra i cavalli di quella terra.[[gandalf_introduzione_20260518141633]]  
-Il testo indica esplicitamente che Gandalf ne è il cavaliere, a sottolineare un legame privilegiato tra lo stregone e questo cavallo.[[gandalf_introduzione_20260518141633]]
+Shadowfax è legato in modo particolare a Gandalf, che lo cavalca in qualità di suo cavaliere. La denominazione di “signore dei cavalli di Rohan” indica una posizione di supremazia sugli altri cavalli di quel popolo, suggerendo un ruolo speciale all’interno delle scuderie o delle mandrie di Rohan. [[gandalf_introduzione_20260518185232]]
 
 ## Relazioni
 
-- **Gandalf** – Shadowfax è il cavallo di cui Gandalf è cavaliere.[[gandalf_introduzione_20260518141633]]  
-- **Rohan** – Shadowfax è definito “signore dei cavalli di Rohan”, collegandolo al popolo e alle terre di Rohan.[[gandalf_introduzione_20260518141633]]
+- **Gandalf** – Shadowfax è il cavallo di Gandalf, che ne è il cavaliere. [[gandalf_introduzione_20260518185232]]
+- **Rohan** – Shadowfax è definito signore dei cavalli di Rohan, il che lo collega direttamente a quel regno e ai suoi Rohirrim. [[gandalf_introduzione_20260518185232]]
 
 ## Domande aperte
 
-- Non sono specificate nel documento le caratteristiche fisiche dettagliate di Shadowfax.  
-- Non è chiarito come Shadowfax sia entrato al servizio di Gandalf.  
-- Il testo non fornisce informazioni sul ruolo di Shadowfax in episodi narrativi specifici.
+- In quali circostanze precise Gandalf diventa cavaliere di Shadowfax?
+- Quali sono le qualità specifiche (fisiche o “caratteriali”) che distinguono Shadowfax dagli altri cavalli di Rohan?
+- Shadowfax è legato esclusivamente a Gandalf o è mai stato montato da altri?

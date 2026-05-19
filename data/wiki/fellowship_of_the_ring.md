@@ -1,9 +1,9 @@
 ---
 id: fellowship_of_the_ring
 sources:
-- consiglio_di_elrond_20260518142240
+- consiglio_di_elrond_20260518185756
 type: entity
-subtype: ''
+subtype: event
 domain: tolkien
 last_updated: '2026-05-18'
 stale: false
@@ -13,48 +13,53 @@ title: Fellowship Of The Ring
 ```yaml
 id: fellowship_of_the_ring
 type: entity
-subtype: ""
+subtype: event
 domain: tolkien
-tags: [organizzazione, compagnia, anello_unico]
-sources: [consiglio_di_elrond_20260518142240]
+tags: [compagnia, viaggio, anello_unico]
+sources: [consiglio_di_elrond_20260518185756]
 last_updated: 2026-05-18
 confidence: high
 stale: false
-title: Compagnia dell’Anello
+title: Compagnia dell'Anello
 ```
 
-# Compagnia dell’Anello
+# Compagnia dell'Anello
 
 ## Panoramica
 
-La **Compagnia dell’Anello** è un gruppo di nove membri costituito a Granburrone durante il Consiglio di Elrond, con il compito di accompagnare l’Anello Unico a Mordor affinché venga distrutto. La composizione a nove è definita esplicitamente in opposizione ai nove Nazgûl. [[consiglio_di_elrond_20260518142240]]
+La Compagnia dell'Anello è il gruppo di nove membri nominato da Elrond a conclusione del Consiglio di Elrond, con il compito di portare l'Anello Unico verso Mordor per distruggerlo. La sua costituzione è presentata come risposta diretta alla minaccia dei nove Nazgûl, in esplicita contrapposizione numerica a essi.[[consiglio_di_elrond_20260518185756]]
 
 ## Dettagli
 
-Al termine del Consiglio, Elrond accetta l’offerta di Frodo di portare l’Anello a Mordor e **nomina la Compagnia dell’Anello**, specificando i suoi membri e la logica numerica della scelta: nove compagni contro i nove Spettri dell’Anello. [[consiglio_di_elrond_20260518142240]]
+Al termine del dibattito sul destino dell'Anello Unico, Frodo Baggins, pur esitante, si offre volontariamente di portare l'Anello a Mordor per distruggerlo.[[consiglio_di_elrond_20260518185756]] Elrond accetta questa offerta e, per sostenerlo nell'impresa, istituisce la "Compagnia dell'Anello", composta da nove membri scelti tra i popoli liberi della Terra di Mezzo.[[consiglio_di_elrond_20260518185756]]
 
-La Compagnia è così composta:  
-- **Frodo Baggins**, portatore dell’Anello;  
-- **Sam Gamgee**;  
-- **Merry**;  
-- **Pipino** (i quattro rappresentano gli hobbit);  
-- **Gandalf il Grigio**;  
-- **Aragorn figlio di Arathorn**;  
-- **Boromir** di Gondor (i tre costituiscono la componente umana);  
-- **Legolas Verdefoglia** (per gli elfi);  
-- **Gimli figlio di Glóin** (per i nani). [[consiglio_di_elrond_20260518142240]]
+La composizione della Compagnia è la seguente:
 
-Il Consiglio di Elrond si conclude con l’approvazione del “Capitolo della Compagnia”, e viene stabilito che la Compagnia parta da Granburrone il **25 dicembre 3018 della Terza Era**. [[consiglio_di_elrond_20260518142240]]
+- Frodo Baggins, portatore dell'Anello, hobbit.
+- Sam Gamgee, hobbit, inizialmente presente di nascosto al Consiglio e poi accolto.
+- Merry (Meriadoc Brandybuck), hobbit.
+- Pipino (Peregrin Took), hobbit.
+- Gandalf il Grigio, istar.
+- Aragorn figlio di Arathorn, detto "Grampasso", uomo, erede di Isildur.
+- Boromir, figlio maggiore del Sovrintendente Denethor II, uomo di Gondor.
+- Legolas Verdefoglia, principe elfico di Bosco Atro.
+- Gimli figlio di Glóin, nano di Erebor.[[consiglio_di_elrond_20260518185756]]
+
+La scelta del numero nove è motivata da Elrond come "in opposizione ai nove Nazgûl", implicando una dimensione simbolica e strategica nella formazione del gruppo.[[consiglio_di_elrond_20260518185756]]
+
+Il Consiglio di Elrond si conclude con l'approvazione del "Capitolo della Compagnia", e la Compagnia dell'Anello parte da Granburrone il 25 dicembre dell'anno 3018 della Terza Era.[[consiglio_di_elrond_20260518185756]]
 
 ## Relazioni
 
-- **Consiglio di Elrond** – La Compagnia dell’Anello viene istituita nel corso di questo evento, che ne definisce missione e composizione. [[consiglio_di_elrond_20260518142240]]
-- **Anello Unico** – La ragion d’essere della Compagnia è la distruzione dell’Anello Unico a Mordor; Frodo ne è il portatore. [[consiglio_di_elrond_20260518142240]]
-- **Elrond Mezzelfo** – In qualità di signore di Imladris e convocatore del Consiglio, è colui che accetta l’offerta di Frodo e formalmente nomina la Compagnia. [[consiglio_di_elrond_20260518142240]]
-- **Nazgûl** – La Compagnia è concepita con lo stesso numero di membri dei Nazgûl, in esplicita opposizione a essi. [[consiglio_di_elrond_20260518142240]]
-- **Granburrone/Imladris** – Luogo in cui la Compagnia viene fondata e da cui parte il viaggio il 25 dicembre 3018. [[consiglio_di_elrond_20260518142240]]
+- **Consiglio di Elrond**: la Compagnia nasce direttamente come esito del Consiglio, che ne approva la costituzione e la missione.[[consiglio_di_elrond_20260518185756]]
+- **Anello Unico**: la ragion d'essere della Compagnia è accompagnare il portatore dell'Anello Unico nel viaggio verso Mordor per distruggerlo.[[consiglio_di_elrond_20260518185756]]
+- **Frodo Baggins**: portatore dell'Anello e membro centrale della Compagnia; la sua offerta di portare l'Anello rende necessaria la formazione del gruppo.[[consiglio_di_elrond_20260518185756]]
+- **Elrond**: signore di Imladris, convoca il Consiglio e nomina formalmente la Compagnia dell'Anello e i suoi nove membri.[[consiglio_di_elrond_20260518185756]]
+- **Nazgûl**: la Compagnia è costituita da nove membri "in opposizione ai nove Nazgûl", ponendosi come controparte dei servitori di Sauron.[[consiglio_di_elrond_20260518185756]]
+- **Granburrone/Imladris**: luogo di fondazione della Compagnia e punto di partenza del viaggio il 25 dicembre 3018 T.E.[[consiglio_di_elrond_20260518185756]]
 
 ## Domande aperte
 
-- Il documento non specifica nel dettaglio le modalità pratiche con cui è stato deciso ogni singolo membro della Compagnia (criteri di selezione, eventuali alternative scartate). [[consiglio_di_elrond_20260518142240]]
-- Non sono indicate nel testo le tappe previste del viaggio della Compagnia dopo la partenza da Granburrone. [[consiglio_di_elrond_20260518142240]]
+- Il documento non specifica quali criteri dettagliati guidino la scelta dei singoli membri oltre alla rappresentanza dei diversi popoli e all'opposizione numerica ai Nazgûl.
+- Non sono fornite informazioni sul percorso previsto per la Compagnia dopo la partenza da Granburrone il 25 dicembre 3018 della Terza Era.
+- Non viene precisato se il "Capitolo della Compagnia" abbia una forma scritta o giuridica, o se si tratti di una semplice formula per designare l'accordo del Consiglio.
