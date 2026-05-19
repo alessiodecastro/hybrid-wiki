@@ -47,6 +47,11 @@ HOT_LAYER_PATH = WIKI_DIR / "HOT_LAYER.md"  # singolo file: overview + index
 QUERY_LOG_PATH = DATA_DIR / "query_log.jsonl"  # audit trail append-only delle query
 TOKEN_LOG_PATH = DATA_DIR / "token_log.jsonl"  # consumo token per fase, append-only
 
+# Output persistente dei run dell'eval set (oltre alla console).
+# Sotto tests/ (non data/): è materiale di valutazione, non stato runtime.
+TESTS_DIR = PROJECT_ROOT / "tests"
+EVAL_RESULTS_DIR = TESTS_DIR / "results"
+
 # Classificazione L0/L1/L2 assistita (§6.1: l'LLM propone, l'umano conferma).
 CLASSIFICATION_DIR = DATA_DIR / "classification"
 # Dataset few-shot che cresce a ogni conferma umana (active learning,

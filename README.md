@@ -8,12 +8,13 @@ e `asimov` (Ciclo della Fondazione). Le regole operative sono in
 
 ## Cosa fa
 
-- **Ingest** di documenti su 3 livelli (L0/L1/L2) con classificazione manuale via CLI.
+- **Ingest** su 3 livelli (L0/L1/L2), con livello esplicito o **classificazione assistita** (l'LLM propone, l'umano conferma).
 - **Doppio indice** (raw + wiki) su ChromaDB locale.
 - **Query** multi-indice con orientamento dal Hot Layer e risoluzione conflitti.
 - **Hot Layer** minimo (overview + index) rigenerato dopo ogni ingest L1/L2.
 - **AGENTS.md v0.2** (dominio-agnostico) come contratto operativo letto in ogni chiamata LLM.
 - **Multi-dominio**: tag `domain` per documento, filtro `--domain` in query, isolamento dei corpora.
+- **Manutenzione**: lint health-check, consolidazione duplicati/alias a conferma umana, audit e promozione retroattiva L0.
 
 ## Cosa NON fa ancora (per design)
 
@@ -34,90 +35,137 @@ Copy-Item .env.example .env
 
 ## Uso
 
-### Bulk ingest da manifest YAML
+### Ingest
 
-Per corpus di dimensioni significative (>10 documenti) usa il bulk ingest:
+L'ingest è il processo con cui un documento entra nel sistema. Ogni documento è elaborato su uno di **tre livelli** a costo/valore crescente (design §6.1):
+
+| Livello | Cosa produce | Quando |
+|---|---|---|
+| **L0** | Solo indice raw (chunk + embedding). Nessuna pagina wiki. | Alto volume, basso valore individuale (note di servizio, log). Recuperabile solo via ricerca raw. |
+| **L1** | L0 + una pagina *source* (sintesi autonoma del singolo documento). | Merita una sintesi ma non va integrato col resto della wiki. |
+| **L2** | L1 + estrazione entità e creazione/merge delle pagine *entity* collegate, con gestione contraddizioni. | Documenti strategici che cambiano il quadro generale. |
+
+Il documento raw è **immutabile**: una volta ingestato non viene mai riscritto (unica eccezione: il metadato di livello in caso di promozione retroattiva — vedi *Classificazione assistita*).
+
+**Documento singolo** — `ingest_doc.py`, livello (e per L2 il subtype) dichiarati esplicitamente:
 
 ```powershell
-python scripts/ingest_folder.py --manifest data/raw/incoming/manifest_tolkien.yaml
-python scripts/ingest_folder.py --manifest data/raw/incoming/manifest_tolkien.yaml --dry-run    # piano senza chiamate API
-python scripts/ingest_folder.py --manifest data/raw/incoming/manifest_tolkien.yaml --force      # re-ingesta anche i doc già presenti
+python scripts/ingest_doc.py --file data/raw/incoming/tolkien/frodo_intro.txt --title "Frodo Baggins" --level L2 --subtype character --domain tolkien
+python scripts/ingest_doc.py --file data/raw/incoming/tolkien/lettera_routine.txt --title "Nota Mathom-house" --level L0
 ```
 
-Il manifest dichiara `defaults` (es. dominio e livello) + lista `documents` con override puntuali. Idempotente per default: skippa i documenti già ingestati riconoscendoli da `(source_filename, domain)`.
+**Bulk da manifest** — `ingest_folder.py`. Un manifest YAML descrive l'intero corpus: `defaults` (dominio/livello comuni) + lista `documents` con override per documento. Il campo `level` è **opzionale**: se omesso, il documento viene classificato automaticamente (vedi *Classificazione assistita*). È il modo consigliato oltre i ~10 documenti, perché riproducibile.
 
-Il bulk ingest **rimanda il rebuild dell'Hot Layer a fine batch** (un solo rebuild invece di uno per documento): il rebuild è O(pagine_totali), eseguirlo per ogni doc renderebbe il costo del batch O(N²). `ingest_doc.py` (documento singolo) ricostruisce invece subito, come prima.
+```powershell
+python scripts/ingest_folder.py --manifest data/raw/incoming/tolkien/manifest_tolkien.yaml --dry-run   # piano, nessuna chiamata API
+python scripts/ingest_folder.py --manifest data/raw/incoming/tolkien/manifest_tolkien.yaml             # esegue
+python scripts/ingest_folder.py --manifest data/raw/incoming/asimov/manifest_asimov.yaml               # secondo corpus
+python scripts/ingest_folder.py --manifest data/raw/incoming/tolkien/manifest_tolkien.yaml --force     # re-ingesta anche i già presenti
+```
+
+Proprietà del bulk ingest:
+- **Idempotente**: salta i documenti già ingestati riconoscendoli da `(source_filename, domain)`; `--force` li re-ingesta.
+- **Tollerante agli errori**: un documento che fallisce non blocca il batch (conteggiato in `FAILED`).
+- **Hot Layer differito**: il rebuild dell'index è O(pagine_totali); il bulk lo esegue **una sola volta a fine batch** invece che per documento (altrimenti O(N²) sul corpus). `ingest_doc.py` su singolo documento ricostruisce subito.
 
 ### Domini multipli
 
-Aggiungi documenti di un nuovo dominio con `--domain` (in `ingest_doc.py`) o nel campo `domain` del manifest. Poi filtra le query:
+Il motore è dominio-agnostico: ogni documento porta un tag `domain` (da `--domain` in `ingest_doc.py` o dal campo `domain` nel manifest). I corpora restano isolati; una pagina wiki che aggrega sorgenti di domini diversi assume `domain=_mixed` ed è inclusa in tutti i filtri. In query si filtra per dominio:
 
 ```powershell
 python scripts/ask.py "Chi è il protagonista?" --domain tolkien
 python scripts/ask.py "Chi è il protagonista?" --domain asimov
 ```
 
-Le pagine wiki che aggregano sorgenti di domini diversi assumono `domain=_mixed` e sono incluse in tutti i filtri.
+### Interrogare la knowledge base
 
-### Ingest dei 10 documenti seed (singoli, per riferimento)
-
-```powershell
-python scripts/ingest_doc.py --file data/raw/incoming/frodo_intro.txt        --title "Frodo Baggins — introduzione"    --level L2 --subtype character
-python scripts/ingest_doc.py --file data/raw/incoming/gandalf_intro.txt      --title "Gandalf — introduzione"          --level L2 --subtype character
-python scripts/ingest_doc.py --file data/raw/incoming/aragorn_intro.txt      --title "Aragorn — introduzione"          --level L2 --subtype character
-python scripts/ingest_doc.py --file data/raw/incoming/sam_intro.txt          --title "Samwise Gamgee"                  --level L1
-python scripts/ingest_doc.py --file data/raw/incoming/anello_unico.txt       --title "Anello Unico"                    --level L2 --subtype artifact
-python scripts/ingest_doc.py --file data/raw/incoming/contea.txt             --title "La Contea"                       --level L2 --subtype place
-python scripts/ingest_doc.py --file data/raw/incoming/mordor.txt             --title "Mordor"                          --level L2 --subtype place
-python scripts/ingest_doc.py --file data/raw/incoming/monte_fato.txt         --title "Monte Fato"                      --level L1
-python scripts/ingest_doc.py --file data/raw/incoming/consiglio_elrond.txt   --title "Consiglio di Elrond"             --level L2 --subtype event
-python scripts/ingest_doc.py --file data/raw/incoming/lettera_routine.txt    --title "Nota Mathom-house Halimath 1419" --level L0
-python scripts/ingest_doc.py --file data/raw/incoming/sauron_intro.txt       --title "Sauron"                          --level L2 --subtype character
-```
-
-### Fare una domanda
+Una domanda esegue la pipeline di query (design §6.2): orientamento dal Hot Layer → retrieval doppio (wiki + raw, filtrabile per `--domain`) → risoluzione conflitti → risposta con citazioni, livello di confidence e gap dichiarati. Ogni query è loggata in `data/query_log.jsonl`.
 
 ```powershell
 python scripts/ask.py "Chi è il portatore dell'Anello?"
-python scripts/ask.py "In che anno fu fondata la Contea?"
-python scripts/ask.py "Quali oggetti porta Frodo quando lascia la Contea?"
+python scripts/ask.py "Quanti abitanti ha Trantor?" --domain asimov
 ```
 
-### Eseguire tutto l'eval set
+### eval set
+
+L'eval set è un file YAML di domande con **risposta e sorgenti attese**, organizzate per categoria (sintesi, dettaglio raw, conflitto, relazione, gap, cross-dominio). Eseguirlo lancia la pipeline di query su ogni domanda e mostra **affiancati** la risposta del sistema e l'atteso dichiarato: è lo strumento di valutazione qualitativa (design §7.2). Nel walking skeleton non c'è scoring automatico — il confronto è umano.
+
+Due eval set inclusi:
+- `tests/eval_set.yaml` — dominio singolo (tolkien).
+- `tests/eval_set_crossdomain.yaml` — cross-dominio; ogni domanda può dichiarare il proprio `domain`, per testare isolamento e contaminazione tra corpora.
 
 ```powershell
 python scripts/ask.py --eval tests/eval_set.yaml
+python scripts/ask.py --eval tests/eval_set_crossdomain.yaml
+python scripts/ask.py --eval tests/eval_set.yaml --domain tolkien   # forza un dominio su tutte le domande
 ```
+
+Ogni esecuzione, oltre alla console, salva un report in `tests/results/evalset_results_YYYYMMDD_HHMMSS.txt` (un file per run, contenuto identico alla console: header con eval set/timestamp/filtro dominio, ogni domanda con risposta–sorgenti–confidence–atteso, riepilogo token finale). Un file per esecuzione permette di confrontare run diversi nel tempo e individuare regressioni.
 
 ### Classificazione L0/L1/L2 assistita
 
+Assegnare il livello a mano non scala. La classificazione assistita (design §6.1) segue il principio *l'LLM propone, l'umano conferma*, con una decisione a tre stadi:
+
+1. **Regole deterministiche** (`data/classification/rules.yaml`, opzionale): se un documento combacia per sorgente/titolo/dominio, livello fissato a regola — niente LLM.
+2. **Proposta LLM**: criteri da `AGENTS.md` + esempi few-shot dalle conferme umane precedenti. È *active learning*: ogni conferma affina le proposte successive.
+3. **Gate di confidenza asimmetrico**: regola, oppure L0/L1 ad **alta** confidence → ingest automatico; **L2 o confidence non alta → coda di review umana**. Mai auto-ingest di un L2: sbagliare verso il basso perde il documento per le query concettuali ed è il rischio grave; sbagliare verso l'alto è solo spreco.
+
+Workflow proposta → conferma:
+
 ```powershell
-# proposta read-only
-python scripts/classify.py --file data/raw/incoming/frodo_intro.txt --title "Frodo Baggins" --domain tolkien
-# proposta + accoda per review
-python scripts/classify.py --file ... --title "..." --domain ... --enqueue
-python scripts/classify.py --review            # mostra la coda
-# l'umano edita review_queue.yaml (approved_level: L0|L1|L2|reject), poi:
-python scripts/classify.py --confirm           # ingesta gli approvati + active learning
+# 1. proposta read-only su un singolo documento
+python scripts/classify.py --file data/raw/incoming/tolkien/frodo_intro.txt --title "Frodo Baggins" --domain tolkien
+
+# 2. proposta + accodamento per review
+python scripts/classify.py --file <doc> --title "<t>" --domain <d> --enqueue
+
+# 3. esamina la coda delle proposte in attesa
+python scripts/classify.py --review
+
+# 4. l'umano edita data/classification/review_queue.yaml impostando, per ogni entry,
+#    approved_level: L0|L1|L2   (oppure 'reject' per scartare, null = lascia in attesa)
+
+# 5. esegue gli approvati: ingest al livello scelto + registra l'esempio (active learning)
+python scripts/classify.py --confirm
 ```
 
-Nel manifest del bulk ingest il campo `level` è ora **opzionale**: se omesso, il documento viene classificato. Gate (§6.1): regole deterministiche o L0/L1 ad alta confidence → ingest automatico; L2 o confidence bassa → coda di review umana (mai auto-ingest di un L2). Audit retroattivo:
+Nel **bulk ingest** la classificazione è automatica per i documenti senza `level` nel manifest: stesso gate (auto-ingest dei casi sicuri, accodamento del resto in `review_queue.yaml`).
+
+**Promozione retroattiva** — un documento ingestato come L0 può rivelarsi strategico (design §6.1). Un audit ri-classifica i documenti L0 e segnala i candidati; la promozione è poi eseguita esplicitamente dall'umano e **non duplica il raw immutabile**: riesegue solo gli step wiki del nuovo livello e aggiorna il solo metadato `level` (`promoted_from`/`promoted_at`).
 
 ```powershell
-python scripts/lint.py --audit-l0                          # ri-classifica i doc L0, segnala candidati promozione
-python scripts/classify.py --promote <doc_id> --level L2   # promozione retroattiva human-gated (visti i candidati)
+python scripts/lint.py --audit-l0                          # ri-classifica i doc L0, marca [PROMOTE] i candidati
+python scripts/classify.py --promote <doc_id> --level L2   # esegue la promozione (human-gated)
 ```
 
 ### Lint: health check e consolidazione duplicati
 
+`lint.py` raccoglie le operazioni di manutenzione della knowledge base (design §6.3), in tre modalità.
+
+**1. Health check** (default, read-only) — fotografia di integrità: conteggi (documenti raw, pagine wiki, vettori), dimensione del Hot Layer, pagine wiki senza sorgenti, pagine non presenti nell'index, riferimenti a sorgenti inesistenti.
+
 ```powershell
-python scripts/lint.py                          # health check read-only (default)
-python scripts/lint.py --detect-duplicates      # FASE 1: report cluster duplicati/alias (read-only)
-# rivedere data/lint/consolidation_report.yaml, mettere approved: true sui cluster giusti
-python scripts/lint.py --apply-consolidation    # FASE 2: applica i soli cluster approvati
+python scripts/lint.py
 ```
 
-La consolidazione (§6.3 del design) è **a due fasi con conferma umana**: detect produce un report YAML, l'umano approva, apply esegue i merge. Reversibile: la wiki è in git + `data/lint/applied_merges.jsonl` conserva lo snapshot integrale di ogni alias eliminato.
+**2. Consolidazione duplicati/alias** — crescendo, la wiki genera pagine ridondanti per la stessa entità (sinonimi, varianti, alias/persona). È **a due fasi con conferma umana** (l'output del lint non è mai automatico, design §6.3):
+
+- **DETECT** (read-only): similarità coseno tra pagine entità calcolata sui vettori già in ChromaDB (costo embedding nullo) → l'LLM giudica ogni coppia candidata distinguendo **duplicati** (`same_entity`/`alias_of` → da fondere) da **relazioni gerarchiche** (`subset_of` → NON si fondono, restano entità distinte: es. *Monte Fato* è *dentro* Mordor, non un suo duplicato). Scrive `data/lint/consolidation_report.yaml` coi cluster proposti, tutti `approved: false`. Filtro same-domain: mai merge cross-corpus.
+- **Triage umano**: si rivede il report e si mette `approved: true` solo sui cluster corretti (`canonical`/`aliases` editabili a mano).
+- **APPLY**: fonde i soli cluster approvati nel canonical, riscrive i link `[[alias]]→[[canonical]]` in tutte le pagine, elimina pagina e vettore dell'alias, ricostruisce il Hot Layer una volta. Reversibile: la wiki è in git e `data/lint/applied_merges.jsonl` conserva lo snapshot integrale (frontmatter + body) di ogni alias eliminato.
+
+```powershell
+python scripts/lint.py --detect-duplicates      # FASE 1 (read-only) → report YAML
+# rivedere data/lint/consolidation_report.yaml, approved: true sui cluster giusti
+python scripts/lint.py --apply-consolidation    # FASE 2 (distruttivo, solo cluster approvati)
+```
+
+**3. Audit L0** — ri-classifica i documenti L0 per individuare candidati alla promozione (vedi *Classificazione assistita*). Read-only: segnala, non promuove.
+
+```powershell
+python scripts/lint.py --audit-l0
+python scripts/lint.py --audit-l0 --sample 20   # campiona 20 doc L0 invece di tutti
+```
 
 ### Report consumo token
 
@@ -148,14 +196,21 @@ Le fasi tracciate:
 
 ```
 hybrid-wiki/
-├── src/          # moduli core
+├── src/                       # moduli core (ingest, query, lint, classifier, stores, ...)
 ├── data/
-│   ├── raw/      # documenti originali (immutabili)
-│   ├── wiki/     # pagine sintetizzate + HOT_LAYER.md
-│   └── vectors/  # ChromaDB (creato a runtime)
-├── schema/AGENTS.md          # contratto operativo dominio-agnostico (v0.2)
-├── scripts/      # CLI: ingest_doc, ingest_folder, ask, lint, tokens
-└── tests/        # eval_set.yaml (tolkien) + eval_set_crossdomain.yaml
+│   ├── raw/incoming/          # documenti sorgente per dominio (tolkien/, asimov/) + manifest
+│   ├── raw/                   # documenti originali ingestati (immutabili)
+│   ├── wiki/                  # pagine sintetizzate + HOT_LAYER.md
+│   ├── vectors/               # ChromaDB (creato a runtime)
+│   ├── lint/                  # consolidation_report.yaml + applied_merges.jsonl (audit)
+│   ├── classification/        # review_queue.yaml + examples.jsonl (active learning) + rules.yaml
+│   └── *_log.jsonl            # query_log, token_log (audit append-only)
+├── schema/AGENTS.md           # contratto operativo dominio-agnostico (v0.2)
+├── scripts/                   # CLI: ingest_doc, ingest_folder, ask, classify, lint, tokens
+└── tests/
+    ├── eval_set.yaml          # eval dominio singolo (tolkien)
+    ├── eval_set_crossdomain.yaml
+    └── results/               # report per-run: evalset_results_YYYYMMDD_HHMMSS.txt
 ```
 
 ## Note di funzionamento
@@ -169,6 +224,10 @@ hybrid-wiki/
 - **Stress tassonomia**: `psicostoria` e `fondazione` (corpus asimov) non rientrano nei `subtype` standard (character/place/artifact/event/book). La pipeline crea comunque la pagina entity con `subtype: ""` invece di forzare un tipo errato (vedi AGENTS.md, "Limite noto della tassonomia").
 - **Isolamento domini**: una pagina wiki che aggrega sorgenti di domini diversi assume `domain: _mixed`; il filtro `--domain X` include `X` + `_mixed`.
 
-## Roadmap successiva
+## Stato e roadmap
 
-Vedi sezione 10 (Roadmap di implementazione) di `../hybrid-wiki-rag-design.md`. Il prossimo passo è la fase di **Scaling**: access control, classificazione assistita, lint automatica, dependency graph.
+**Completati**: Walking Skeleton · correzioni dal pilot (design §11) · fase **Scaling** (design §12: inventario gerarchico, lint di consolidazione, classificazione assistita, promozione retroattiva).
+
+**Non ancora implementati** (design §7 e §10): access control multi-utente, sincronizzazione batch/near-real-time, synthesis pages + dependency graph, eval framework con scoring automatico, multimodal, ottimizzazione costi.
+
+Riferimento completo: `../hybrid-wiki-rag-design.md` (v2.2, §§11–12 per le correzioni validate sul pilot).

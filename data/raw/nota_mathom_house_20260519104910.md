@@ -2,11 +2,11 @@
 id: nota_mathom_house_20260519104910
 title: Nota Mathom-house
 source: lettera_routine.txt
-level: L1
+level: L0
 domain: tolkien
 ingested_at: '2026-05-19T10:49:10'
-promoted_from: L0
-promoted_at: '2026-05-19T12:13:58'
+promoted_from: L1
+promoted_at: '2026-05-19T14:12:14'
 ---
 
 Nota di servizio del Mathom-house di Michel Delving.

@@ -1,0 +1,342 @@
+# Eval set: tests/eval_set_crossdomain.yaml
+# Eseguito: 2026-05-19T14:29:57
+# Filtro dominio CLI: (nessuno)
+# Domande: 12
+
+======================================================================
+Q: Chi è il protagonista e qual è la sua missione?
+----------------------------------------------------------------------
+Il protagonista, nel contesto dei testi richiamati, è Frodo Baggins, un hobbit della Contea, erede di Bilbo e portatore dell’Anello Unico nel viaggio che lo conduce fino al Monte Fato in Mordor.[[frodo_baggins]]
+
+La sua missione è portare l’Anello Unico fino al Monte Fato, nel cuore di Mordor, per distruggerlo nel fuoco in cui è stato forgiato, così da eliminare il potere di Sauron. Questa missione viene formalizzata al Consiglio di Elrond, dove si decide di inviare una Compagnia a Mordor “con il compito di portare l’Anello a Mordor per distruggerlo”.[[council_of_elrond]] Frodo, accompagnato soprattutto da Samwise Gamgee, percorre questo viaggio attraverso Brea, Granburrone, Moria, Lothlórien e infine fino al Monte Fato.[[frodo_baggins_introduzione_20260518185126]] [[frodo_baggins_20260519105332]]
+----------------------------------------------------------------------
+Wiki sources : frodo_baggins, council_of_elrond
+Raw  sources : frodo_baggins_introduzione_20260518185126, frodo_baggins_20260519105332
+Confidence   : high
+Gaps         : La domanda è molto generica; si assume come riferimento Il Signore degli Anelli / la Guerra dell’Anello. Non sono trattati altri possibili protagonisti o missioni di opere diverse.
+======================================================================
+Atteso: Frodo (portatore dell'Anello) o Aragorn — mondo Tolkien. NON deve citare Hari Seldon.
+Sorgenti attese: ['frodo_baggins', 'aragorn']
+
+======================================================================
+Q: Chi è il protagonista e qual è la sua missione?
+----------------------------------------------------------------------
+Nel contesto dei risultati recuperati, il protagonista implicito della domanda è **Hari Seldon**.
+
+- **Chi è il protagonista:**  
+  Hari Seldon è un matematico originario di Helicon, padre della psicostoria e figura centrale del Ciclo della Fondazione. È ricordato come il più grande pianificatore della storia umana e come l’artefice del Piano Seldon, che struttura l’intera saga attorno alle sue previsioni e alle successive Crisi Seldon.[[hari_seldon]]
+
+- **Qual è la sua missione:**  
+  La sua missione è **ridurre il periodo di barbarie** che seguirà al previsto crollo dell’Impero Galattico, **da circa trentamila a circa mille anni**, tramite un grande progetto psicostorico (il Piano Seldon). Per realizzarlo, Seldon crea due Fondazioni agli estremi opposti della Galassia, con il compito di conservare e riorganizzare il sapere e il potere necessari alla nascita di un Secondo Impero Galattico entro mille anni dal crollo del primo.[[hari_seldon]][[seldon_plan]]
+----------------------------------------------------------------------
+Wiki sources : hari_seldon, seldon_plan
+Raw  sources : hari_seldon_20260518190004, la_fondazione_20260518190604, le_crisi_seldon_20260518190350
+Confidence   : high
+Gaps         : La domanda è molto generica e non specifica esplicitamente l’opera o il personaggio; l’identificazione di Hari Seldon come protagonista si basa sul fatto che i risultati di retrieval sono centrate sul Ciclo della Fondazione e sul Piano Seldon, ma altri personaggi potrebbero essere considerati protagonisti in singoli volumi.
+======================================================================
+Atteso: Hari Seldon, fondatore della psicostoria e del Piano Seldon. NON deve citare Frodo.
+Sorgenti attese: ['hari_seldon']
+
+======================================================================
+Q: Descrivi la capitale e il suo punto debole.
+----------------------------------------------------------------------
+Trantor è la capitale dell’Impero Galattico: un’ecumenopoli che ricopre l’intera superficie del pianeta, circa 190 milioni di km², sigillata sotto cupole metalliche. È situata il più vicino possibile al centro gravitazionale della Galassia e da lì amministra per oltre dodicimila anni un impero di venticinque milioni di pianeti abitati, con una popolazione di circa 40 miliardi di abitanti quasi tutti impiegati nella burocrazia imperiale.[[trantor_20260518190139]][[source_trantor_20260518190139]]
+
+Il suo punto debole strutturale è la totale dipendenza da mondi agricoli esterni: Trantor non è autosufficiente in campo alimentare e importa cibo da venti pianeti agricoli vicini. La rete logistica che garantisce questi rifornimenti è “enorme e fragile”; bloccarla significa condannare Trantor alla carestia. Proprio questa vulnerabilità logistica è indicata come il tallone d’Achille della capitale e dell’Impero stesso, elemento che Hari Seldon considera cruciale nelle sue previsioni psicostoriche sul crollo imperiale.[[trantor_20260518190139]][[l_impero_galattico_20260518190718]]
+----------------------------------------------------------------------
+Wiki sources : source_trantor_20260518190139, source_l_impero_galattico_20260518190718
+Raw  sources : trantor_20260518190139, l_impero_galattico_20260518190718
+Confidence   : high
+Gaps         : Nessuna contraddizione rilevata tra WIKI e RAW su capitale, estensione e punto debole di Trantor; non sono però dettagliate qui le modalità concrete con cui il blocco dei rifornimenti porta al crollo politico dell’Impero.
+======================================================================
+Atteso: Trantor, ecumenopoli, dipendente dall'import di cibo da 20 mondi agricoli.
+Sorgenti attese: ['trantor']
+
+======================================================================
+Q: Qual è la fortezza del nemico principale?
+----------------------------------------------------------------------
+Nel contesto della Guerra dell’Anello, il nemico principale è Sauron; la sua fortezza è Barad-dûr, la “Torre Oscura”, situata a nord‑ovest di Mordor, da cui amministra il suo regno e manifesta il suo potere come Occhio fiammeggiante.[[barad_dur]][[mordor_20260518185647]][[sauron_20260518185851]]
+----------------------------------------------------------------------
+Wiki sources : barad_dur
+Raw  sources : mordor_20260518185647, sauron_20260518185851
+Confidence   : high
+Gaps         : La domanda è molto generica; si assume il contesto del Signore degli Anelli e che il ‘nemico principale’ sia Sauron. Non sono trattati casi in cui il nemico principale fosse un altro (es. Morgoth in epoche precedenti).
+======================================================================
+Atteso: Barad-dûr a Mordor (Sauron). NON deve citare il Mulo.
+Sorgenti attese: ['mordor', 'sauron']
+
+======================================================================
+Q: Quanti abitanti ha Trantor al suo apice?
+----------------------------------------------------------------------
+Al suo apice, Trantor ha una popolazione compresa tra circa 40 e 45 miliardi di abitanti.
+
+Le fonti della knowledge base però non concordano sul valore preciso:
+
+- La voce dedicata a Trantor indica **circa 40 miliardi di abitanti** al culmine dello sviluppo del pianeta, quasi tutti impiegati nell’amministrazione imperiale [[trantor_20260518190139]][[trantor]].
+- La scheda sull’Impero Galattico parla invece di **circa 45 miliardi di persone** residenti su Trantor al culmine della potenza imperiale [[l_impero_galattico_20260518190718]].
+
+Si tratta di due documenti RAW di pari livello (nessuno è marcato come più recente o più autorevole per questo dato specifico), quindi il conflitto non è risolvibile in modo univoco. La risposta più corretta è quindi un intervallo indicativo: **decine di miliardi, intorno ai 40–45 miliardi di abitanti** al massimo splendore dell’Impero.
+----------------------------------------------------------------------
+Wiki sources : trantor
+Raw  sources : trantor_20260518190139, l_impero_galattico_20260518190718
+Confidence   : medium
+Gaps         : Le fonti RAW forniscono due stime diverse (40 vs 45 miliardi) per la popolazione massima di Trantor senza un criterio interno per stabilire quale sia prevalente; non è quindi possibile dare un singolo valore esatto, solo un intervallo approssimativo.
+======================================================================
+Atteso: Conflitto voluto: trantor.txt dice ~40 miliardi, impero_galattico.txt dice ~45 miliardi. Deve esplicitare entrambe.
+Sorgenti attese: ['trantor', 'impero_galattico']
+
+======================================================================
+Q: Cos'è la psicostoria e su quali assiomi si fonda?
+----------------------------------------------------------------------
+La psicostoria è una disciplina matematica immaginaria che permette di prevedere, in termini statistici, il comportamento di grandi masse di popolazione su scala galattica. È al centro del Ciclo della Fondazione di Isaac Asimov ed è la principale creazione scientifica di Hari Seldon, che la usa come base teorica per il Piano Seldon e per l’istituzione delle Fondazioni [[psychohistory]; [hari_seldon_20260518190004]; [la_psicostoria_20260518190534]].
+
+Integra storia, sociologia e matematica statistica, trasformando i processi storici in oggetti di previsione quantitativa: non cerca di predire le azioni di singoli individui, ma le tendenze aggregate di intere civiltà. L’analogia dichiarata è con la teoria cinetica dei gas: è impossibile seguire una singola molecola, ma è possibile descrivere con precisione il comportamento globale del gas [[la_psicostoria_20260518190534]].
+
+### Assiomi fondamentali
+
+Secondo le fonti, la psicostoria si fonda su due assiomi principali:
+
+1. **Ampiezza della popolazione**
+   - La popolazione oggetto di previsione deve essere “sufficientemente vasta”, idealmente l’intera Galassia: molti milioni di miliardi di esseri umani distribuiti su milioni di mondi abitati. Solo a questa scala le leggi statistiche diventano stabili e le previsioni psicostoriche risultano affidabili [[la_psicostoria_20260518190534]; [[psychohistory]] per la sintesi].
+
+2. **Ignoranza dei soggetti rispetto alle previsioni**
+   - La popolazione non deve essere consapevole dei risultati dell’analisi psicostorica, perché tale consapevolezza altererebbe i comportamenti e invaliderebbe le previsioni. Per questo i dettagli del Piano Seldon e delle funzioni di Seldon sono tenuti segreti e rivelati solo in forma retrospettiva, tramite le apparizioni olografiche nella Cripta del Tempo [[la_psicostoria_20260518190534]; [le_crisi_seldon_20260518190350]].
+
+Da questi assiomi discende un limite strutturale: la psicostoria assume una distribuzione “normale” degli individui e non contempla la comparsa di singoli soggetti anomali, con poteri o caratteristiche fuori scala. La figura del Mulo, mutante in grado di manipolare le emozioni di masse intere, rappresenta proprio la violazione di questa assunzione e manda fuori bersaglio le previsioni del Piano Seldon [[la_psicostoria_20260518190534]; [il_mulo_20260518190109]].
+
+Non risultano conflitti tra le fonti su definizione e assiomi: la voce enciclopedica e il documento tematico li presentano in modo coerente, con il RAW che fornisce i dettagli numerici e l’analogia fisica, e la pagina wiki che offre la sintesi concettuale [[psychohistory]; [la_psicostoria_20260518190534]].
+----------------------------------------------------------------------
+Wiki sources : psychohistory, source_hari_seldon_20260518190004, source_la_psicostoria_20260518190534, seldon_plan
+Raw  sources : hari_seldon_20260518190004, la_psicostoria_20260518190534, le_crisi_seldon_20260518190350, il_mulo_20260518190109
+Confidence   : high
+Gaps         : Nessuna lacuna rilevante sugli assiomi di base; eventuali ulteriori assiomi secondari o formalizzazioni matematiche dettagliate non sono presenti nel materiale attuale.
+======================================================================
+Atteso: Disciplina predittiva statistica; 2 assiomi (popolazione vasta; inconsapevolezza). Verificare come è stata classificata la pagina entity (subtype non standard).
+Sorgenti attese: ['psicostoria']
+
+======================================================================
+Q: Cos'è la Fondazione e qual è il suo vero scopo?
+----------------------------------------------------------------------
+La Fondazione è un organismo creato da Hari Seldon nell’ambito del Piano Seldon per gestire il crollo dell’Impero Galattico e ridurre il successivo periodo di barbarie da trentamila a mille anni.[[foundation]][[hari_seldon_20260518190004]]  
+
+### Che cos’è (facciata ufficiale)
+
+- **Natura**: un’istituzione scientifica insediata sul pianeta Terminus, ai margini della Galassia, nell’anno 12.069 dell’Era Galattica.[[foundation]][[la_fondazione_20260518190604]]  
+- **Scopo dichiarato**: compilare l’Enciclopedia Galattica, un’opera che dovrebbe raccogliere l’intero sapere dell’Impero per salvarlo dalla distruzione imminente.[[foundation]][[enciclopedia_galattica_20260518190510]]  
+- **Copertura politica**: questo progetto enciclopedico è ciò che Seldon presenta alle autorità imperiali per ottenere l’approvazione del trasferimento di centomila studiosi su Terminus.[[enciclopedia_galattica_20260518190510]]  
+
+In questa veste “ufficiale” la Fondazione appare come una comunità di eruditi che lavorano a un’impresa culturale neutrale.[[foundation]]  
+
+### Qual è il suo vero scopo
+
+Secondo la psicostoria di Seldon, l’Impero è destinato a crollare in pochi secoli, generando trentamila anni di caos prima della nascita di un Secondo Impero. Per abbreviare questo periodo di barbarie a circa mille anni, Seldon progetta il **Piano Seldon**, che prevede la creazione di due Fondazioni ai due estremi della Galassia.[[hari_seldon_20260518190004]]  
+
+In questo quadro, la (Prima) Fondazione ha tre funzioni fondamentali:
+
+1. **Preservare e concentrare il sapere scientifico e tecnico**  
+   La missione enciclopedica è solo un *pretesto*: la vera funzione è radunare scienziati e tecnologi su un mondo periferico, creando un nucleo compatto di competenze che sopravviva al collasso imperiale.[[la_fondazione_20260518190604]][[enciclopedia_galattica_20260518190510]]  
+
+2. **Guidare l’evoluzione politica della periferia galattica**  
+   Collocata su un pianeta povero di risorse e privo di forza militare, la Fondazione è “forzata” dalle Crisi Seldon a evolversi per fasi:
+   - fase **religioso‑tecnologica** (epoca dei Sindaci come Salvor Hardin), usando la scienza come religione per dominare i regni vicini;  
+   - fase **commerciale** (epoca dei Principi Mercanti come Hober Mallow), in cui il potere si esercita tramite commercio e ricatto economico.[[la_fondazione_20260518190604]][[le_crisi_seldon_20260518190350]]  
+
+   Le Crisi Seldon sono punti in cui le alternative storiche si restringono fino a una sola via d’uscita, già prevista dalla psicostoria: la Fondazione finisce così per muoversi lungo il percorso calcolato dal Piano senza conoscerne i dettagli.[[le_crisi_seldon_20260518190350]]  
+
+3. **Costituire il nucleo del Secondo Impero Galattico**  
+   Nella visione di Seldon, la Fondazione deve diventare la potenza dominante della periferia e, alla lunga, il seme da cui sorgerà il Secondo Impero Galattico entro mille anni dal crollo del primo.[[foundation]][[la_fondazione_20260518190604]]  
+
+### Il “vero centro” nascosto: la Seconda Fondazione
+
+Il progetto complessivo di Seldon non si esaurisce nella Fondazione visibile su Terminus. Esiste una **Seconda Fondazione**, nascosta su Trantor, indicata cripticamente come “Star’s End”.[[trantor_20260518190139]][[second_foundation]]  
+
+- La Prima Fondazione è il **braccio operativo e tecnologico** del Piano.  
+- La Seconda Fondazione è il **centro segreto di controllo psicostorico**, incaricato di correggere deviazioni gravi (come la minaccia del Mulo) e riportare il Piano sui binari previsti.[[la_fondazione_20260518190604]][[second_foundation]]  
+
+In questo senso, il “vero scopo” della Fondazione di Terminus è duplice: svolgere il ruolo di nucleo del futuro Secondo Impero e, al tempo stesso, essere uno strumento all’interno di un disegno più ampio governato dalla psicostoria e sorvegliato dalla Seconda Fondazione.[[foundation]][[hari_seldon_20260518190004]][[second_foundation]]
+----------------------------------------------------------------------
+Wiki sources : foundation, first_foundation, second_foundation, source_la_fondazione_20260518190604
+Raw  sources : la_fondazione_20260518190604, enciclopedia_galattica_20260518190510, hari_seldon_20260518190004, le_crisi_seldon_20260518190350, trantor_20260518190139
+Confidence   : high
+Gaps         : Non sono elencate nel dettaglio tutte le singole fasi storiche e politiche attraversate dalla Fondazione né l’intera cronologia delle Crisi Seldon; per questi aspetti servirebbero ulteriori sorgenti raw o pagine dedicate.
+======================================================================
+Atteso: Organizzazione su Terminus; pretesto enciclopedia, scopo reale psicostorico. Entità senza subtype standard.
+Sorgenti attese: ['fondazione', 'terminus']
+
+======================================================================
+Q: Chi è il protagonista e qual è la sua missione?
+----------------------------------------------------------------------
+Nel contesto del **Ciclo della Fondazione** (dominio *asimov*), i dati retrieved parlano di **Hari Seldon** e del **Piano Seldon**, non di un singolo romanzo specifico; la risposta quindi vale per questo corpus soltanto, e altri corpora potrebbero avere protagonisti/missioni diverse.
+
+### Protagonista
+
+Il protagonista concettuale è **Hari Seldon**: matematico originario di Helicon, fondatore della psicostoria e figura centrale dell’intera saga della Fondazione.[[hari_seldon]]  
+È descritto come “il più grande pianificatore della storia umana” e personaggio cardine attorno a cui ruota la costruzione del Piano Seldon.[[hari_seldon]]
+
+### Missione
+
+La sua missione è la progettazione e realizzazione del **Piano Seldon**:
+
+- Prevede il **crollo inevitabile dell’Impero Galattico** tramite la psicostoria.[[hari_seldon]]
+- Concepisce il **Piano Seldon** per ridurre il periodo di barbarie dopo il crollo da **trentamila a mille anni**, creando le condizioni per un **Secondo Impero Galattico**.[[seldon_plan]]
+- Per attuare il piano, fonda **due Fondazioni** ai margini opposti della Galassia, con la Prima Fondazione su Terminus come nucleo visibile del futuro Impero.[[seldon_plan; la_fondazione_20260518190604]]
+
+In sintesi: Hari Seldon è il protagonista, e la sua missione è usare la psicostoria per guidare l’umanità attraverso il collasso dell’Impero e ridurre al minimo l’era di caos, gettando le basi di un nuovo Impero galattico.[[hari_seldon; seldon_plan]]
+----------------------------------------------------------------------
+Wiki sources : hari_seldon, seldon_plan
+Raw  sources : hari_seldon_20260518190004, la_fondazione_20260518190604
+Confidence   : medium
+Gaps         : La domanda non specifica esplicitamente a quale libro o opera si riferisca; la risposta è stata data assumendo il dominio 'asimov' e il focus sulla saga della Fondazione nel suo complesso. Altri corpora (es. 'tolkien') potrebbero avere protagonisti e missioni diversi.
+======================================================================
+Atteso: Senza scope il retrieval mescola Tolkien e Asimov. Atteso: confidence medium/low e/o risposta che distingue i due mondi. Si OSSERVA il grado di contaminazione.
+Sorgenti attese: []
+
+======================================================================
+Q: Chi guida la lotta contro il male nascosto?
+----------------------------------------------------------------------
+Nel materiale disponibile, l’espressione “male nascosto” può riferirsi a:
+
+---
+
+### Dominio Tolkien
+
+Nel legendarium tolkieniano il “male nascosto” è rappresentato soprattutto da Sauron, che per gran parte della Seconda e Terza Era agisce indirettamente tramite l’Anello Unico, i Nazgûl e i suoi servi, più come presenza occulta che come avversario apertamente visibile. [[sauron]] [[sauron_20260518185851]]
+
+A guidare la lotta contro questo male, nei passi accessibili del corpus, è l’alleanza dei “popoli liberi” della Terra di Mezzo, organizzata in momenti decisivi come il Consiglio di Elrond, convocato proprio per decidere come affrontare la minaccia di Sauron e dell’Anello: il Consiglio è presieduto da Elrond Mezzelfo, che ne guida i lavori e istituisce la Compagnia dell’Anello incaricata di portare l’Anello a Mordor per distruggerlo. [[council_of_elrond]]  
+Nel frammento presente, la figura di “guida della lotta” contro Sauron emerge quindi in forma collegiale (Consiglio + Compagnia), con Elrond come guida del Consiglio, più che in un singolo campione nominato esplicitamente. [[council_of_elrond]]
+
+---
+
+### Dominio Asimov
+
+Nel ciclo della Fondazione, il “male nascosto” può essere associato al Mulo: un mutante umano, fisicamente debole e di origini oscure, che grazie ai suoi poteri psichici conquista in pochi anni una vasta porzione della Galassia, inclusa la Fondazione, sfruttando un vantaggio invisibile (la manipolazione delle emozioni) che la psicostoria non può prevedere. [[the_mule]] [[il_mulo_20260518190109]]  
+
+La lotta contro questa minaccia anomala è guidata, secondo i frammenti disponibili, dalla Seconda Fondazione, “all’altro estremo della Galassia”, che interviene per riportare il Piano Seldon sui suoi binari dopo che il Mulo ha messo seriamente in crisi il progetto. La Seconda Fondazione è descritta come l’istanza che corregge la deviazione causata dal Mulo, più che come un singolo individuo. [[la_fondazione_20260518190604]] [[le_crisi_seldon_20260518190350]]
+
+---
+
+In sintesi:  
+- Nel corpus tolkieniano la lotta contro il male (Sauron) è guidata collegialmente dal Consiglio di Elrond e dalla Compagnia dell’Anello, con Elrond come figura di presidenza del Consiglio. [[council_of_elrond]] [[sauron]]  
+- Nel corpus asimoviano la lotta contro il “male nascosto” rappresentato dal Mulo è guidata dalla Seconda Fondazione, che agisce per correggere il Piano Seldon e fermare l’anomalia. [[the_mule]] [[la_fondazione_20260518190604]]
+----------------------------------------------------------------------
+Wiki sources : sauron, the_mule, council_of_elrond, source_sauron_20260518185851
+Raw  sources : sauron_20260518185851, il_mulo_20260518190109, le_crisi_seldon_20260518190350, la_fondazione_20260518190604
+Confidence   : medium
+Gaps         : La domanda è molto generica e non specifica il dominio (Tolkien o Asimov) né l’espressione esatta “male nascosto” in un contesto testuale; l’identificazione del riferimento (Sauron, il Mulo) è quindi interpretativa. Il corpus non fornisce ancora una pagina dedicata alla Seconda Fondazione né una sintesi centrata sui singoli leader della lotta contro il Mulo, perciò la risposta resta a livello di organizzazioni (Consiglio/Compagnia, Seconda Fondazione) più che di singole figure personali.
+======================================================================
+Atteso: Domanda ambigua cross-mondo (Gandalf vs Seconda Fondazione). Si osserva se il sistema confonde i domini.
+Sorgenti attese: []
+
+======================================================================
+Q: Confronta il ruolo di Hari Seldon con quello di Gandalf come figure-guida.
+----------------------------------------------------------------------
+Hari Seldon e Gandalf sono entrambi figure‑guida centrali, ma incarnano due modelli quasi opposti di guida: uno razionale‑sistemico, l’altro personale‑carismatico. La risposta si basa su due domini distinti (Asimov, Tolkien) e non copre eventuali altre opere.
+
+---
+
+## Asimov — Hari Seldon come guida “a distanza” e sistemica
+
+- **Posizione**: Seldon è un matematico, fondatore della psicostoria e ideatore del Piano Seldon, pensato per abbreviare i 30.000 anni di barbarie dopo il crollo dell’Impero Galattico a circa 1.000 anni tramite la creazione di due Fondazioni ai margini della Galassia.[[hari_seldon]] [[hari_seldon_20260518190004]]
+- **Tipo di guida**:
+  - Guida **indiretta e postuma**: muore nell’anno 12.069 E.G., poco dopo l’insediamento della Fondazione su Terminus, ma continua a “guidare” attraverso le registrazioni olografiche che compaiono nella Cripta del Tempo durante le Crisi Seldon.[[hari_seldon_20260518190004]] [[le_crisi_seldon_20260518190350]]
+  - La guida è mediata da una **teoria scientifica** (psicostoria) che determina, su scala di masse, quale soluzione storica sia praticamente inevitabile; nelle crisi, “le scelte disponibili si riducono progressivamente fino a una sola via d’uscita possibile: quella già prevista dalla psicostoria di Hari Seldon”.[[le_crisi_seldon_20260518190350]]
+- **Libertà e conoscenza**:
+  - I protagonisti agiscono “credendo di scegliere”, ma sono spinti da forze sociali ed economiche verso l’esito previsto.[[le_crisi_seldon_20260518190350]]
+  - Seldon insiste che la popolazione **non deve conoscere i dettagli del Piano** per non alterarne le condizioni statistiche.[[le_crisi_seldon_20260518190350]]
+- **Limite della guida**:
+  - L’imprevedibilità individuale (es. il Mulo) è il punto debole del Piano: quando il Mulo interviene, il messaggio di Seldon risulta fuori bersaglio, mostrando che la guida funziona solo finché valgono gli assiomi statistici.[[hari_seldon_20260518190004]] [[le_crisi_seldon_20260518190350]]
+
+In sintesi: Seldon è una guida‑progettista di sistemi, che agisce quasi solo tramite il Piano, la Cripta e l’autorità del suo nome.
+
+---
+
+## Tolkien — Gandalf come guida incarnata e relazionale
+
+- **Posizione**: Gandalf è uno dei cinque Istari, Maia inviato nella Terra di Mezzo per contrastare Sauron; dopo la sua caduta a Moria e lo scontro col Balrog ritorna come Gandalf il Bianco, capo del nuovo ordine dei Saggi al posto di Saruman.[[gandalf]] [[gandalf_introduzione_20260518185232]]
+- **Tipo di guida**:
+  - Guida **presente e itinerante**: è fisicamente accanto ai personaggi chiave (Bilbo, Frodo, la Compagnia), li accompagna, sprona e rimprovera.[[gandalf_introduzione_20260518185232]]
+  - Organizza la spedizione di Erebor, identifica l’anello di Bilbo come Anello Unico, mette in moto il viaggio di Frodo e lo guida fino a Brea e al Consiglio di Elrond.[[gandalf_introduzione_20260518185232]]
+- **Libertà e conoscenza**:
+  - Gandalf consiglia e orienta, ma **non impone**: lascia a Bilbo e a Frodo la responsabilità delle decisioni cruciali; la sua guida è morale e esistenziale, non deterministica.
+  - Non esiste un Piano unico e vincolante come quello di Seldon: Gandalf interpreta i segni, coordina le alleanze, ma il futuro resta aperto e rischioso (la sua stessa morte e trasformazione, l’esito della guerra contro Sauron).[[gandalf_introduzione_20260518185232]]
+- **Ambito della guida**:
+  - È una guida **personale e carismatica**: ispira fiducia, coraggio e speranza, soprattutto negli umili.
+  - Pur essendo potentissimo, opera in modo limitato e collaborativo, coerente col mandato degli Istari.
+
+In sintesi: Gandalf è una guida incarnata e relazionale, che fa crescere e responsabilizza gli altri più che determinare in anticipo gli esiti.
+
+---
+
+## Confronto sintetico
+
+- **Scala**: Seldon opera su scala galattica e secolare; Gandalf su scala locale e personale.
+- **Strumento**: Seldon guida tramite psicostoria e istituzioni (Fondazioni, Cripta del Tempo); Gandalf tramite saggezza, persuasione, presenza e sacrificio.
+- **Temporalità**: Seldon progetta il futuro da lontano e guida soprattutto da morto; Gandalf agisce nel presente, anche al costo di morire e tornare trasformato.[[hari_seldon_20260518190004]] [[gandalf_introduzione_20260518185232]]
+- **Immagine di libertà**: per Seldon la libertà individuale è un fattore di rumore da controllare; per Gandalf è il centro della storia, da proteggere e coltivare.
+----------------------------------------------------------------------
+Wiki sources : hari_seldon, gandalf, source_hari_seldon_20260518190004, source_gandalf_introduzione_20260518185232
+Raw  sources : hari_seldon_20260518190004, le_crisi_seldon_20260518190350, gandalf_introduzione_20260518185232
+Confidence   : medium
+Gaps         : La risposta copre solo i due corpora presenti (Ciclo della Fondazione e legendarium tolkieniano). Ulteriori sfumature sul ruolo di Gandalf in altre opere di Tolkien o su interpretazioni critiche di Hari Seldon non sono incluse nel corpus attuale.
+======================================================================
+Atteso: Domanda comparativa esplicita. Lo skeleton NON ha synthesis pages: atteso un tentativo di sintesi con confidence bassa o gap segnalato — è il segnale che servono synthesis (fase Scaling).
+Sorgenti attese: ['hari_seldon', 'gandalf']
+
+======================================================================
+Q: Qual è il punto debole della previsione/del piano?
+----------------------------------------------------------------------
+Il punto debole è strutturale e ha due facce, legate agli stessi assiomi della psicostoria e del Piano Seldon.
+
+1. **L’imprevedibilità dell’individuo (soprattutto se “fuori scala”)**  
+   - La psicostoria “non può prevedere le azioni di un individuo specifico, ma può prevedere con accuratezza le tendenze di intere civiltà” [[la_psicostoria_20260518190534]].  
+   - Essa assume una distribuzione “normale” degli individui e **non contempla variabili eccezionali e irripetibili** [[la_psicostoria_20260518190534]].  
+   - Il Mulo incarna questo punto cieco: un singolo mutante con poteri mentali unici che altera le emozioni delle masse e **non era previsto dalle equazioni**, mettendo in crisi sia la psicostoria sia il Piano Seldon [[la_psicostoria_20260518190534; il_mulo_20260518190109]].  
+   - Una registrazione di Seldon nella Cripta risulta “completamente fuori bersaglio” durante una crisi dominata dal Mulo, proprio perché **l’evento individuale eccezionale non rientrava nel modello** [[le_crisi_seldon_20260518190350; il_mulo_20260518190109]].
+
+   Questo è sintetizzato anche così: “la storia delle masse è prevedibile, quella dei singoli individui no — ed è proprio l’imprevedibilità individuale a costituire il punto debole del suo Piano” [[hari_seldon_20260518190004]].
+
+2. **La necessità che la popolazione resti ignara del Piano**  
+   - Tra gli assiomi di base: “la popolazione non deve essere consapevole dei risultati dell’analisi psicostorica, perché tale consapevolezza altererebbe i comportamenti e invaliderebbe le previsioni. Per questo i dettagli del Piano Seldon sono tenuti segreti” [[la_psicostoria_20260518190534]].  
+   - Il meccanismo delle Crisi Seldon funziona proprio perché i protagonisti “agiscono credendo di scegliere, mentre la psicostoria aveva già calcolato l’esito” [[le_crisi_seldon_20260518190350]].  
+
+   Se le masse (o un numero sufficiente di attori politici chiave) conoscessero il Piano in dettaglio, potrebbero deviarne consapevolmente, **invalidando le previsioni**.
+
+In sintesi: il Piano Seldon è potente finché si applica a grandi masse ignare e statisticamente “normali”. Il suo punto debole principale sono gli **individui eccezionali e consapevoli**, capaci di modificare in modo non modellabile il comportamento collettivo: il Mulo è l’esempio paradigmatico di questa vulnerabilità [[la_psicostoria_20260518190534; le_crisi_seldon_20260518190350; il_mulo_20260518190109; hari_seldon_20260518190004]].
+----------------------------------------------------------------------
+Wiki sources : psychohistory, seldon_plan, source_la_psicostoria_20260518190534, source_le_crisi_seldon_20260518190350
+Raw  sources : la_psicostoria_20260518190534, le_crisi_seldon_20260518190350, il_mulo_20260518190109, hari_seldon_20260518190004
+Confidence   : high
+Gaps         : Nessun conflitto rilevato nelle fonti sulla natura del punto debole del Piano/psicostoria; eventuali ulteriori limiti (es. quelli logistici o politici interni alla Fondazione) non sono trattati nei frammenti disponibili.
+======================================================================
+Atteso: Il Mulo: mutante individuale non previsto dalla psicostoria (assunzione statistica).
+Sorgenti attese: ['il_mulo', 'psicostoria']
+
+======================================================================
+Q: Cosa c'è scritto sull'oggetto del potere?
+----------------------------------------------------------------------
+Sull’Anello del Potere (l’Anello Unico) è incisa, in lingua nera di Mordor, la formula del Signore Oscuro:
+
+> «Ash nazg durbatulûk, ash nazg gimbatul,  
+> ash nazg thrakatulûk, agh burzum-ishi krimpatul»  
+>  
+> che viene tradotta come:  
+> «Un Anello per domarli, un Anello per trovarli,  
+> un Anello per ghermirli e nel buio incatenarli». [[anello_unico_20260518185429]]
+
+Le parole sono incise in “fuoco invisibile” sull’Anello e diventano leggibili solo quando l’Anello viene riscaldato sul fuoco. [[anello_unico_20260518185429]] [[source_anello_unico_20260518185429]]
+----------------------------------------------------------------------
+Wiki sources : one_ring, rings_of_power, source_anello_unico_20260518185429
+Raw  sources : anello_unico_20260518185429
+Confidence   : high
+======================================================================
+Atteso: Iscrizione in lingua nera sull'Anello Unico. Dominio Tolkien, nessuna interferenza Asimov.
+Sorgenti attese: ['anello_unico', 'one_ring']
+
+
+=== TOKEN USAGE (sessione corrente) ===
+phase                               op         calls   prompt   compl.    total
+--------------------------------------------------------------------------------
+query:llm_synthesis                 chat          12    97177    14819   111996
+query:embedding                     embedding     12      173        0      173
+--------------------------------------------------------------------------------
+TOTAL                                             24    97350    14819   112169
