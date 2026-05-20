@@ -1,0 +1,45 @@
+# Manifest del corpus Rowling — Ciclo di Harry Potter.
+# Terzo dominio per i test cross-domain.
+#
+# Lanciare con:
+#   python scripts/ingest_folder.py --manifest data/raw/incoming/rowling/manifest_rowling.yaml
+#
+# I path di `file` sono relativi alla dir di questo manifest.
+#
+# NOTE PER IL TEST DI CLASSIFICAZIONE ASSISTITA:
+# - Alcuni documenti sono volutamente SENZA il campo `level`: la pipeline
+#   deve proporre il livello tramite LLM e applicare il gate asimmetrico
+#   (L0/L1 high-conf → ingest auto; L2 o low-conf → coda review umana).
+# - I documenti senza level sono: harry_potter, albus_dumbledore, horcrux,
+#   neville_longbottom, severus_piton.
+#   Ci aspettiamo che i primi 4 character/concept finiscano in coda L2,
+#   mentre neville è limite L1/L2 (test borderline).
+#
+# NOTE PER IL TEST DI CONFLICT RESOLUTION:
+# - Contraddizione voluta sulla data di fondazione di Hogwarts:
+#   hogwarts.txt → "intorno all'anno 990 d.C."
+#   neville_longbottom.txt → "fondata nel 993 d.C."
+#   (riflette ambiguità canonica nei testi di Rowling).
+
+defaults:
+  domain: rowling
+  # NB: nessun `level` nei defaults: i documenti senza level esplicito
+  # devono passare per la classificazione assistita (LLM propone + gate
+  # asimmetrico). Se mettiamo level: L1 qui, tutti gli entry senza level
+  # ereditano L1 e il classificatore non viene mai chiamato.
+
+documents:
+  # --- doc con livello esplicito ---
+  - { file: hermione_granger.txt,        title: "Hermione Granger",                level: L2, subtype: character }
+  - { file: voldemort.txt,               title: "Lord Voldemort",                  level: L2, subtype: character }
+  - { file: hogwarts.txt,                title: "Hogwarts",                        level: L2, subtype: place }
+  - { file: prima_caduta_voldemort.txt,  title: "La Prima Caduta di Voldemort",    level: L2, subtype: event }
+  - { file: ron_weasley.txt,             title: "Ron Weasley",                     level: L1 }
+  - { file: avviso_ministero.txt,        title: "Circolare Ministero 147-B",       level: L0 }
+
+  # --- doc SENZA livello: passano per la classificazione assistita ---
+  - { file: harry_potter.txt,            title: "Harry Potter" }
+  - { file: albus_dumbledore.txt,        title: "Albus Silente" }
+  - { file: horcrux.txt,                 title: "Horcrux" }
+  - { file: neville_longbottom.txt,      title: "Neville Paciock" }
+  - { file: severus_piton.txt,           title: "Severus Piton" }

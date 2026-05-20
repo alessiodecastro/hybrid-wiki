@@ -1,5 +1,5 @@
-generated_at: '2026-05-19T09:45:11'
-entity_pages_scanned: 43
+generated_at: '2026-05-20T13:30:30'
+entity_pages_scanned: 65
 params:
   min_cosine: 0.75
   neighbors_k: 6
@@ -7,105 +7,91 @@ instructions: 'PROPOSALS = duplicati (same_entity/alias_of): mettere ''approved:
   SOLO sui cluster corretti, poi python scripts/lint.py --apply-consolidation. HIERARCHY_SUGGESTIONS
   = relazioni gerarchiche (subset_of): SOLO informative, NON vengono mai applicate;
   sono spunti per link nel grafo, le entità restano distinte.'
-proposals:
-- domain: asimov
-  canonical: first_foundation
-  aliases:
-  - foundation
-  relations:
-  - same_entity
-  confidence: high
-  rationale: Entrambe descrivono l’organizzazione fondata da Hari Seldon su Terminus
-    nell’ambito del Piano Seldon; la pagina B usa il nome più generico ma il contenuto
-    è specifico della Prima Fondazione, quindi va
-  approved: false
-- domain: tolkien
-  canonical: sauron
-  aliases:
-  - annatar
-  relations:
-  - alias_of
-  confidence: high
-  rationale: Annatar è esplicitamente descritto come un’identità/forma assunta da
-    Sauron, non come personaggio distinto.
-  approved: true
+proposals: []
 hierarchy_suggestions:
+- part: horcruxes_of_lord_voldemort
+  container: horcrux
+  confidence: high
+  rationale: La pagina sugli Horcrux di Lord Voldemort descrive il sottoinsieme specifico
+    degli Horcrux creati da Voldemort, mentre la pagina Horcrux tratta il concetto
+    generale di Horcrux.
+- part: first_foundation
+  container: foundation
+  confidence: high
+  rationale: La pagina 'first_foundation' tratta specificamente la Prima Fondazione
+    insediata su Terminus, mentre 'foundation' descrive il progetto/Fondazione nel
+    suo complesso, includendo la Prima Fondazione come
 - part: fellowship_of_the_ring
   container: council_of_elrond
   confidence: high
   rationale: La Compagnia dell’Anello è un risultato/parte specifica del Consiglio
-    di Elrond, che è l’evento principale in cui viene istituita.
-- part: foundation
+    di Elrond, che è l’evento più ampio in cui viene istituita.
+- part: seldon_crises
   container: seldon_plan
   confidence: high
-  rationale: 'La Fondazione è l’organizzazione creata e utilizzata all’interno del
-    più ampio Piano Seldon, che comprende anche altre componenti (come le due Fondazioni
-    e le Crisi Seldon), quindi è un sotto-aspetto '
-- part: time_vault
-  container: seldon_crises
+  rationale: 'Le Crisi Seldon sono una serie di eventi discreti e previsti all’interno
+    del Piano Seldon, che è il progetto psicostorico complessivo: le crisi costituiscono
+    una parte strutturale ma non esaustiva del'
+- part: terminus
+  container: first_foundation
   confidence: high
-  rationale: La Cripta del Tempo è l’artefatto che contiene i messaggi legati alle
-    Crisi Seldon, che sono una serie di eventi storici più ampi previsti dal Piano
-    Seldon.
+  rationale: La Prima Fondazione è un’organizzazione, mentre Terminus è il pianeta
+    che la ospita; il luogo è contenitore spaziale ma non un aspetto/parteen tegrante
+    dell’organizzazione, quindi le entità restano di
 - part: stars_end
   container: second_foundation
   confidence: high
-  rationale: Star's End è la specifica localizzazione su Trantor dove si trova il
-    vero centro della Seconda Fondazione, che è l’organizzazione più ampia legata
-    a quel luogo.
+  rationale: Star's End è definito esplicitamente come il luogo fisico del centro
+    della Seconda Fondazione su Trantor, quindi è una localizzazione interna a un’organizzazione
+    più ampia.
 - part: trantor
   container: galactic_empire
   confidence: high
-  rationale: Trantor è il pianeta-capitale, quindi un singolo luogo all’interno dell’entità
-    politica più ampia rappresentata dall’Impero Galattico.
+  rationale: Trantor è il pianeta-capitale ed è esplicitamente descritto come centro
+    amministrativo interno all’Impero Galattico, che è l’entità politico-territoriale
+    più ampia.
 - part: seldon_plan
   container: hari_seldon
   confidence: high
-  rationale: Il Piano Seldon è il progetto psicostorico concepito da Hari Seldon,
-    quindi è un aspetto/creazione interna alla biografia del personaggio, non la stessa
-    entità né un alias.
-- part: second_foundation
-  container: foundation
-  confidence: high
-  rationale: La Seconda Fondazione è esplicitamente descritta come un centro segreto
-    distinto ma interno al più ampio progetto della Fondazione di Seldon, quindi è
-    una parte/ramo specifico dell’organizzazione gene
+  rationale: Il Piano Seldon è il progetto psicostorico ideato da Hari Seldon e rappresenta
+    un aspetto/creazione centrale ma parziale rispetto alla figura del personaggio.
 - part: second_foundation
   container: trantor
   confidence: high
-  rationale: 'La Seconda Fondazione è un’organizzazione segreta insediata su Trantor
-    dopo il Grande Sacco, mentre Trantor è il pianeta-capitale: la prima è localizzata
-    come parte/insediamento sul secondo, non sono '
+  rationale: 'La Seconda Fondazione è un’organizzazione segreta avente sede su Trantor,
+    che è il pianeta-capitale: l’organizzazione è quindi un aspetto/sotto-entità localizzato
+    nel luogo più ampio.'
 - part: time_vault
   container: first_foundation
   confidence: high
-  rationale: La Cripta del Tempo è un singolo artefatto situato su Terminus e usato
-    dalla Prima Fondazione, che è un’organizzazione molto più ampia e comprensiva
-    di cui la Cripta costituisce solo un elemento.
+  rationale: La Cripta del Tempo è un artefatto specifico situato a Terminus e destinato
+    alla Prima Fondazione, che è un’organizzazione molto più ampia di cui la Cripta
+    costituisce solo un elemento funzionale.
 - part: stars_end
   container: trantor
   confidence: high
-  rationale: Star's End è esplicitamente descritto come una specifica localizzazione
-    su Trantor (area delle rovine della Biblioteca Galattica), mentre Trantor è l’intero
-    pianeta.
+  rationale: Star's End è esplicitamente definito come una specifica localizzazione
+    sul pianeta Trantor (tra le rovine della Biblioteca Galattica), quindi un luogo
+    contenuto all’interno di Trantor e non coincident
 - part: time_vault
   container: seldon_plan
   confidence: high
-  rationale: La Cripta del Tempo è un artefatto specifico su Terminus usato per comunicare
-    e confermare le tappe del Piano Seldon, che è il progetto psicostorico complessivo;
-    quindi la cripta è un elemento interno
-- part: mount_doom
-  container: mordor
-  confidence: high
-  rationale: Mount Doom/Orodruin è il vulcano situato al centro della regione di Mordor,
-    quindi è un luogo contenuto all’interno dell’altro e non la stessa entità.
-- part: nurn
-  container: mordor
-  confidence: high
-  rationale: Núrn è esplicitamente descritta come la regione meridionale e più fertile
-    all’interno di Mordor, che è l’intera regione/regno di Sauron.
+  rationale: 'La Cripta del Tempo è un artefatto specifico su Terminus che serve a
+    comunicare l’andamento del Piano Seldon, mentre il Piano Seldon è il progetto
+    psicostorico complessivo: la cripta è quindi un aspet'
 - part: one_ring
   container: rings_of_power
   confidence: high
-  rationale: L’Anello Unico è uno specifico Anello del Potere, mentre la pagina sugli
-    Anelli del Potere descrive l’intera categoria che lo include.
+  rationale: L’Anello Unico è esplicitamente descritto come uno degli Anelli del Potere,
+    creato per dominarli tutti, quindi è un elemento specifico all’interno della categoria
+    più ampia degli Anelli del Potere.
+- part: mount_doom
+  container: mordor
+  confidence: high
+  rationale: Mount Doom (Orodruin) è il vulcano situato al centro della regione di
+    Mordor, quindi è un luogo interno e parte di Mordor, non la stessa entità.
+- part: nurn
+  container: mordor
+  confidence: high
+  rationale: Núrn è esplicitamente descritta come la regione meridionale e fertile
+    all’interno di Mordor, che è il territorio più ampio che la contiene.

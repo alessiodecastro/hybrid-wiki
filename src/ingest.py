@@ -23,8 +23,10 @@ import re
 from datetime import datetime, date
 from pathlib import Path
 
+from openai import BadRequestError
+
 from .config import (
-    AGENTS_MD_PATH, CHUNK_SIZE_WORDS, CHUNK_OVERLAP_WORDS,
+    AGENTS_MD_PATH, CHUNK_SIZE_WORDS, CHUNK_OVERLAP_WORDS, DATA_DIR,
     RAW_COLLECTION, WIKI_COLLECTION, VALID_LEVELS, VALID_SUBTYPES, TOKEN_LOG_PATH,
     DEFAULT_DOMAIN, MIXED_DOMAIN, ENTITY_INVENTORY_CAP, ENTITY_SHORTLIST_K,
 )
@@ -33,6 +35,43 @@ from .embeddings import Embedder
 from .llm_client import LLMClient
 from .hot_layer import HotLayer
 from .token_tracker import TokenTracker
+
+
+# Log degli skip causati dal content filter Azure. Append-only: serve come
+# audit trail di "cosa NON è stato integrato e perchè", così le entità
+# saltate sono recuperabili (es. con un retry futuro su prompt ridotti).
+CONTENT_FILTER_SKIPS_PATH = DATA_DIR / "content_filter_skips.jsonl"
+
+
+def _is_content_filter(exc: BadRequestError) -> bool:
+    """True se l'eccezione OpenAI deriva dal content management policy
+    (status 400 + code 'content_filter'). Distinto da altri 400 (es.
+    payload malformato), che vanno comunque sollevati."""
+    try:
+        body = getattr(exc, "body", None) or {}
+        return (body.get("error") or {}).get("code") == "content_filter"
+    except Exception:
+        return False
+
+
+def _log_content_filter_skip(doc_id: str, page_id: str, title: str, domain: str, op: str) -> None:
+    """Append idempotente di un record di skip nel log. Non solleva: se
+    fallisce la scrittura, l'ingest deve comunque proseguire."""
+    record = {
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "doc_id": doc_id,
+        "page_id": page_id,
+        "title": title,
+        "domain": domain,
+        "operation": op,
+        "reason": "azure_content_filter",
+    }
+    try:
+        CONTENT_FILTER_SKIPS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with CONTENT_FILTER_SKIPS_PATH.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception:
+        pass
 
 
 # Regex per generare slug "stile filesystem" da titoli liberi. Tutto
@@ -640,20 +679,41 @@ class IngestPipeline:
             # Branch principale: creazione vs merge. Cambia il prompt
             # e quindi la natura (e il costo) della chiamata LLM:
             # il merge include la pagina esistente in input, è più caro.
-            if self.wiki.exists(page_id):
-                with self.tracker.phase("ingest:l2:entity_merge"):
-                    merged = self._merge_entity_page(page_id, doc_id, title, body, domain)
-                # Dominio della pagina aggiornato: se il nuovo dominio
-                # differisce dal corrente, segna la pagina come "_mixed"
-                # (sorgenti multi-dominio). Permette al filtro query-time
-                # di scegliere se includerla.
-                existing_fm, _ = self.wiki.get(page_id)
-                current_domain = existing_fm.get("domain", DEFAULT_DOMAIN)
-                page_domain = current_domain if current_domain == domain else MIXED_DOMAIN
-            else:
-                with self.tracker.phase("ingest:l2:entity_create"):
-                    merged = self._create_entity_page(page_id, subtype, doc_id, title, body, domain)
-                page_domain = domain
+            #
+            # Graceful skip sul content filter Azure: corpora narrativi
+            # (Tolkien, Rowling, ...) possono triggerare il filtro su
+            # singole entità senza che il documento intero sia
+            # "violento". Saltiamo la singola entità con audit log,
+            # NON l'intero ingest. Allineato alla tolleranza errori del
+            # bulk ingest (ingest_folder.py).
+            try:
+                if self.wiki.exists(page_id):
+                    with self.tracker.phase("ingest:l2:entity_merge"):
+                        merged = self._merge_entity_page(page_id, doc_id, title, body, domain)
+                    # Dominio della pagina aggiornato: se il nuovo dominio
+                    # differisce dal corrente, segna la pagina come "_mixed"
+                    # (sorgenti multi-dominio). Permette al filtro query-time
+                    # di scegliere se includerla.
+                    existing_fm, _ = self.wiki.get(page_id)
+                    current_domain = existing_fm.get("domain", DEFAULT_DOMAIN)
+                    page_domain = current_domain if current_domain == domain else MIXED_DOMAIN
+                    op = "merge"
+                else:
+                    with self.tracker.phase("ingest:l2:entity_create"):
+                        merged = self._create_entity_page(page_id, subtype, doc_id, title, body, domain)
+                    page_domain = domain
+                    op = "create"
+            except BadRequestError as e:
+                if _is_content_filter(e):
+                    print(f"  [content_filter] skip entity '{page_id}' "
+                          f"({'merge in pagina esistente' if self.wiki.exists(page_id) else 'create'}) "
+                          f"per doc '{doc_id}' — log in {CONTENT_FILTER_SKIPS_PATH.name}")
+                    _log_content_filter_skip(
+                        doc_id, page_id, title, domain,
+                        op="merge" if self.wiki.exists(page_id) else "create",
+                    )
+                    continue
+                raise
             # Metadati aggiornati a ogni passaggio: importa che sources sia
             # cumulativo (vedi WikiStore.update_with_merge).
             extra_meta = {

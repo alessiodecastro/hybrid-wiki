@@ -37,15 +37,57 @@ Copy-Item .env.example .env
 
 ### Ingest
 
-L'ingest è il processo con cui un documento entra nel sistema. Ogni documento è elaborato su uno di **tre livelli** a costo/valore crescente (design §6.1):
+L'ingest è il processo con cui un documento entra nel sistema. Ogni documento è elaborato su uno di **tre livelli** a costo/valore crescente (design §6.1). I tre livelli sono **incrementali**: L1 include tutto ciò che fa L0, L2 include tutto ciò che fa L1.
 
-| Livello | Cosa produce | Quando |
+| Livello | File su disco prodotti | Vettori ChromaDB | Hot Layer | Quando usarlo |
+|---|---|---|---|---|
+| **L0** | `data/raw/<doc_id>.md` (copia immutabile con frontmatter). Nessun file in `data/wiki/`. | `raw_chunks`: N chunk da ~200 parole con overlap 40, embeddati uno per uno (`ingest:l0:raw_index`). | Non aggiornato (il doc non compare nell'index). | Alto volume, basso valore individuale (avvisi, log, note di servizio, comunicazioni operative). Recuperabile **solo** via ricerca raw — non emerge nelle query orientative basate sul Hot Layer. |
+| **L1** | L0 + `data/wiki/source_<doc_id>.md` (pagina *source*: sintesi autonoma del singolo documento, sezioni `## Overview / ## Dettagli / ## Citazioni notevoli`). | L0 + `wiki_pages`: 1 vettore per la pagina source (`ingest:l1:source_page` + `ingest:l2:wiki_index` per l'embedding). | Aggiornato a fine batch: la source page compare nell'index del Hot Layer. | Documento che merita una sintesi propria ma **non** va integrato col resto della wiki (es. atto puntuale, articolo singolo, scheda non riusabile). |
+| **L2** | L1 + N file `data/wiki/<entity_id>.md` (pagine *entity*) creati o aggiornati — uno per ogni entità sostanziale estratta dal documento; può anche modificare entità già esistenti (merge col contenuto preesistente, con sezione `## Contraddizioni note` se ci sono divergenze). | L1 + 1 vettore per ogni pagina entity creata o aggiornata. Le entity pages già esistenti vengono re-embeddate dopo il merge. | Aggiornato a fine batch: tutte le nuove entity pages entrano nell'index del Hot Layer. | Documento strategico (biografie complete, eventi cardine, concetti centrali): cambia il quadro generale del corpus e va integrato. |
+
+**Lettura della tabella**: una riga di ingest L2 può quindi produrre, in un solo passaggio: 1 file raw immutabile + 1 source page + da 1 a ~10 entity pages (nuove o aggiornate) + altrettanti vettori. Il riepilogo a fine ingest mostra `wiki=[source_..., entity_id_1, entity_id_2, ...]`.
+
+Il documento raw è **immutabile**: una volta ingestato non viene mai riscritto. Unica eccezione: il metadato `level` in caso di **promozione retroattiva** (un doc L0 diventato strategico viene rieseguito agli step L1/L2 senza duplicare il raw — vedi *Classificazione assistita*).
+
+#### Pagina *source* vs pagina *entity*
+
+I file in `data/wiki/` sono di **due tipi** (campo `type` nel frontmatter), con cicli di vita radicalmente diversi:
+
+| | **Source page** (`type: source`) | **Entity page** (`type: entity`) |
 |---|---|---|
-| **L0** | Solo indice raw (chunk + embedding). Nessuna pagina wiki. | Alto volume, basso valore individuale (note di servizio, log). Recuperabile solo via ricerca raw. |
-| **L1** | L0 + una pagina *source* (sintesi autonoma del singolo documento). | Merita una sintesi ma non va integrato col resto della wiki. |
-| **L2** | L1 + estrazione entità e creazione/merge delle pagine *entity* collegate, con gestione contraddizioni. | Documenti strategici che cambiano il quadro generale. |
+| **Identità** | "vista sul documento": fissa la prospettiva di **un singolo raw** | "vista sull'entità del mondo": rappresenta una cosa (personaggio, luogo, evento) **trasversale ai documenti** |
+| **Cardinalità sorgenti** | 1:1 — sempre **una sola** source (il doc da cui è stata generata) | 1:N — lista cumulativa, deduplicata, di tutti i raw che hanno contribuito |
+| **Mutabilità** | **Append-only / immutabile**. Una volta scritta non viene mai più modificata. | **Mergeable**. Ogni nuovo doc che la menziona sostanzialmente la raffina, arricchisce o contraddice (sezione `## Contraddizioni note`). |
+| **Fedeltà** | Fedele al singolo doc anche se in conflitto con altri (se il raw dice "1604", la source dice "1604") | Aggrega le tensioni: se due raw divergono, l'entity **mantiene entrambe le versioni esplicitamente** |
+| **id** | `source_<doc_id>` (con timestamp del doc) | `<entity_id>` (slug inglese snake_case stabile, es. `frodo_baggins`, `one_ring`) |
+| **Domain** | Sempre del singolo doc | Diventa `_mixed` se le sources sono di domini diversi |
+| **Struttura** | `## Overview / ## Dettagli / ## Citazioni notevoli` | `## Panoramica / ## Dettagli / ## Relazioni / ## Domande aperte` (+ `## Contraddizioni note` opzionale) |
+| **Esiste dal livello** | L1 in su | Solo L2 |
 
-Il documento raw è **immutabile**: una volta ingestato non viene mai riscritto (unica eccezione: il metadato di livello in caso di promozione retroattiva — vedi *Classificazione assistita*).
+**Come si declina nell'ingest L2** (`src/ingest.py`):
+
+```
+L0 → indicizzazione raw (chunk + embeddings)
+L1 → L0 + _make_source_page()       # sempre CREATE, mai merge (doc_id unico)
+L2 → L1 + _integrate_entities():
+       ├─ _create_entity_page()     # entità nuova → 1 chiamata LLM, contesto = solo nuovo doc
+       └─ _merge_entity_page()      # entità esistente → 1 chiamata LLM, contesto = pagina + nuovo doc
+```
+
+La source ha **un solo flusso**: `create`, mai `merge`. Lo stesso file ingestato due volte (es. `--force`) produce **due** source page con `doc_id` distinti, mai una fusione. Il prompt LLM vede solo il nuovo doc e ne produce una sintesi auto-contenuta.
+
+L'entity ha **due flussi**, scelti runtime in base a `WikiStore.exists(page_id)`. Il merge è l'unico punto del sistema dove un prompt LLM riceve **due input concorrenti** (pagina esistente + nuovo doc) con regole esplicite: preservare le info ancora valide, aggiungere le nuove, e — se c'è divergenza — esplicitare il conflitto in `## Contraddizioni note`. Per questo è anche lo step più sensibile al content filter: combinare due contesti già "carichi" può superare le soglie di severity (vedi `data/content_filter_skips.jsonl` se compaiono skip granulari).
+
+Conseguenze operative di questa distinzione:
+
+| Aspetto | Source | Entity |
+|---|---|---|
+| Conflict resolution | Non opera (1 sola fonte per definizione) | Qui scattano `## Contraddizioni note` e le `CONFLICT_RULES` lato query |
+| Lint consolidation (`--detect-duplicates`) | Non opera sulle source (immutabili 1:1) | Opera **solo** su entity (cluster di duplicati/alias, merge controllato) |
+| Promozione retroattiva | Crea una nuova source (con `promoted_from`) | Può aggiornare entity esistenti tramite re-integration |
+| Citazioni `[[id]]` in risposta | Tipicamente per dettagli puntuali, numeri, citazioni testuali | Tipicamente per concetti, sintesi, relazioni |
+
+In una battuta: **la source è la memoria di "cosa ha detto questo documento", l'entity è la memoria di "cosa sappiamo su questa cosa"**. La prima fissa una prospettiva e non la rinnega mai; la seconda costruisce un consensus cumulativo gestendo esplicitamente le tensioni tra fonti.
 
 **Documento singolo** — `ingest_doc.py`, livello (e per L2 il subtype) dichiarati esplicitamente:
 
@@ -54,7 +96,36 @@ python scripts/ingest_doc.py --file data/raw/incoming/tolkien/frodo_intro.txt --
 python scripts/ingest_doc.py --file data/raw/incoming/tolkien/lettera_routine.txt --title "Nota Mathom-house" --level L0
 ```
 
-**Bulk da manifest** — `ingest_folder.py`. Un manifest YAML descrive l'intero corpus: `defaults` (dominio/livello comuni) + lista `documents` con override per documento. Il campo `level` è **opzionale**: se omesso, il documento viene classificato automaticamente (vedi *Classificazione assistita*). È il modo consigliato oltre i ~10 documenti, perché riproducibile.
+**Bulk da manifest** — `ingest_folder.py`. Un manifest YAML descrive l'intero corpus: `defaults` (campi ereditati da tutti i documenti) + lista `documents` con override per documento. È il modo consigliato oltre i ~10 documenti, perché riproducibile e idempotente.
+
+Struttura attesa del manifest:
+
+```yaml
+# base_dir: opzionale; default = cartella del manifest. Path dei file relativi a questa.
+defaults:
+  domain: <stringa libera>   # es. tolkien, asimov, rowling, work_notes
+  # level: <opzionale qui — vedi sotto>
+documents:
+  - { file: <nome_file.txt>, title: "<titolo leggibile>", level: L2, subtype: character }
+  - { file: <nome_file.txt>, title: "<titolo leggibile>", level: L1 }
+  - { file: <nome_file.txt>, title: "<titolo leggibile>", level: L0 }
+  - { file: <nome_file.txt>, title: "<titolo leggibile>" }   # senza level → classificazione assistita
+```
+
+Campi obbligatori per documento: `file`, `title`. Campi opzionali: `level` (L0/L1/L2), `subtype` (solo per L2: `character|place|artifact|event|book`), `domain` (override del default). Ogni campo presente nell'entry **vince** sul default omonimo.
+
+**Comportamento del campo `level` — il punto importante.** Cosa succede a un documento dipende dalla **combinazione** tra `defaults.level` e il `level` nell'entry:
+
+| `defaults.level` | `level` nell'entry | Risultato per il documento |
+|---|---|---|
+| `L1` (o qualunque livello) | `L2` (esplicito) | Ingest a L2 (l'entry vince sul default). |
+| `L1` (o qualunque livello) | assente | Ingest a L1 (eredita dal default). **Nessuna classificazione**. |
+| **assente** | `L2` (esplicito) | Ingest a L2. |
+| **assente** | assente | **Classificazione assistita**: l'LLM propone il livello, il gate asimmetrico decide se auto-ingestare o accodare per review umana (vedi *Classificazione L0/L1/L2 assistita*). |
+
+In pratica: per innescare la classificazione assistita su una parte dei documenti del manifest, occorre **omettere `level` dai defaults** e ometterlo nelle entry che si vogliono classificare. Mettere un default ovunque significa rinunciare alla classificazione assistita per tutto il batch.
+
+Nel dry-run, le entry che andranno a classificazione compaiono come `PLAN [CLASSIFY]` invece che `PLAN [L1]`.
 
 ```powershell
 python scripts/ingest_folder.py --manifest data/raw/incoming/tolkien/manifest_tolkien.yaml --dry-run   # piano, nessuna chiamata API
@@ -63,8 +134,19 @@ python scripts/ingest_folder.py --manifest data/raw/incoming/asimov/manifest_asi
 python scripts/ingest_folder.py --manifest data/raw/incoming/tolkien/manifest_tolkien.yaml --force     # re-ingesta anche i già presenti
 ```
 
+Marker stampati in output (uno per documento):
+
+| Marker | Significato |
+|---|---|
+| `OK    [Lx] domain file  doc_id=... wiki=[...]` | Ingestato con successo al livello indicato; elenca i file wiki prodotti. |
+| `SKIP  [Lx] domain file  (già ingestato)` | Idempotenza: stesso `(source_filename, domain)` già nel raw store. `--force` ignora il check. |
+| `CLASS [Lx] domain file  -> Lx/conf (LLM\|REGOLA) auto-ingest` | Classificato e ingestato automaticamente (gate: L0/L1 high-confidence, oppure regola deterministica). |
+| `QUEUE [??] domain file  proposto Lx/conf → review umana` | Classificato ma accodato per conferma umana (gate: L2 o confidence non alta). Vai a `classify.py --review`. |
+| `FAIL  [Lx] domain file  -> <errore>` | Errore (encoding, prompt rejection, ecc.). Il batch prosegue. |
+| `MISS  [Lx] domain file  (file non trovato)` | Il file dichiarato nel manifest è assente dal disco. |
+
 Proprietà del bulk ingest:
-- **Idempotente**: salta i documenti già ingestati riconoscendoli da `(source_filename, domain)`; `--force` li re-ingesta.
+- **Idempotente**: salta i documenti già ingestati riconoscendoli da `(source_filename, domain)`; `--force` li re-ingesta. Lo stesso file in un dominio diverso non viene considerato duplicato (caso lecito).
 - **Tollerante agli errori**: un documento che fallisce non blocca il batch (conteggiato in `FAILED`).
 - **Hot Layer differito**: il rebuild dell'index è O(pagine_totali); il bulk lo esegue **una sola volta a fine batch** invece che per documento (altrimenti O(N²) sul corpus). `ingest_doc.py` su singolo documento ricostruisce subito.
 
@@ -77,14 +159,82 @@ python scripts/ask.py "Chi è il protagonista?" --domain tolkien
 python scripts/ask.py "Chi è il protagonista?" --domain asimov
 ```
 
-### Interrogare la knowledge base
+### Interrogare la knowledge base (`ask.py`)
 
-Una domanda esegue la pipeline di query (design §6.2): orientamento dal Hot Layer → retrieval doppio (wiki + raw, filtrabile per `--domain`) → risoluzione conflitti → risposta con citazioni, livello di confidence e gap dichiarati. Ogni query è loggata in `data/query_log.jsonl`.
+Una domanda esegue la pipeline di query (design §6.2) implementata in `src/query.py`. Ogni query è loggata in `data/query_log.jsonl` (audit trail append-only).
 
 ```powershell
 python scripts/ask.py "Chi è il portatore dell'Anello?"
 python scripts/ask.py "Quanti abitanti ha Trantor?" --domain asimov
+python scripts/ask.py --eval tests/eval_set_threedomains.yaml   # batch su un eval set
 ```
+
+#### Cosa fa la pipeline, passo per passo
+
+La query è una **singola chiamata LLM** preceduta da una fase di preparazione del contesto. Il modello non itera né richiama tool: ha tutto in una sola passata e produce risposta + metadati strutturati.
+
+1. **Embedding della domanda** (`query:embedding`).
+   La domanda viene embeddata con lo stesso modello usato per i documenti (Azure `text-embedding-3-small`). Costo: 1 chiamata embedding, ~50-300 token.
+
+2. **Retrieval multi-indice in parallelo** (operazione locale su ChromaDB, **zero token**).
+   - `wiki_pages`: top **4** pagine (sintesi + relazioni). Filtro: `domain ∈ {<domain>, _mixed}` se `--domain` è passato.
+   - `raw_chunks`: top **6** chunk grezzi (dettagli, numeri, citazioni testuali). Filtro: `domain = <domain>` stretto se `--domain` è passato.
+   - I due `top-k` sono separati per design (`WIKI_TOP_K=4`, `RAW_TOP_K=6`): wiki sono pagine dense, raw sono frammenti corti — servono cardinalità diverse.
+   - I filtri sono applicati **lato ChromaDB**, non post-filter: così il top-k opera già sul sottoinsieme rilevante e non si "perdono" hit utili.
+
+3. **Caricamento del Hot Layer** (file `data/wiki/HOT_LAYER.md`, ricostruito ad ogni ingest L1/L2).
+   È una "mappa" del corpus: overview tematica (generata da LLM) + index deterministico delle pagine entity con tag. Iniettato nel system prompt come **orientamento**: dice al modello "ecco la geografia del corpus, ecco dove cercare".
+
+4. **Calcolo della whitelist citazioni** (cruciale anti-hallucination).
+   Dai hit recuperati si estrae l'elenco esatto dei `page_id` (wiki) e dei `doc_id` (raw) che il modello **può** citare con `[[id]]`. Per riferirsi a entità non recuperate, il modello deve usare il nome in chiaro **senza wikilink**. Senza questa whitelist il modello fabbrica id plausibili ma inesistenti.
+
+5. **Policy multi-corpus** (si attiva solo se `--domain` non è passato e il corpus contiene più di un dominio).
+   Una scansione filesystem rileva quali domini esistono nel corpus e quali sono coperti dal retrieval. Il system prompt riceve due regole:
+   - Se il retrieval copre **più** domini → struttura la risposta **per sezioni separate per dominio** (no fusione tra mondi), cap confidence a `medium`.
+   - Se copre **un solo** dominio ma il corpus ne ha altri → rispondi sul dominio coperto **ma dichiara esplicitamente** che gli altri corpora potrebbero rispondere diversamente; cap confidence a `medium` (eccetto quando la domanda nomina entità univoche).
+   Questa policy nasce per evitare la "dominanza silenziosa" — domanda generica → risposta da un solo corpus senza segnalare gli altri (caso classico osservato in eval).
+
+6. **Costruzione del system prompt** (lungo per design, è la "configurazione runtime" del modello).
+   Contiene, nell'ordine: la strategia in 6 punti, l'eventuale policy multi-corpus, lo **scan obbligatorio dei conflitti** (vedi sotto), le regole di citazione con whitelist, il vincolo di compattezza, le `CONFLICT_RULES`, il contratto di output JSON, `AGENTS.md`, e il **Hot Layer** in coda.
+
+7. **Sintesi finale** (`query:llm_synthesis`, fase più costosa).
+   Una singola chiamata `chat.completions.create` con `max_tokens=3500`. Il modello riceve la domanda + i blocchi wiki+raw formattati e produce risposta in markdown **terminata con un blocco JSON** auto-descrittivo (`answer / wiki_sources / raw_sources / confidence / gaps`).
+
+8. **Parsing tollerante della risposta**.
+   - *Path nominale*: estrae l'ultimo blocco JSON dal testo e ne ricava i campi strutturati.
+   - *Fallback*: se il JSON manca o è malformato (tipico caso: risposta troncata a `max_tokens`), estrae gli id dai `[[wikilink]]` inline e li classifica con un'euristica (`doc_id` se termina con `_AAAAMMGGHHMMSS`, altrimenti `page_id`). In questo caso la `confidence` viene forzata a `low` per segnalare onestamente il degrado.
+
+9. **Append al query log**.
+   Record JSONL in `data/query_log.jsonl` con domanda, timestamp, risposta, sorgenti, confidence, gap.
+
+#### Cosa cerca dove, e a chi crede di più
+
+La pipeline cerca **due cose diverse in due indici diversi**, e ha regole esplicite su quale prevale quando divergono. Queste regole — le `CONFLICT_RULES` — sono iniettate nel system prompt di **ogni** query.
+
+| Tipo di informazione cercata | Indice prioritario | Perché |
+|---|---|---|
+| Numeri specifici (date, cifre, codici) | **RAW** | I dati grezzi sono fedeli al documento originale; le sintesi possono arrotondare. |
+| Citazioni testuali | **RAW** | Solo il raw contiene il testo letterale. |
+| Stati attuali ("cosa è vero ora") | **RAW** se più recente, **WIKI** se aggrega più fonti | Trade-off recency vs aggregazione. |
+| Sintesi e interpretazioni | **WIKI** | È esattamente il lavoro che le pagine entity fanno. |
+| Relazioni e collegamenti | **WIKI** | Le entity hanno la sezione `## Relazioni`; i raw vedono solo la propria prospettiva. |
+
+**Comportamento sui conflitti**:
+- **WIKI vs RAW divergono su un fatto**: la risposta **non nasconde il conflitto** — espone entrambe le versioni ("secondo [[wiki_page]]…; secondo il documento [[doc_id]]…") e indica quale prevale per regola. (Esempio nel corpus: Hogwarts fondata "circa 990" nella entity vs "993" in un raw → la risposta cita entrambe le date.)
+- **RAW vs RAW divergono** (due documenti grezzi danno valori diversi sullo stesso fatto, nessuno chiaramente più autorevole): il modello **non** ne sceglie uno arbitrariamente. Riporta **entrambi** con le rispettive citazioni, dichiara il conflitto come irrisolto, e cappa la confidence a `medium` (o `low` se il fatto è centrale per la domanda). (Esempio: popolazione di Trantor, ~40 mld vs ~45 mld in due raw asimov diversi.)
+
+Per forzare questo comportamento il prompt include uno **scan obbligatorio dei conflitti** prima della formulazione della risposta: il modello deve fare una passata attiva su tutti i frammenti retrieved (wiki + raw) cercando discrepanze su numeri, date, nomi — **incluse menzioni di passaggio nei chunk marginali**, perché una contraddizione in un frammento secondario è un segnale, non rumore. Senza questo vincolo esplicito il modello tende a fidarsi del primo risultato ad alto ranking e ignorare il resto.
+
+#### Cosa contiene la risposta
+
+Ogni invocazione di `ask.py` stampa:
+
+- la **risposta** in markdown, con citazioni inline `[[id]]` (solo id presenti nella whitelist);
+- le **Wiki sources** e **Raw sources** effettivamente usate;
+- la **Confidence** (`high` / `medium` / `low`) — calibrata per tipo di domanda e qualità delle fonti;
+- eventuali **Gaps**: lacune dichiarate dal modello (entità non coperte, conflitti irrisolti, dominio non retrieved).
+
+In modalità `--eval` ogni domanda viene affiancata al proprio `expected_summary` per confronto umano; il run viene salvato anche in `tests/results/evalset_results_YYYYMMDD_HHMMSS.txt` per analisi di regressione.
 
 ### eval set
 
@@ -106,30 +256,52 @@ Ogni esecuzione, oltre alla console, salva un report in `tests/results/evalset_r
 
 Assegnare il livello a mano non scala. La classificazione assistita (design §6.1) segue il principio *l'LLM propone, l'umano conferma*, con una decisione a tre stadi:
 
-1. **Regole deterministiche** (`data/classification/rules.yaml`, opzionale): se un documento combacia per sorgente/titolo/dominio, livello fissato a regola — niente LLM.
-2. **Proposta LLM**: criteri da `AGENTS.md` + esempi few-shot dalle conferme umane precedenti. È *active learning*: ogni conferma affina le proposte successive.
-3. **Gate di confidenza asimmetrico**: regola, oppure L0/L1 ad **alta** confidence → ingest automatico; **L2 o confidence non alta → coda di review umana**. Mai auto-ingest di un L2: sbagliare verso il basso perde il documento per le query concettuali ed è il rischio grave; sbagliare verso l'alto è solo spreco.
+1. **Regole deterministiche** (`data/classification/rules.yaml`, opzionale): se un documento combacia per sorgente/titolo/dominio, livello fissato a regola — niente LLM, confidence alta, `rule_applied=True`.
+2. **Proposta LLM**: criteri da `AGENTS.md` + esempi few-shot dalle conferme umane precedenti (`data/classification/examples.jsonl`). È *active learning*: ogni conferma affina le proposte successive. Output JSON `{level, confidence, rationale}`.
+3. **Gate di confidenza asimmetrico**: regola, oppure L0/L1 ad **alta** confidence → ingest automatico; **L2 o confidence non alta → coda di review umana** (`data/classification/review_queue.yaml`). Mai auto-ingest di un L2: sbagliare verso il basso perde il documento per le query concettuali ed è il rischio grave; sbagliare verso l'alto è solo spreco.
 
-Workflow proposta → conferma:
+**Quando si attiva la classificazione.** La classificazione viene innescata in due situazioni:
+- da `ingest_folder.py`, automaticamente, per ogni documento del manifest **senza `level`** (e senza default `level` ereditato — vedi tabella nella sezione *Ingest*);
+- da `classify.py --file ...`, esplicitamente, su un singolo documento (utile per testare una proposta prima di decidere se ingestare).
+
+In entrambi i casi le entry che il gate non auto-ingesta vengono accodate in `review_queue.yaml` con `approved_level: null` (in attesa).
+
+**Workflow proposta → conferma** (`classify.py`):
 
 ```powershell
-# 1. proposta read-only su un singolo documento
+# 1. PROPOSTA su singolo documento, read-only (stampa livello/confidence/motivazione).
 python scripts/classify.py --file data/raw/incoming/tolkien/frodo_intro.txt --title "Frodo Baggins" --domain tolkien
 
-# 2. proposta + accodamento per review
+# 2. PROPOSTA + accodamento per review umana.
 python scripts/classify.py --file <doc> --title "<t>" --domain <d> --enqueue
 
-# 3. esamina la coda delle proposte in attesa
+# 3. REVIEW della coda (read-only): elenca le entry con stato PENDING / -> L0|L1|L2|reject.
 python scripts/classify.py --review
 
-# 4. l'umano edita data/classification/review_queue.yaml impostando, per ogni entry,
-#    approved_level: L0|L1|L2   (oppure 'reject' per scartare, null = lascia in attesa)
+# 4. EDIT MANUALE di data/classification/review_queue.yaml: per ogni entry impostare
+#    approved_level a uno tra:
+#       L0 | L1 | L2   → verrà ingestato a questo livello dal --confirm
+#       reject         → scartato (uscirà dalla coda, nessun ingest)
+#       null           → lasciato in attesa (resterà in coda anche dopo --confirm)
+#    Il subtype (per L2) NON va specificato: è estratto automaticamente dal contenuto.
 
-# 5. esegue gli approvati: ingest al livello scelto + registra l'esempio (active learning)
+# 5. CONFIRM: ingesta le entry approvate al livello scelto, le rimuove dalla coda
+#    e le registra come esempi few-shot per le classificazioni successive.
 python scripts/classify.py --confirm
 ```
 
-Nel **bulk ingest** la classificazione è automatica per i documenti senza `level` nel manifest: stesso gate (auto-ingest dei casi sicuri, accodamento del resto in `review_queue.yaml`).
+**Cosa fa `--confirm`** entry per entry, in ordine:
+
+| `approved_level` nella queue | Azione di `--confirm` |
+|---|---|
+| `L0` / `L1` / `L2` | Chiama `pipeline.ingest(file, level=approved, subtype=None, domain=...)`. Per L2 il subtype viene proposto dall'estrattore entità sul contenuto. La decisione viene registrata in `examples.jsonl` (active learning). L'entry esce dalla coda. |
+| `reject` | Stampa `REJECT <file>`. Nessun ingest. L'entry esce dalla coda. |
+| `null` (o assente o stringa vuota) | L'entry **resta in coda** — utile per decidere solo alcune entry alla volta. Contatore `In attesa`. |
+| Valore non valido (es. `L3`, `maybe`) | Warning a stderr, entry lasciata in coda. |
+
+Alla fine `--confirm` stampa un riepilogo `Ingestati / Rifiutati / In attesa` e il consumo token. La coda è **deduplicata** su `(file, domain)`: ri-classificare lo stesso file sovrascrive la proposta precedente, non crea un duplicato.
+
+**Differenza pratica tra le due porte d'ingresso alla coda**: il bulk ingest da manifest tipicamente vi accoda blocchi di documenti L2 ad alta confidence (per il gate asimmetrico tutti gli L2 passano sempre per la coda), mentre `classify.py --file --enqueue` è utile per accodare singoli documenti in modo iterativo, fuori da un batch.
 
 **Promozione retroattiva** — un documento ingestato come L0 può rivelarsi strategico (design §6.1). Un audit ri-classifica i documenti L0 e segnala i candidati; la promozione è poi eseguita esplicitamente dall'umano e **non duplica il raw immutabile**: riesegue solo gli step wiki del nuovo livello e aggiorna il solo metadato `level` (`promoted_from`/`promoted_at`).
 

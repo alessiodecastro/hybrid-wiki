@@ -1,0 +1,153 @@
+# Eval set CROSS-DOMINIO a TRE corpora (Tolkien + Asimov + Rowling).
+#
+# Presuppone i tre corpus ingestati:
+#   python scripts/ingest_folder.py --manifest data/raw/incoming/tolkien/manifest_tolkien.yaml
+#   python scripts/ingest_folder.py --manifest data/raw/incoming/asimov/manifest_asimov.yaml
+#   python scripts/ingest_folder.py --manifest data/raw/incoming/rowling/manifest_rowling.yaml
+#   python scripts/classify.py --confirm   # per i doc rowling senza level esplicito
+#
+# Eseguire con:
+#   python scripts/ask.py --eval tests/eval_set_threedomains.yaml
+#
+# Estende eval_set_crossdomain.yaml con:
+# - il terzo dominio (rowling)
+# - una contraddizione voluta NEL DOMINIO rowling (anno fondazione Hogwarts)
+# - crossref a 3 mondi (mentori, eletti)
+# - confronto Anello Unico vs Horcrux (artefatti del potere)
+# - gap test (Dementori: assenti dal corpus)
+#
+# Categorie:
+#   isolation     -> filtro per dominio, risposta deve restare nel proprio corpus
+#   conflict      -> contraddizione intra-dominio, attesa esplicitazione
+#   contamination -> nessun filtro: osservare quanto il sistema mescola
+#   crossref      -> confronto comparativo esplicito (synthesis: skeleton non le ha)
+#   gap           -> entità non presente nel corpus, attesa dichiarazione di gap
+#   relation      -> aggregazione di relazioni interne al dominio
+#   detail        -> dettaglio specifico recuperabile solo dal raw layer
+
+questions:
+
+  # --- ISOLAMENTO ROWLING ---
+
+  - id: t01
+    category: isolation
+    question: "Chi è il protagonista e qual è la sua missione?"
+    domain: rowling
+    expected_summary: "Harry Potter, mago britannico, missione: sconfiggere Voldemort distruggendo gli Horcrux. NON deve citare Frodo né Hari Seldon."
+    expected_sources: [harry_potter]
+
+  - id: t02
+    category: isolation
+    question: "Descrivi l'antagonista principale e le sue caratteristiche."
+    domain: rowling
+    expected_summary: "Lord Voldemort (Tom Marvolo Riddle). Mago oscuro, frammenta l'anima in 7 parti tramite Horcrux. NON deve citare Sauron né il Mulo."
+    expected_sources: [lord_voldemort, voldemort]
+
+  - id: t03
+    category: isolation
+    question: "Qual è l'artefatto centrale del male e come può essere disattivato?"
+    domain: rowling
+    expected_summary: "Gli Horcrux. Disattivabili con veleno di Basilisco, Fiendfyre, zanna di Basilisco o Spada di Grifondoro. NON deve citare l'Anello Unico."
+    expected_sources: [horcrux]
+
+  # --- ISOLAMENTO INCROCIATO (stessa domanda, dominio diverso) ---
+
+  - id: t04
+    category: isolation
+    question: "Qual è l'artefatto centrale del male e come può essere disattivato?"
+    domain: tolkien
+    expected_summary: "L'Anello Unico, distrutto solo nel fuoco del Monte Fato. NON deve citare gli Horcrux né Trantor."
+    expected_sources: [one_ring, mount_doom]
+
+  - id: t05
+    category: isolation
+    question: "Chi è il protagonista e qual è la sua missione?"
+    domain: asimov
+    expected_summary: "Hari Seldon, fondatore della psicostoria e del Piano. NON deve citare Harry Potter né Frodo."
+    expected_sources: [hari_seldon]
+
+  # --- CONFLICT (contraddizione intra-rowling voluta) ---
+
+  - id: t06
+    category: conflict
+    question: "In che anno fu fondata Hogwarts?"
+    domain: rowling
+    expected_summary: "Contraddizione voluta: hogwarts.txt dice circa 990 d.C., neville_longbottom.txt dice 993 d.C. La risposta deve esplicitare entrambe le date con citazione."
+    expected_sources: [hogwarts, neville_longbottom, neville_paciock]
+
+  # --- DETAGLIO RAW (numeri/citazioni precise) ---
+
+  - id: t07
+    category: detail
+    question: "Qual è il materiale e la lunghezza della bacchetta di Harry Potter?"
+    domain: rowling
+    expected_summary: "Agrifoglio, nucleo penna di fenice, 27,9 cm. Gemella di quella di Voldemort. Dettaglio recuperabile dal raw."
+    expected_sources: [harry_potter]
+
+  - id: t08
+    category: detail
+    question: "Quanti abitanti ha Trantor al suo apice?"
+    domain: asimov
+    expected_summary: "Conflitto voluto residuo: trantor.txt dice ~40 miliardi, impero_galattico.txt dice ~45 miliardi. Sanity check sul dominio asimov."
+    expected_sources: [trantor]
+
+  # --- RELATION (aggregazione interna al dominio) ---
+
+  - id: t09
+    category: relation
+    question: "Chi ha distrutto ciascuno dei sette Horcrux di Voldemort?"
+    domain: rowling
+    expected_summary: "Diario → Harry Potter (1993); anello Gaunt → Silente (1996); medaglione → Ron Weasley (1997); coppa → Hermione Granger (1998); diadema → Vincent Crabbe via Fiendfyre (1998); Nagini → Neville Paciock (1998); il frammento in Harry → Voldemort stesso (1998)."
+    expected_sources: [horcrux]
+
+  # --- CROSSREF 2-WAY (Tolkien <> Rowling) ---
+
+  - id: t10
+    category: crossref
+    question: "Quali paralleli ci sono tra l'Anello Unico e gli Horcrux come artefatti che contengono parte dell'essere del loro creatore?"
+    expected_summary: "Comparazione esplicita: entrambi contengono parte dell'essere del creatore (Sauron / Voldemort), conferiscono potere/immortalità, vanno distrutti per neutralizzare il creatore. Lo skeleton non ha synthesis pages: atteso un tentativo di sintesi con confidence bassa o gap segnalato."
+    expected_sources: [one_ring, horcrux]
+
+  # --- CROSSREF 3-WAY (tutti e tre i mondi) ---
+
+  - id: t11
+    category: crossref
+    question: "Confronta i ruoli di mentore di Gandalf (Tolkien), Albus Silente (Rowling) e Hari Seldon (Asimov)."
+    expected_summary: "Confronto a 3 corpora. Atteso: tentativo di sintesi con confidence medium/low; ciascuno guida i protagonisti verso uno scontro decisivo ma con strumenti diversi (magia, conoscenza, predizione statistica). Segnale che servono synthesis pages."
+    expected_sources: [gandalf, albus_silente, hari_seldon]
+
+  - id: t12
+    category: crossref
+    question: "I 'prescelti' nei tre cicli (Frodo, Harry Potter, Hari Seldon): in cosa si assomigliano e in cosa differiscono?"
+    expected_summary: "Frodo è prescelto per missione (portare l'Anello); Harry per profezia (scontro con Voldemort); Hari Seldon è prescelto per intelligenza e visione (psicostoria) — non è un 'eroe' classico ma un architetto. Atteso tentativo di sintesi."
+    expected_sources: [frodo_baggins, harry_potter, hari_seldon]
+
+  # --- CONTAMINATION (nessun domain: si osserva la mescolanza) ---
+
+  - id: t13
+    category: contamination
+    question: "Chi è il protagonista e qual è la sua missione?"
+    expected_summary: "Senza scope il sistema considera 3 corpora. Atteso: confidence medium/low e/o risposta che distingue i tre mondi. Si OSSERVA la contaminazione: il sistema fonde i tre, ne sceglie uno arbitrariamente, o li separa esplicitamente?"
+    expected_sources: []
+
+  - id: t14
+    category: contamination
+    question: "Quali sono gli oggetti del potere maledetti?"
+    expected_summary: "Senza scope: Anello Unico (tolkien) e Horcrux (rowling). Asimov non ha un equivalente. Si osserva se il sistema cita entrambi i mondi pertinenti o ne privilegia uno."
+    expected_sources: []
+
+  # --- GAP (entità non presenti nel corpus) ---
+
+  - id: t15
+    category: gap
+    question: "Chi sono i Dementori e quale ruolo hanno nella saga?"
+    domain: rowling
+    expected_summary: "I Dementori NON sono trattati in alcun documento del corpus rowling. Atteso: il sistema deve dichiarare il gap esplicitamente, NON allucinare descrizioni dai propri dati pre-training."
+    expected_sources: []
+
+  - id: t16
+    category: gap
+    question: "Cos'è il Marchio Oscuro e dove appare?"
+    domain: rowling
+    expected_summary: "Il Marchio Oscuro è menzionato di passaggio in severus_piton.txt ('ricevette il Marchio Oscuro') ma NON ha pagina entity propria né trattazione sostanziale. Atteso: risposta limitata con riferimento alla sola menzione, oppure gap dichiarato. Test della soglia 'menzione ≠ trattazione' (design §11.1)."
+    expected_sources: [severus_piton]
