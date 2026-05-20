@@ -1,6 +1,6 @@
-# AGENTS.md — v0.2
+# AGENTS.md — v0.3
 
-Contratto operativo del companion wiki di lettura (walking skeleton).
+Contratto operativo del companion wiki di lettura.
 Sistema **dominio-agnostico**: stesso motore, più corpora indipendenti.
 
 ## Scopo
@@ -17,6 +17,7 @@ libera che identifica il corpus di provenienza. Domini attualmente attivi
 
 - `tolkien` — legendarium di J.R.R. Tolkien (LotR, Hobbit, Silmarillion).
 - `asimov`  — Ciclo della Fondazione di Isaac Asimov.
+- `rowling` — Ciclo di Harry Potter di J.K. Rowling.
 
 **Regola di isolamento**: una pagina wiki appartiene al dominio delle sue
 sorgenti. Se un'entità riceve contributi da sorgenti di domini diversi, la
@@ -102,15 +103,28 @@ title: <titolo leggibile>
 ## Criteri L0/L1/L2
 
 - **L0 — indicizzazione minima**: solo embedding nel raw store. Documenti ad
-  alto volume e basso valore strategico individuale. Recuperabili solo via
-  ricerca raw.
+  alto volume e basso valore strategico individuale (avvisi, note di servizio,
+  log, comunicazioni operative). Recuperabili solo via ricerca raw.
 - **L1 — sintesi singola**: L0 + pagina `type: source` con sezioni
-  `## Overview / ## Dettagli / ## Citazioni notevoli`.
+  `## Overview / ## Dettagli / ## Citazioni notevoli`. La source è 1:1 col
+  doc, **append-only**, mai mergeable.
 - **L2 — integrazione completa**: L1 + identificazione entità e
-  aggiornamento/creazione pagine `type: entity`, con segnalazione di
-  contraddizioni in `## Contraddizioni note`.
+  creazione/merge di pagine `type: entity`, con esplicitazione delle
+  contraddizioni in `## Contraddizioni note`. L'entity aggrega contributi
+  da N raw e **viene aggiornata** ad ogni nuovo doc rilevante.
 
-La classificazione è **manuale** in questa fase (livello dal manifest/CLI).
+La classificazione è **assistita** (l'LLM propone, l'umano conferma) con un
+gate di confidenza asimmetrico: regole deterministiche o L0/L1 ad alta
+confidence → ingest automatico; L2 o confidence non alta → coda di review
+umana. Il livello può essere comunque dichiarato esplicitamente nel manifest
+o via CLI per bypassare il classificatore.
+
+**Confine L0 (decisivo, da valutare per primo nella classificazione)**: un
+documento è L0 se di natura amministrativa, logistica, di routine o di
+servizio **anche se denso di nomi propri**. Una circolare che cita venti
+entità resta L0 — citare ≠ trattare. Si promuove a L1/L2 solo se il
+documento *tratta sostanzialmente* (biografia, caratterizzazione, decisione,
+evento analizzato) almeno un'entità o un tema.
 
 ## Regole di risoluzione conflitti (query time)
 
@@ -143,6 +157,30 @@ valori diversi per la stessa quantità).
   ## Domande aperte
   ## Contraddizioni note   (opzionale, solo se presenti)
   ```
+
+### Regola "menzione ≠ trattazione" (lato query)
+
+Il principio §11.1 ("menzione ≠ trattazione sostanziale") vale anche
+**lato query**, non solo lato ingest:
+
+- Se un'entità è solo **menzionata di passaggio** in un raw (es. compare
+  in una sola frase, senza biografia, caratterizzazione o trattazione
+  diretta), NON colmare il vuoto attingendo a conoscenza esterna al
+  corpus. Limitati a riportare la menzione effettiva e dichiara il gap.
+- Esempio: "Severus Piton ricevette il Marchio Oscuro" è una **menzione**
+  del Marchio Oscuro, non una sua trattazione. Una domanda "Cos'è il
+  Marchio Oscuro?" deve produrre: (a) la sola menzione presente nel
+  corpus con citazione, e (b) un gap esplicito sul resto — NON una
+  descrizione tratta dal canone esterno.
+- La presenza di una singola occorrenza NON autorizza a parlare
+  ampiamente dell'entità: la conoscenza pre-training resta fuori dal
+  perimetro fattuale della risposta. Eventuali integrazioni "dal canone"
+  vanno esplicitamente segregate (es. "fuori corpus, dal canone:...")
+  e non concorrono alle citazioni con `[[id]]`.
+
+Stessa logica per i **gap totali** (entità mai menzionata nel corpus):
+rispondere "non determinabile dalle fonti attuali" con confidence=low e
+nessuna ricostruzione da conoscenza esterna.
 
 ## Citazioni e tracciabilità
 
