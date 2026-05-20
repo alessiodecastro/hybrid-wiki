@@ -14,7 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.stores import WikiStore, VectorDB
+from src.stores import WikiStore, VectorDB, EntityIndex
 from src.config import WIKI_COLLECTION
 
 
@@ -25,12 +25,19 @@ def main(page_ids: list[str]) -> None:
 
     wiki = WikiStore()
     vdb = VectorDB()
+    index = EntityIndex()
 
     for pid in page_ids:
         removed = wiki.delete_page(pid)
         vdb.delete(WIKI_COLLECTION, [pid])
-        print(f"  {pid:<40} file: {'rimosso' if removed else 'assente'}  vettore: cancellato")
+        # Se è un entity_id consolidato nell'indice, lo rimuoviamo
+        # interamente (le source restano nei loro raw, ma l'entry
+        # consolidated viene cancellata e potrà essere ri-creata).
+        index_removed = index.remove(pid)
+        print(f"  {pid:<40} file: {'rimosso' if removed else 'assente'}  "
+              f"vettore: cancellato  indice: {'rimosso' if index_removed else 'assente'}")
 
+    index.save()
     print(f"\nFatto. {len(page_ids)} pagine processate.")
     print("Le pagine verranno ricreate al prossimo ingest che le menzioni come entità.")
 

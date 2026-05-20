@@ -24,8 +24,11 @@ import click
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.stores import RawStore, WikiStore, VectorDB
-from src.config import HOT_LAYER_PATH, RAW_COLLECTION, WIKI_COLLECTION, CONSOLIDATION_REPORT_PATH
+from src.stores import RawStore, WikiStore, VectorDB, EntityIndex
+from src.config import (
+    HOT_LAYER_PATH, RAW_COLLECTION, WIKI_COLLECTION,
+    CONSOLIDATION_REPORT_PATH, TOKEN_LOG_PATH, ENTITY_CONSOLIDATION_THRESHOLD,
+)
 
 
 # Regex per catturare i wikilink `[[id]]` usati come riferimenti incrociati.
@@ -108,6 +111,135 @@ def _health_check():
     click.echo("\n=== FINE REPORT ===")
 
 
+def _entity_stats():
+    """Osservabilità del regime lazy materialization (§13).
+
+    Read-only. Legge l'indice entità + il token log per produrre:
+    - distribuzione degli stati (aliased / consolidated / stable)
+    - istogramma di n_sources (1, 2, 3-5, 6-10, >10)
+    - breakdown per dominio
+    - top 10 entity per n_sources (le "regine" del corpus)
+    - top 10 entity aliased per n_sources (candidate a consolidamento manuale)
+    - costo cumulato dal token log (consolidate + merge)
+    - stima costo evitato vs eager (threshold=1)
+    """
+    import json
+    from collections import Counter
+
+    click.echo("=== HYBRID WIKI — ENTITY STATS ===\n")
+
+    index = EntityIndex()
+    entries = index.list_all()
+    if not entries:
+        click.echo("Indice entità vuoto. Nulla da analizzare.")
+        return
+
+    threshold = ENTITY_CONSOLIDATION_THRESHOLD
+    click.echo(f"Soglia consolidamento attiva: {threshold}\n")
+
+    # --- Stati ---
+    by_state = Counter(e.get("state", "?") for e in entries)
+    total = len(entries)
+    click.echo(f"Totale entità in indice: {total}")
+    for state in ("aliased", "consolidated", "stable"):
+        n = by_state.get(state, 0)
+        pct = 100.0 * n / total if total else 0
+        click.echo(f"  {state:<14} : {n:>5}  ({pct:5.1f}%)")
+    click.echo()
+
+    # --- Istogramma n_sources ---
+    bins = {"1": 0, "2": 0, "3-5": 0, "6-10": 0, ">10": 0}
+    for e in entries:
+        n = e.get("n_sources", 0)
+        if n <= 1:
+            bins["1"] += 1
+        elif n == 2:
+            bins["2"] += 1
+        elif n <= 5:
+            bins["3-5"] += 1
+        elif n <= 10:
+            bins["6-10"] += 1
+        else:
+            bins[">10"] += 1
+    click.echo("Distribuzione n_sources:")
+    for label, n in bins.items():
+        pct = 100.0 * n / total if total else 0
+        bar = "█" * int(pct / 2)
+        click.echo(f"  n={label:<5} : {n:>5}  ({pct:5.1f}%) {bar}")
+    click.echo()
+
+    # --- Breakdown per dominio ---
+    by_dom = Counter(e.get("domain") or "_unknown" for e in entries)
+    click.echo("Distribuzione per dominio:")
+    for dom, n in sorted(by_dom.items(), key=lambda x: -x[1]):
+        click.echo(f"  {dom:<20} : {n}")
+    click.echo()
+
+    # --- Top entity per n_sources ---
+    top = sorted(entries, key=lambda e: -e.get("n_sources", 0))[:10]
+    click.echo("Top 10 entità per n_sources (le 'regine' del corpus):")
+    for e in top:
+        click.echo(f"  {e['n_sources']:>3}  {e['state']:<13}  {e['id']:<35}  [{e.get('subtype') or '-'}, {e.get('domain') or '-'}]")
+    click.echo()
+
+    # --- Aliased candidate a consolidamento manuale ---
+    aliased_top = sorted(
+        [e for e in entries if e.get("state") == "aliased"],
+        key=lambda e: -e.get("n_sources", 0)
+    )[:10]
+    if aliased_top:
+        click.echo("Top entità ALIASED (candidate a consolidamento manuale):")
+        for e in aliased_top:
+            gap = threshold - e["n_sources"]
+            click.echo(f"  {e['n_sources']:>3}  (-{gap} alla soglia)  {e['id']:<35}  [{e.get('subtype') or '-'}, {e.get('domain') or '-'}]")
+        click.echo()
+
+    # --- Costo dal token log ---
+    cost_consolidate = 0
+    cost_merge = 0
+    cost_eager_create_equivalent = 0  # stima: cosa avresti speso con threshold=1
+    if TOKEN_LOG_PATH.exists():
+        try:
+            for line in TOKEN_LOG_PATH.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                phase = rec.get("phase", "")
+                tokens = rec.get("total_tokens", 0)
+                if phase == "ingest:l2:entity_consolidate":
+                    cost_consolidate += tokens
+                elif phase == "ingest:l2:entity_merge":
+                    cost_merge += tokens
+                elif phase == "ingest:l2:entity_create":
+                    # Pre-refactoring: stima del costo "eager"
+                    cost_eager_create_equivalent += tokens
+        except Exception as e:
+            click.echo(f"(token_log non leggibile: {e})")
+
+    click.echo("Costo cumulato dal token log:")
+    click.echo(f"  consolidate (lazy)   : {cost_consolidate:>10,} tokens")
+    click.echo(f"  merge incrementale   : {cost_merge:>10,} tokens")
+    click.echo(f"  create (eager, pre-refactor): {cost_eager_create_equivalent:>10,} tokens")
+    click.echo(f"  TOTALE entity ops    : {cost_consolidate + cost_merge + cost_eager_create_equivalent:>10,} tokens")
+    click.echo()
+
+    # --- Verdetto ---
+    aliased_count = by_state.get("aliased", 0)
+    aliased_pct = 100.0 * aliased_count / total if total else 0
+    click.echo("=== VERDETTO ===")
+    if aliased_pct >= 40:
+        click.echo(f"Lazy materialization sta evitando il {aliased_pct:.0f}% di entity_create LLM calls.")
+        click.echo("La soglia attuale è ben tarata sul corpus.")
+    elif aliased_pct >= 20:
+        click.echo(f"Lazy materialization moderata ({aliased_pct:.0f}% aliased). Soglia OK.")
+    else:
+        click.echo(f"Quasi tutte le entità si consolidano ({100 - aliased_pct:.0f}%). Considerare di alzare la soglia.")
+    click.echo()
+
+
 @click.command()
 @click.option("--detect-duplicates", is_flag=True, default=False,
               help="FASE 1: rileva cluster duplicati/alias e scrive il report YAML (read-only).")
@@ -115,12 +247,19 @@ def _health_check():
               help="FASE 2: applica i cluster con approved:true nel report (distruttivo).")
 @click.option("--audit-l0", is_flag=True, default=False,
               help="Audit campionario L0 (§6.3 #7): ri-classifica i doc L0 e segnala candidati promozione (read-only).")
+@click.option("--entity-stats", "entity_stats", is_flag=True, default=False,
+              help="Osservabilità lazy materialization (§13): distribuzione stati, n_sources, costi cumulati.")
 @click.option("--sample", default=0, type=int,
               help="Con --audit-l0: numero di doc L0 da campionare (0 = tutti).")
-def main(detect_duplicates: bool, apply_consolidation: bool, audit_l0: bool, sample: int):
+def main(detect_duplicates: bool, apply_consolidation: bool, audit_l0: bool,
+         entity_stats: bool, sample: int):
     """Lint della knowledge base. Senza flag: health check read-only."""
-    if sum([detect_duplicates, apply_consolidation, audit_l0]) > 1:
+    if sum([detect_duplicates, apply_consolidation, audit_l0, entity_stats]) > 1:
         raise click.UsageError("Una modalità per volta.")
+
+    if entity_stats:
+        _entity_stats()
+        return
 
     if audit_l0:
         import random

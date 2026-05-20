@@ -1,7 +1,8 @@
-# AGENTS.md — v0.3
+# AGENTS.md — v0.4
 
 Contratto operativo del companion wiki di lettura.
 Sistema **dominio-agnostico**: stesso motore, più corpora indipendenti.
+Materializzazione **lazy** delle entity page (§13 del design doc).
 
 ## Scopo
 
@@ -55,10 +56,11 @@ skeleton: creare comunque la pagina `type: entity` con `subtype` vuoto
 
 ### Riuso e unicità delle entità (anti-frammentazione)
 
-Una entità del mondo = **una sola pagina**. Prima di coniare un nuovo
-`entity_id`, verificare l'inventario delle entità esistenti del dominio:
-se l'entità esiste già, riusare il suo id **esatto**, anche se nel testo
-compare con nome diverso. Casi di duplicazione vietati:
+Una entità del mondo = **un solo `entity_id`**. Prima di coniare un nuovo
+id, verificare l'inventario delle entità esistenti del dominio (gestito
+in `data/wiki/_entity_index.yaml`): se l'entità esiste già — anche solo
+come entry `aliased` senza pagina md — riusare il suo id **esatto**,
+anche se nel testo compare con nome diverso. Casi di duplicazione vietati:
 
 - variante con/senza articolo: `shire` vs `the_shire`
 - singolare/plurale: `seldon_crisis` vs `seldon_crises`
@@ -72,9 +74,37 @@ compare con nome diverso. Casi di duplicazione vietati:
 L'`entity_id` è **sempre in inglese** (snake_case) anche quando il contenuto
 della pagina è in italiano: `primary_radiant`, non `radiante_primario`.
 
-Soglia di entità: una cosa diventa pagina solo se **trattata in modo
+Soglia di rilevanza: una cosa diventa entità solo se **trattata in modo
 sostanziale** (≥2-3 frasi specifiche). Le menzioni di passaggio non sono
-entità.
+entità — non vanno proposte nemmeno come `entity_id` candidato.
+
+### Stati di un'entità (lazy materialization)
+
+Un `entity_id` registrato non implica una pagina md materializzata. Le
+entità hanno tre stati possibili nell'indice (`_entity_index.yaml`):
+
+- **`aliased`** — `n_sources < THRESHOLD` (default 3). L'entità è
+  registrata nell'indice con la lista delle source che la citano. Non
+  esiste come file md, non ha vettore in ChromaDB. È citabile con
+  `[[entity_id]]` nelle source page e nelle risposte.
+- **`consolidated`** — al raggiungimento della soglia, le N source
+  vengono fuse in una entity page con una sola chiamata LLM. Da qui in
+  poi esiste come file md + vettore, e ogni nuovo doc che la cita la
+  aggiorna con merge incrementale.
+- **`stable`** (riservato a usi futuri) — entità consolidated congelate.
+
+Implicazioni operative per il lavoro LLM:
+
+- **In ingest L2**, identificare un'entità non significa necessariamente
+  generare una pagina. Il sistema decide automaticamente in base allo
+  stato e alle sources accumulate. Compito dell'LLM: identificare
+  l'`entity_id` corretto, non preoccuparsi della materializzazione.
+- **In query**, una citazione `[[entity_id]]` è valida anche se non
+  esiste una entity page tra i risultati wiki retrieved. In quel caso
+  l'entità è `aliased`: il retrieval ha pescato le source che la citano,
+  e la risposta va sintetizzata da quelle. NON allucinare contenuti
+  esterni al corpus per riempire il vuoto: vale la regola
+  "menzione ≠ trattazione" (sotto).
 
 **Inventario parziale a grande scala.** Oltre una soglia di entità
 l'inventario mostrato non è l'elenco completo ma uno *scheletro* aggregato

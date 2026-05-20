@@ -24,7 +24,7 @@ va sostituito con un index gerarchico caricato dinamicamente.
 from __future__ import annotations
 from datetime import date
 from .config import HOT_LAYER_PATH, AGENTS_MD_PATH
-from .stores import WikiStore
+from .stores import WikiStore, EntityIndex
 from .llm_client import LLMClient
 
 
@@ -58,16 +58,23 @@ class HotLayer:
     e letto a ogni query.
     """
 
-    def __init__(self, wiki_store: WikiStore, llm: LLMClient | None = None):
+    def __init__(self, wiki_store: WikiStore, llm: LLMClient | None = None,
+                 entity_index: EntityIndex | None = None):
         """Inizializza il Hot Layer.
 
         Args:
             wiki_store: sorgente delle pagine wiki da indicizzare.
             llm: opzionale. Se None, l'overview viene sostituita da un
                 testo placeholder (utile in test / offline).
+            entity_index: opzionale. Se fornito, il Hot Layer riporta il
+                conteggio delle entità in stato `aliased` (§13) — non
+                materializzate ma comunque parte del corpus. Se assente,
+                viene istanziato di default.
         """
         self.wiki_store = wiki_store
         self.llm = llm
+        # Lazy: l'EntityIndex viene letto solo al rebuild, non subito.
+        self.entity_index = entity_index or EntityIndex()
 
     def load(self) -> str:
         """Carica il Hot Layer corrente. Fallback su placeholder se non esiste."""
@@ -151,10 +158,27 @@ class HotLayer:
     def rebuild(self) -> str:
         """Ricostruisce il file HOT_LAYER.md da zero.
 
+        Con lazy materialization (§13) l'index include solo le entity
+        consolidated (filtro implicito: wiki_store.list() legge dal
+        filesystem, le aliased non hanno file). Le aliased vengono
+        riportate solo come conteggio aggregato per dare consapevolezza
+        dello spazio entità completo all'LLM in query.
+
         Side effect: scrive su disco. Ritorna anche il contenuto per
         eventuale ispezione/test.
         """
         index_md, entries = self._build_index()
+        # Aliased counter (§13): rispecchia entità note ma non
+        # materializzate. Il modello in query deve sapere che il corpus
+        # è più ampio dell'index visibile.
+        aliased_entries = self.entity_index.list_by_state("aliased")
+        n_aliased = len(aliased_entries)
+        # Breakdown per dominio: utile per orientamento multi-corpus.
+        aliased_by_domain: dict[str, int] = {}
+        for e in aliased_entries:
+            d = e.get("domain") or "_unknown"
+            aliased_by_domain[d] = aliased_by_domain.get(d, 0) + 1
+
         overview = self._build_overview(entries)
         glossary = _load_agents_md()
         # Il glossary completo (AGENTS.md) NON viene incluso nel Hot Layer
@@ -167,11 +191,27 @@ class HotLayer:
                 "\n## Riferimento AGENTS\n"
                 "Vedi `schema/AGENTS.md` per regole operative e convenzioni di naming.\n"
             )
+        # Sezione "Spazio aliased": invisibile nell'index navigabile ma
+        # contabilizzata. Sopra una soglia minima è informazione utile.
+        aliased_section = ""
+        if n_aliased > 0:
+            breakdown = ", ".join(
+                f"{d}: {c}" for d, c in sorted(aliased_by_domain.items())
+            )
+            aliased_section = (
+                f"\n\n## Entità aliased ({n_aliased} non materializzate)\n"
+                f"Ci sono {n_aliased} entità note al corpus ma non ancora "
+                f"materializzate come pagina (n_sources < soglia di consolidamento). "
+                f"Sono comunque citabili con `[[entity_id]]` e recuperabili via "
+                f"retrieval delle loro source page. Distribuzione per dominio: "
+                f"{breakdown}.\n"
+            )
         content = (
             f"# Hot Layer — Companion Wiki di Lettura\n\n"
             f"_Aggiornato: {date.today().isoformat()}_\n\n"
             f"## Overview\n\n{overview}\n\n"
-            f"## Index ({len(entries)} pagine)\n{index_md}\n"
+            f"## Index ({len(entries)} pagine materializzate)\n{index_md}"
+            f"{aliased_section}\n"
             f"{glossary_excerpt}"
         )
         HOT_LAYER_PATH.write_text(content, encoding="utf-8")

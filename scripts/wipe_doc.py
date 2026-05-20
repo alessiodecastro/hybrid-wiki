@@ -22,13 +22,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.stores import VectorDB
+from src.stores import VectorDB, EntityIndex
 from src.config import RAW_DIR, WIKI_DIR, RAW_COLLECTION, WIKI_COLLECTION
 
 
-def wipe_doc(doc_id: str, vdb: VectorDB) -> dict:
+def wipe_doc(doc_id: str, vdb: VectorDB, index: EntityIndex) -> dict:
     """Rimuove raw file + source page file + vettori raw chunks + vettore
-    source page. Idempotente: chiamarlo su un doc_id già pulito è no-op.
+    source page + contributi dell'indice entità. Idempotente.
     """
     out = {"doc_id": doc_id}
 
@@ -52,6 +52,12 @@ def wipe_doc(doc_id: str, vdb: VectorDB) -> dict:
     vdb.delete(WIKI_COLLECTION, [source_id])
     out["source_vector_deleted"] = True
 
+    # Contributi dell'indice entità: rimuove doc_id dalle sources di tutte
+    # le entry. Le entity che restano senza sources vengono cancellate
+    # dall'indice (orphaned).
+    orphaned = index.remove_source_contribution(doc_id)
+    out["index_orphaned"] = orphaned
+
     return out
 
 
@@ -61,14 +67,20 @@ def main(doc_ids: list[str]) -> None:
         sys.exit(1)
 
     vdb = VectorDB()
+    index = EntityIndex()
     for did in doc_ids:
-        res = wipe_doc(did, vdb)
+        res = wipe_doc(did, vdb, index)
         print(f"  {did}")
         print(f"     raw md       : {'rimosso' if res['raw_md'] else 'assente'}")
         print(f"     source md    : {'rimosso' if res['source_md'] else 'assente'}")
         print(f"     raw chunks   : cancellati (where doc_id=={did})")
         print(f"     source vec   : cancellato")
+        if res.get("index_orphaned"):
+            print(f"     indice       : rimosse entry orfane: {res['index_orphaned']}")
+        else:
+            print(f"     indice       : contributi del doc rimossi dalle sources")
 
+    index.save()
     print(f"\nFatto. {len(doc_ids)} documenti puliti.")
 
 

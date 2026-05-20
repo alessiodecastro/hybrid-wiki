@@ -30,7 +30,10 @@ from .config import (
     RAW_COLLECTION, WIKI_COLLECTION, VALID_LEVELS, VALID_SUBTYPES, TOKEN_LOG_PATH,
     DEFAULT_DOMAIN, MIXED_DOMAIN, ENTITY_INVENTORY_CAP, ENTITY_SHORTLIST_K,
 )
-from .stores import RawStore, WikiStore, VectorDB
+from .stores import (
+    RawStore, WikiStore, VectorDB, EntityIndex,
+    ENTITY_STATE_ALIASED, ENTITY_STATE_CONSOLIDATED,
+)
 from .embeddings import Embedder
 from .llm_client import LLMClient
 from .hot_layer import HotLayer
@@ -168,6 +171,11 @@ class IngestPipeline:
         self.embedder = embedder or Embedder(tracker=self.tracker)
         self.llm = llm or LLMClient(tracker=self.tracker)
         self.hot = HotLayer(self.wiki, self.llm)
+        # Indice centrale entità (§13). Lazy load: il file viene letto al
+        # primo accesso. Shared tra tutti i passaggi del batch — quindi è
+        # consistente attraverso più ingest consecutivi nella stessa
+        # invocazione di pipeline.
+        self.entity_index = EntityIndex()
         # AGENTS.md viene caricato UNA VOLTA all'init: nel ciclo di vita
         # tipico di un ingest batch non cambia. In caso di hot-reload del
         # contratto operativo, ricreare la pipeline.
@@ -485,38 +493,77 @@ class IngestPipeline:
             pages[pid] = (fm, pbody)
         return pages
 
+    def _aliased_entries_for_domain(self, domain: str) -> list[dict]:
+        """Entry aliased dall'indice che riguardano il dominio target.
+
+        Include entità con domain corrispondente o `_mixed`. Output
+        ordinato per id. Usato per arricchire l'inventario con le
+        entità NOTE ma non ancora materializzate (§13): l'LLM deve
+        comunque non coniarne varianti.
+        """
+        out = []
+        for e in self.entity_index.list_by_state(ENTITY_STATE_ALIASED):
+            edom = e.get("domain") or ""
+            if edom == domain or edom == MIXED_DOMAIN or edom == "":
+                out.append(e)
+        out.sort(key=lambda x: x["id"])
+        return out
+
     def _entity_inventory(self, domain: str, query_embedding: list[float] | None = None) -> str:
         """Inventario delle entità esistenti, da iniettare in _identify_entities.
 
         Serve a far RIUSARE al modello gli id esistenti invece di crearne
         varianti (the_shire vs shire, orodruin vs mount_doom, ...).
 
-        Due modalità (debito noto §11.1: l'inventario piatto è O(N) e satura
-        il contesto oltre ~ENTITY_INVENTORY_CAP entità):
+        Con lazy materialization (§13) l'inventario include DUE classi:
+        - CONSOLIDATED: entità con pagina md materializzata (dal filesystem,
+          come storicamente). Hanno descrittore breve dal body.
+        - ALIASED: entità note solo nell'indice (n_sources < THRESHOLD).
+          Niente body, solo id + subtype + n_sources — comunque sufficienti
+          per impedire la creazione di varianti del medesimo id.
 
-        - PIATTA (n <= cap, oppure nessun query_embedding): lista completa.
-          Comportamento storico, retro-compatibile.
-        - GERARCHICA (n > cap): SCHELETRO aggregato per subtype (conteggi +
-          pochi esemplari, dà consapevolezza dello spazio) + SHORTLIST
-          semantica delle K entità più affini al documento (recall mirato,
-          O(K) indipendente da N). La shortlist usa il vettore della source
-          page già creata (nessun embedding aggiuntivo).
+        Due modalità (debito noto §11.1: oltre ~ENTITY_INVENTORY_CAP entità
+        consolidated l'inventario piatto satura il contesto):
+        - PIATTA (n consolidated <= cap, oppure nessun query_embedding):
+          lista completa consolidated + lista aliased compatta.
+        - GERARCHICA (n consolidated > cap): SCHELETRO per subtype +
+          SHORTLIST semantica (solo consolidated, le aliased non hanno
+          vettore). Le aliased restano come elenco aggregato compatto.
         """
         pages = self._collect_entity_pages(domain)
-        if not pages:
+        aliased = self._aliased_entries_for_domain(domain)
+
+        if not pages and not aliased:
             return "(nessuna entità esistente in questo dominio: è il primo documento)"
+
+        # Sezione ALIASED (riga compatta, ridotta a id + subtype + n_sources).
+        # Mostrata anche in modalità gerarchica perché tipicamente sono
+        # poche righe ognuna: utili per anti-frammentazione, costano poco.
+        aliased_block = ""
+        if aliased:
+            lines = []
+            for e in aliased:
+                sub = e.get("subtype") or "-"
+                lines.append(f"- {e['id']} [{sub}] (aliased, {e['n_sources']} sources)")
+            aliased_block = (
+                "\n\nALIASED (entità note ma non ancora consolidate — riusa l'id se trattate nel doc, "
+                "altrimenti ignora):\n"
+                + "\n".join(lines)
+            )
 
         # Modalità piatta: sotto soglia o senza query vector disponibile.
         if len(pages) <= ENTITY_INVENTORY_CAP or query_embedding is None:
+            if not pages:
+                return "(nessuna entità materializzata in questo dominio)" + aliased_block
             lines = [self._entity_line(pid, fm, body) for pid, (fm, body) in pages.items()]
-            return "\n".join(sorted(lines))
+            return "\n".join(sorted(lines)) + aliased_block
 
         # --- Modalità gerarchica ---
         # 1. Scheletro: per subtype, conteggio + fino a 3 esemplari.
         by_sub: dict[str, list[str]] = {}
         for pid, (fm, _b) in pages.items():
             by_sub.setdefault(fm.get("subtype") or "-", []).append(pid)
-        skeleton_lines = ["SCHELETRO (panoramica aggregata — lo spazio entità è più ampio della shortlist):"]
+        skeleton_lines = ["SCHELETRO (panoramica aggregata — lo spazio entità consolidated è più ampio della shortlist):"]
         for sub in sorted(by_sub):
             ids = sorted(by_sub[sub])
             esempi = ", ".join(ids[:3])
@@ -525,6 +572,8 @@ class IngestPipeline:
 
         # 2. Shortlist semantica: K entità più vicine al documento.
         #    Filtro ChromaDB: solo entity, dominio o _mixed.
+        #    Le aliased non hanno vettore e non compaiono nella shortlist —
+        #    ma compaiono nella sezione ALIASED già aggiunta.
         where = {
             "$and": [
                 {"domain": {"$in": [domain, MIXED_DOMAIN]}},
@@ -542,9 +591,10 @@ class IngestPipeline:
 
         return (
             "\n".join(skeleton_lines)
-            + f"\n\nSHORTLIST (le {len(short_lines)} entità esistenti più affini a questo documento — "
+            + f"\n\nSHORTLIST (le {len(short_lines)} entità consolidated più affini a questo documento — "
             "controlla QUI prima di coniare un id nuovo):\n"
             + shortlist
+            + aliased_block
         )
 
     def _identify_entities(
@@ -653,10 +703,13 @@ class IngestPipeline:
         return clean
 
     def _integrate_entities(self, doc_id: str, title: str, body: str, hint_subtype: str | None, domain: str) -> list[str]:
-        """Per ogni entità identificata: crea o aggiorna la pagina entity.
+        """Per ogni entità identificata nel doc, decide il branch (§13):
+        aliased (solo update indice, no LLM), consolidamento (LLM su N source),
+        merge incrementale (LLM su entity esistente + nuovo doc).
 
         Returns:
-            Lista dei page_id toccati (creati o aggiornati).
+            Lista dei page_id materializzati o aggiornati. Le entità
+            rimaste `aliased` NON compaiono qui (nessun file md creato).
         """
         # Query vector per la shortlist semantica dell'inventario gerarchico.
         # Riuso del vettore della source page (creata e embeddata appena prima
@@ -673,64 +726,158 @@ class IngestPipeline:
                 doc_id, title, body, hint_subtype, domain, query_embedding=q_emb
             )
         touched: list[str] = []
+
         for ent in entities:
-            page_id = ent["id"]
+            entity_id = ent["id"]
             subtype = ent["subtype"]
-            # Branch principale: creazione vs merge. Cambia il prompt
-            # e quindi la natura (e il costo) della chiamata LLM:
-            # il merge include la pagina esistente in input, è più caro.
-            #
-            # Graceful skip sul content filter Azure: corpora narrativi
-            # (Tolkien, Rowling, ...) possono triggerare il filtro su
-            # singole entità senza che il documento intero sia
-            # "violento". Saltiamo la singola entità con audit log,
-            # NON l'intero ingest. Allineato alla tolleranza errori del
-            # bulk ingest (ingest_folder.py).
+
+            # Step 1 (sempre): registra il contributo nell'indice.
+            # Zero LLM. L'entità è già nota o appena registrata in stato `aliased`.
+            self.entity_index.upsert_contribution(entity_id, doc_id, subtype, domain)
+            entry = self.entity_index.get(entity_id)
+
+            # Step 2: decide il branch in base allo stato + soglia.
+            should_consolidate = self.entity_index.should_consolidate(entity_id)
+            is_consolidated = entry["state"] == ENTITY_STATE_CONSOLIDATED
+
+            if not should_consolidate and not is_consolidated:
+                # CASO "aliased sotto soglia": niente file, niente LLM, niente vettore.
+                # Solo update indice (già fatto sopra). L'entità è citabile via
+                # [[entity_id]] e lato query verrà sintetizzata dalle source.
+                continue
+
+            # I due rami che richiedono chiamata LLM. Graceful skip su
+            # content filter Azure (corpora narrativi): salta la singola
+            # entità con audit log, non blocca l'ingest.
             try:
-                if self.wiki.exists(page_id):
+                if should_consolidate:
+                    # CONSOLIDAMENTO: aliased → consolidated. Una sola chiamata
+                    # LLM, input = N source page elencate nell'indice.
+                    with self.tracker.phase("ingest:l2:entity_consolidate"):
+                        new_body = self._consolidate_entity(
+                            entity_id, subtype, entry["sources"], entry["domain"]
+                        )
+                    page_domain = entry["domain"]
+                    op = "consolidate"
+                else:
+                    # MERGE INCREMENTALE: entità già consolidated, integra il nuovo doc.
                     with self.tracker.phase("ingest:l2:entity_merge"):
-                        merged = self._merge_entity_page(page_id, doc_id, title, body, domain)
-                    # Dominio della pagina aggiornato: se il nuovo dominio
-                    # differisce dal corrente, segna la pagina come "_mixed"
-                    # (sorgenti multi-dominio). Permette al filtro query-time
-                    # di scegliere se includerla.
-                    existing_fm, _ = self.wiki.get(page_id)
+                        new_body = self._merge_entity_page(entity_id, doc_id, title, body, domain)
+                    existing_fm, _ = self.wiki.get(entity_id)
                     current_domain = existing_fm.get("domain", DEFAULT_DOMAIN)
                     page_domain = current_domain if current_domain == domain else MIXED_DOMAIN
                     op = "merge"
-                else:
-                    with self.tracker.phase("ingest:l2:entity_create"):
-                        merged = self._create_entity_page(page_id, subtype, doc_id, title, body, domain)
-                    page_domain = domain
-                    op = "create"
             except BadRequestError as e:
                 if _is_content_filter(e):
-                    print(f"  [content_filter] skip entity '{page_id}' "
-                          f"({'merge in pagina esistente' if self.wiki.exists(page_id) else 'create'}) "
+                    skip_op = "consolidate" if should_consolidate else "merge"
+                    print(f"  [content_filter] skip entity '{entity_id}' ({skip_op}) "
                           f"per doc '{doc_id}' — log in {CONTENT_FILTER_SKIPS_PATH.name}")
-                    _log_content_filter_skip(
-                        doc_id, page_id, title, domain,
-                        op="merge" if self.wiki.exists(page_id) else "create",
-                    )
+                    _log_content_filter_skip(doc_id, entity_id, title, domain, op=skip_op)
+                    # Importante: NON marchiamo consolidated se è fallito.
+                    # L'entità resta aliased nell'indice e ritenterà al prossimo doc.
                     continue
                 raise
-            # Metadati aggiornati a ogni passaggio: importa che sources sia
-            # cumulativo (vedi WikiStore.update_with_merge).
+
+            # Persistenza: salva file md, indicizza vettore, aggiorna indice.
             extra_meta = {
                 "type": "entity",
                 "subtype": subtype,
                 "domain": page_domain,
+                "sources": entry["sources"],
                 "last_updated": date.today().isoformat(),
                 "stale": False,
-                "title": page_id.replace("_", " ").title(),
+                "title": entity_id.replace("_", " ").title(),
             }
-            self.wiki.update_with_merge(page_id, merged, [doc_id], extra_meta=extra_meta)
-            # Re-embed della pagina aggiornata. Fase dedicata per separare
-            # il costo dell'embedding wiki da quello della generazione testo.
+            # update_with_merge gestisce sia primo salvataggio (consolidate)
+            # sia update di pagina esistente (merge incrementale).
+            # Per il consolidate, le sources sono già nell'extra_meta e
+            # vengono usate dal WikiStore.update_with_merge.
+            self.wiki.update_with_merge(
+                entity_id, new_body,
+                [doc_id] if op == "merge" else [],  # consolidate: sources in extra_meta
+                extra_meta=extra_meta,
+            )
             with self.tracker.phase("ingest:l2:wiki_index"):
-                self._index_wiki_page(page_id)
-            touched.append(page_id)
+                self._index_wiki_page(entity_id)
+
+            if op == "consolidate":
+                self.entity_index.mark_consolidated(entity_id)
+            touched.append(entity_id)
+
+        # Persisti l'indice una sola volta a fine integrazione (batch save).
+        self.entity_index.save()
         return touched
+
+    def _consolidate_entity(self, entity_id: str, subtype: str,
+                            source_ids: list[str], domain: str) -> str:
+        """Genera una entity page consolidando N source page in una passata.
+
+        È il sostituto del vecchio `_create_entity_page` per il caso "ho
+        accumulato N source per questa entità e ora vale la pena
+        materializzarla". Differenza chiave: invece di leggere il body del
+        nuovo doc, legge i body delle N source page già nel WikiStore
+        (sintesi già strutturate, contesto migliore di N raw grezzi).
+
+        Args:
+            entity_id: id dell'entità da consolidare.
+            subtype: character|place|... o "" (concetto).
+            source_ids: lista doc_id dei doc che hanno contribuito.
+            domain: dominio dell'entità (o _mixed).
+
+        Returns:
+            Body markdown della entity page consolidata (frontmatter
+            aggiunto dal chiamante).
+        """
+        subtype_label = subtype or "concetto/organizzazione (fuori tassonomia standard)"
+
+        # Legge i body delle source page già nel WikiStore. Saltiamo le
+        # mancanti (non dovrebbe succedere, ma safety): la generazione
+        # avviene comunque sulle disponibili.
+        source_blocks: list[str] = []
+        for src_doc_id in source_ids:
+            spid = f"source_{src_doc_id}"
+            if not self.wiki.exists(spid):
+                continue
+            _fm, sbody = self.wiki.get(spid)
+            source_blocks.append(f"### Source [[{src_doc_id}]]\n\n{sbody}")
+
+        if not source_blocks:
+            # Caso di edge: tutte le source page mancano. Fallback a
+            # stringa minima invece di crashare.
+            return (
+                f"# {entity_id.replace('_', ' ').title()}\n\n"
+                f"## Panoramica\n\nEntità identificata ma senza source disponibili "
+                f"al momento del consolidamento.\n\n"
+                f"## Dettagli\n\n## Relazioni\n\n## Domande aperte\n"
+            )
+
+        sources_csv = ", ".join(f"[[{sid}]]" for sid in source_ids)
+        system = (
+            f"Sei un curatore di un companion wiki di lettura, corpus '{domain}'. "
+            f"Genera la pagina ENCICLOPEDICA per l'entità '{entity_id}' "
+            f"(tipo: {subtype_label}) CONSOLIDANDO le {len(source_blocks)} "
+            "source page elencate. Le source sono già sintesi strutturate dei "
+            "documenti originali: combina le informazioni che convergono, "
+            "menziona esplicitamente le contraddizioni se presenti.\n\n"
+            "Struttura in markdown:\n"
+            "# <Nome leggibile>\n\n"
+            "## Panoramica\n\n## Dettagli\n\n## Relazioni\n\n"
+            "## Domande aperte\n\n"
+            "## Contraddizioni note   (opzionale, solo se le source divergono "
+            "su un fatto specifico)\n\n"
+            "Italiano, tono enciclopedico, terza persona. "
+            f"Cita le sorgenti con [[doc_id]] usando esclusivamente gli id "
+            f"forniti ({sources_csv}). Niente invenzioni: solo contenuti "
+            "deducibili dalle source.\n\n"
+            f"AGENTS.md:\n{self.agents_md}"
+        )
+        user = (
+            f"Entity da consolidare: '{entity_id}' (subtype: {subtype or 'concetto'}, "
+            f"domain: {domain}).\n\n"
+            f"Source disponibili ({len(source_blocks)}):\n\n"
+            + "\n\n---\n\n".join(source_blocks)
+        )
+        return self.llm.complete(system=system, user=user, max_tokens=2500)
 
     def _create_entity_page(self, page_id: str, subtype: str, doc_id: str, title: str, body: str, domain: str) -> str:
         """Genera ex-novo una pagina entity dal documento sorgente."""

@@ -44,6 +44,7 @@ INCOMING_DIR = RAW_DIR / "incoming"         # documenti sorgente prima dell'inge
 WIKI_DIR = DATA_DIR / "wiki"                # pagine wiki generate (entity + source + Hot Layer)
 VECTORS_DIR = DATA_DIR / "vectors"          # store ChromaDB persistente
 HOT_LAYER_PATH = WIKI_DIR / "HOT_LAYER.md"  # singolo file: overview + index
+ENTITY_INDEX_PATH = WIKI_DIR / "_entity_index.yaml"  # indice centrale entità (§13)
 QUERY_LOG_PATH = DATA_DIR / "query_log.jsonl"  # audit trail append-only delle query
 TOKEN_LOG_PATH = DATA_DIR / "token_log.jsonl"  # consumo token per fase, append-only
 
@@ -107,12 +108,23 @@ CHUNK_OVERLAP_WORDS = 40
 
 # ----------------------------------------------------------------------------
 # Retrieval: top-k separati per indice wiki e raw.
-# Wiki ha pagine "dense" (sintesi), 4 sono di norma sufficienti per orientare
-# l'LLM. Raw ha chunk frammentati, k più alto aumenta la probabilità di
-# pescare la frase precisa che risolve la domanda.
+# Wiki ha pagine "dense" (sintesi), il top-k va calibrato in base al regime
+# di materializzazione. Con lazy merge (§13), molte entità centrali del
+# corpus restano aliased e sono recuperabili SOLO attraverso le loro
+# source page: alzare WIKI_TOP_K da 4 a 6 compensa pescando più source
+# (con embedding più "stretto" sul singolo doc) accanto alle entity
+# consolidated. Raw ha chunk frammentati, k più alto aumenta la probabilità
+# di pescare la frase precisa che risolve la domanda.
 # ----------------------------------------------------------------------------
-WIKI_TOP_K = 4
+WIKI_TOP_K = 6
 RAW_TOP_K = 6
+
+# Lazy materialization delle entity page (§13).
+# Soglia di consolidamento: un'entità diventa pagina md materializzata solo
+# quando raggiunge questo numero di sources cumulative. Sotto la soglia resta
+# `aliased` (solo entry nell'indice, nessun file/vettore). Default 3.
+# Soglia=1 equivale al merge eager classico (ogni entità è subito pagina).
+ENTITY_CONSOLIDATION_THRESHOLD = int(os.environ.get("ENTITY_CONSOLIDATION_THRESHOLD", "3"))
 
 # Inventario entità per _identify_entities (debito noto §11.1).
 # Sotto il CAP: inventario piatto completo (comportamento storico,

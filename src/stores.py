@@ -16,12 +16,13 @@ in sequenza ma ognuno è autonomo e testabile in isolamento.
 """
 
 from __future__ import annotations
+from datetime import datetime
 from pathlib import Path
 import yaml
 import chromadb
 from .config import (
-    RAW_DIR, WIKI_DIR, VECTORS_DIR, HOT_LAYER_PATH,
-    RAW_COLLECTION, WIKI_COLLECTION,
+    RAW_DIR, WIKI_DIR, VECTORS_DIR, HOT_LAYER_PATH, ENTITY_INDEX_PATH,
+    RAW_COLLECTION, WIKI_COLLECTION, ENTITY_CONSOLIDATION_THRESHOLD,
 )
 
 
@@ -326,3 +327,203 @@ class VectorDB:
         if embs is not None and len(embs) and embs[0] is not None:
             return list(embs[0])
         return None
+
+
+# Stati possibili per un'entità nell'indice (§13).
+ENTITY_STATE_ALIASED = "aliased"           # n_sources < threshold, no file md, no vettore
+ENTITY_STATE_CONSOLIDATED = "consolidated" # entity page materializzata + indicizzata
+ENTITY_STATE_STABLE = "stable"             # consolidata + merge automatico congelato (futuro)
+
+
+class EntityIndex:
+    """Indice centrale delle entità del corpus (§13).
+
+    Single source of truth per:
+    - "esiste un'entità con questo id?" (anti-frammentazione, dedup)
+    - "quali source contribuiscono a questa entità?"
+    - "questa entità è materializzata come pagina md o solo aliased?"
+
+    File su disco: `data/wiki/_entity_index.yaml`. Caricamento on-demand,
+    save esplicito dopo ogni mutazione (no transazioni multi-step; le
+    mutazioni dell'ingest sono già serializzate).
+
+    Per ogni entry:
+        id              : entity_id (snake_case inglese, stabile)
+        subtype         : character|place|artifact|event|book|"" (concetto)
+        domain          : dominio della maggioranza delle source; _mixed se cross
+        sources         : lista doc_id che la citano (ordine = inserimento)
+        n_sources       : len(sources), denormalizzato per lookup veloce
+        state           : aliased | consolidated | stable
+        consolidated_at : ISO timestamp del consolidamento, o None
+        last_updated    : ISO date dell'ultimo update
+    """
+
+    def __init__(self, path: Path = ENTITY_INDEX_PATH,
+                 threshold: int = ENTITY_CONSOLIDATION_THRESHOLD):
+        self.path = path
+        self.threshold = threshold
+        self._data: dict | None = None  # lazy load
+
+    # ------------------------------------------------------------------
+    # I/O su disco
+    # ------------------------------------------------------------------
+    def _load(self) -> dict:
+        """Carica l'indice se non già in memoria. Inizializza vuoto se assente."""
+        if self._data is not None:
+            return self._data
+        if not self.path.exists():
+            self._data = {"version": 1, "threshold": self.threshold, "entities": []}
+            return self._data
+        raw = yaml.safe_load(self.path.read_text(encoding="utf-8")) or {}
+        if "entities" not in raw or raw["entities"] is None:
+            raw["entities"] = []
+        raw.setdefault("version", 1)
+        raw.setdefault("threshold", self.threshold)
+        self._data = raw
+        return self._data
+
+    def save(self) -> None:
+        """Persiste l'indice su disco. No-op se non c'è stato un load (niente da scrivere)."""
+        if self._data is None:
+            return
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.path.write_text(
+            yaml.safe_dump(self._data, sort_keys=False, allow_unicode=True),
+            encoding="utf-8",
+        )
+
+    # ------------------------------------------------------------------
+    # Lookup
+    # ------------------------------------------------------------------
+    def get(self, entity_id: str) -> dict | None:
+        """Ritorna l'entry per un entity_id, o None se assente.
+
+        L'entry restituita è il dict vivo nell'indice: modifiche su di esso
+        si riflettono nella struttura interna. Per safety, il chiamante
+        dovrebbe trattarla come read-only e usare update() per modifiche.
+        """
+        data = self._load()
+        for e in data["entities"]:
+            if e["id"] == entity_id:
+                return e
+        return None
+
+    def exists(self, entity_id: str) -> bool:
+        return self.get(entity_id) is not None
+
+    def list_all(self) -> list[dict]:
+        """Tutte le entry dell'indice (ordine di inserimento)."""
+        return list(self._load()["entities"])
+
+    def list_by_state(self, state: str) -> list[dict]:
+        """Entry filtrate per stato (aliased | consolidated | stable)."""
+        return [e for e in self._load()["entities"] if e.get("state") == state]
+
+    def consolidated_ids(self) -> set[str]:
+        """Insieme degli entity_id consolidated (per filtri Hot Layer/query)."""
+        return {e["id"] for e in self._load()["entities"]
+                if e.get("state") == ENTITY_STATE_CONSOLIDATED}
+
+    def aliased_ids(self) -> set[str]:
+        """Insieme degli entity_id aliased (per whitelist citazioni in query)."""
+        return {e["id"] for e in self._load()["entities"]
+                if e.get("state") == ENTITY_STATE_ALIASED}
+
+    # ------------------------------------------------------------------
+    # Mutazioni
+    # ------------------------------------------------------------------
+    def upsert_contribution(self, entity_id: str, doc_id: str,
+                            subtype: str = "", domain: str = "") -> dict:
+        """Registra un contributo di `doc_id` per `entity_id`.
+
+        Se l'entità non esiste, viene creata in stato `aliased` con
+        sources=[doc_id]. Se esiste, `doc_id` viene appeso alla lista
+        (dedup) e i metadati aggiornati. NON cambia lo stato: la
+        decisione di consolidare resta al chiamante (vedi
+        should_consolidate()).
+
+        Returns:
+            L'entry aggiornata (dict vivo).
+        """
+        data = self._load()
+        entry = self.get(entity_id)
+        now_iso = datetime.now().isoformat(timespec="seconds")
+        today = datetime.now().date().isoformat()
+
+        if entry is None:
+            entry = {
+                "id": entity_id,
+                "subtype": subtype or "",
+                "domain": domain or "",
+                "sources": [doc_id],
+                "n_sources": 1,
+                "state": ENTITY_STATE_ALIASED,
+                "consolidated_at": None,
+                "last_updated": today,
+            }
+            data["entities"].append(entry)
+            return entry
+
+        # Append doc_id se non già presente.
+        if doc_id not in entry["sources"]:
+            entry["sources"].append(doc_id)
+        entry["n_sources"] = len(entry["sources"])
+        entry["last_updated"] = today
+        # Aggiorna subtype se ancora vuoto e ora arriva un valore.
+        if subtype and not entry.get("subtype"):
+            entry["subtype"] = subtype
+        # Domain: se sources di domini diversi, marca _mixed.
+        if domain:
+            current = entry.get("domain") or domain
+            entry["domain"] = current if current == domain else "_mixed"
+        return entry
+
+    def should_consolidate(self, entity_id: str) -> bool:
+        """True se l'entità è `aliased` e ha raggiunto la soglia."""
+        entry = self.get(entity_id)
+        if entry is None:
+            return False
+        return (entry.get("state") == ENTITY_STATE_ALIASED
+                and entry.get("n_sources", 0) >= self.threshold)
+
+    def mark_consolidated(self, entity_id: str) -> None:
+        """Promuove un'entità aliased a consolidated (timestamp registrato)."""
+        entry = self.get(entity_id)
+        if entry is None:
+            raise KeyError(f"Entity '{entity_id}' non trovata nell'indice.")
+        entry["state"] = ENTITY_STATE_CONSOLIDATED
+        entry["consolidated_at"] = datetime.now().isoformat(timespec="seconds")
+        entry["last_updated"] = datetime.now().date().isoformat()
+
+    def remove(self, entity_id: str) -> bool:
+        """Rimuove l'entry. Usato dal wipe e dal lint consolidation merge.
+
+        Returns:
+            True se l'entry esisteva ed è stata rimossa.
+        """
+        data = self._load()
+        before = len(data["entities"])
+        data["entities"] = [e for e in data["entities"] if e["id"] != entity_id]
+        return len(data["entities"]) < before
+
+    def remove_source_contribution(self, doc_id: str) -> list[str]:
+        """Rimuove `doc_id` dalle sources di TUTTE le entità.
+
+        Usato durante il rollback di un doc: l'entità che aveva quel doc
+        come unica source diventa orfana e va rimossa; altrimenti
+        decrementa n_sources e basta. NON declassifica da consolidated
+        ad aliased automaticamente (richiede rebuild dedicato).
+
+        Returns:
+            Lista degli entity_id rimossi (perché senza più sources).
+        """
+        data = self._load()
+        orphaned: list[str] = []
+        for e in list(data["entities"]):
+            if doc_id in e["sources"]:
+                e["sources"] = [s for s in e["sources"] if s != doc_id]
+                e["n_sources"] = len(e["sources"])
+                if not e["sources"]:
+                    data["entities"].remove(e)
+                    orphaned.append(e["id"])
+        return orphaned

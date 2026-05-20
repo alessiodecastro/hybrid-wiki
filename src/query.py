@@ -26,7 +26,7 @@ from .config import (
     RAW_COLLECTION, WIKI_COLLECTION,
     WIKI_TOP_K, RAW_TOP_K, MIXED_DOMAIN,
 )
-from .stores import WikiStore, VectorDB
+from .stores import WikiStore, VectorDB, EntityIndex
 from .embeddings import Embedder
 from .llm_client import LLMClient
 from .hot_layer import HotLayer
@@ -169,7 +169,11 @@ class QueryPipeline:
         self.vdb = VectorDB()
         self.llm = llm or LLMClient(tracker=self.tracker)
         self.embedder = embedder or Embedder(tracker=self.tracker)
-        self.hot = HotLayer(self.wiki, self.llm)
+        # Indice entità (§13): serve a riconoscere le entità `aliased`,
+        # per le quali sono ammessi [[entity_id]] anche se non c'è una
+        # entity page tra i risultati wiki retrieved.
+        self.entity_index = EntityIndex()
+        self.hot = HotLayer(self.wiki, self.llm, entity_index=self.entity_index)
         self.agents_md = _load_agents()
 
     def _corpus_domains(self) -> set[str]:
@@ -236,15 +240,31 @@ class QueryPipeline:
         wiki_block = self._format_hits(wiki_hits, kind="WIKI")
         raw_block = self._format_hits(raw_hits, kind="RAW")
 
-        # Whitelist delle citazioni ammesse: solo gli id effettivamente
-        # recuperati. Senza questa lista il modello inventa wikilink
-        # plausibili ma inesistenti (osservato: morgoth, rings_of_power,
-        # war_of_the_ring...). Con la lista esplicita la hallucination
-        # cala drasticamente.
+        # Whitelist delle citazioni ammesse: id effettivamente recuperati
+        # (page_id wiki + doc_id raw) PIU' gli entity_id `aliased` rilevanti
+        # ai documenti retrieved (§13). Le entità aliased non hanno pagina
+        # md nè vettore wiki, ma sono citabili: il retrieval ha pescato le
+        # loro source, l'LLM le sintetizza runtime.
+        #
+        # Criterio per includere un'aliased nella whitelist: deve essere
+        # tra le sources delle entry indice corrispondenti ai doc_id che
+        # sono effettivamente nei raw_hits. Altrimenti l'LLM potrebbe
+        # citare entità aliased non rappresentate dal retrieval corrente
+        # — è un'allucinazione "morbida" ma comunque scorretta.
         allowed_wiki = sorted({(h.get("metadata") or {}).get("page_id") or h["id"] for h in wiki_hits})
         allowed_raw = sorted({(h.get("metadata") or {}).get("doc_id") or h["id"] for h in raw_hits})
         allowed_wiki = [w for w in allowed_wiki if w]
         allowed_raw = [r for r in allowed_raw if r]
+
+        # Entità aliased pertinenti: scansione dell'indice per quelle che
+        # hanno almeno una source presente nei raw_hits. Tipicamente
+        # piccola lista (max O(n_aliased)).
+        retrieved_doc_ids = set(allowed_raw)
+        allowed_aliased: list[str] = []
+        for e in self.entity_index.list_by_state("aliased"):
+            if any(s in retrieved_doc_ids for s in e.get("sources", [])):
+                allowed_aliased.append(e["id"])
+        allowed_aliased.sort()
 
         # Policy multi-corpus (fix caso x08: dominanza silenziosa).
         # Si attiva SOLO quando non è stato applicato un filtro --domain
@@ -306,16 +326,22 @@ class QueryPipeline:
             # Whitelist + regole di formato citazione. Critico per evitare
             # le hallucination di wikilink osservate sulle risposte lunghe.
             "REGOLE DI CITAZIONE (vincolanti):\n"
-            "- Puoi citare con `[[id]]` SOLO id presenti nella whitelist sottostante. "
+            "- Puoi citare con `[[id]]` SOLO id presenti nelle whitelist sottostanti. "
             "  Se vuoi riferirti a un'entità non in whitelist, scrivila in testo piano "
             "  SENZA wikilink (es. 'Morgoth', non '[[morgoth]]').\n"
-            "- Usa `[[page_id_wiki]]` per concetti, sintesi e relazioni.\n"
+            "- Usa `[[page_id_wiki]]` per concetti, sintesi e relazioni di entità "
+            "  con pagina materializzata (consolidated).\n"
             "- Usa `[[doc_id_raw]]` (quelli con suffisso _AAAAMMGGHHMMSS) per dettagli "
             "  puntuali, date, citazioni testuali.\n"
+            "- Usa `[[entity_id_aliased]]` per entità ALIASED (note al corpus ma "
+            "  senza pagina materializzata). In questo caso non hai una entity page "
+            "  tra i risultati WIKI: sintetizza l'entità dalle source page e dai raw "
+            "  chunks che la trattano. Se la copertura è scarna, dichiara il gap.\n"
             "- Non duplicare wiki+raw nello stesso punto se rimandano allo stesso fatto: "
             "  scegline UNO secondo le regole di risoluzione conflitti.\n"
-            "WIKI page_id ammessi: " + (", ".join(allowed_wiki) if allowed_wiki else "(nessuno)") + "\n"
-            "RAW  doc_id  ammessi: " + (", ".join(allowed_raw) if allowed_raw else "(nessuno)") + "\n\n"
+            "WIKI page_id ammessi (consolidated): " + (", ".join(allowed_wiki) if allowed_wiki else "(nessuno)") + "\n"
+            "ALIASED entity_id ammessi: " + (", ".join(allowed_aliased) if allowed_aliased else "(nessuno)") + "\n"
+            "RAW  doc_id ammessi: " + (", ".join(allowed_raw) if allowed_raw else "(nessuno)") + "\n\n"
             "COMPATTEZZA:\n"
             "La risposta finale (incluso il blocco JSON) deve stare entro ~600 parole. "
             "Se l'argomento è vasto, dai priorità ai fatti essenziali e cita le pagine wiki "

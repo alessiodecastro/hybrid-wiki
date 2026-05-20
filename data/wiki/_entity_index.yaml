@@ -1,0 +1,579 @@
+version: 1
+threshold: 3
+entities:
+- id: frodo_baggins
+  subtype: character
+  domain: tolkien
+  sources:
+  - frodo_baggins_introduzione_20260520162549
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: bilbo_baggins
+  subtype: character
+  domain: tolkien
+  sources:
+  - frodo_baggins_introduzione_20260520162549
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: samwise_gamgee
+  subtype: character
+  domain: tolkien
+  sources:
+  - frodo_baggins_introduzione_20260520162549
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: one_ring
+  subtype: artifact
+  domain: tolkien
+  sources:
+  - frodo_baggins_introduzione_20260520162549
+  - anello_unico_20260520162643
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: gandalf
+  subtype: character
+  domain: tolkien
+  sources:
+  - gandalf_introduzione_20260520162604
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: aragorn
+  subtype: character
+  domain: tolkien
+  sources:
+  - aragorn_introduzione_20260520162615
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: elrond
+  subtype: character
+  domain: tolkien
+  sources:
+  - aragorn_introduzione_20260520162615
+  - consiglio_di_elrond_20260520162740
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: arwen
+  subtype: character
+  domain: tolkien
+  sources:
+  - aragorn_introduzione_20260520162615
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: narsil
+  subtype: artifact
+  domain: tolkien
+  sources:
+  - aragorn_introduzione_20260520162615
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: sauron
+  subtype: character
+  domain: tolkien
+  sources:
+  - anello_unico_20260520162643
+  - sauron_20260520162800
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: mount_doom
+  subtype: place
+  domain: tolkien
+  sources:
+  - anello_unico_20260520162643
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: rings_of_power
+  subtype: artifact
+  domain: tolkien
+  sources:
+  - anello_unico_20260520162643
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: the_shire
+  subtype: place
+  domain: tolkien
+  sources:
+  - la_contea_20260520162659
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: eriador
+  subtype: place
+  domain: tolkien
+  sources:
+  - la_contea_20260520162659
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: arnor
+  subtype: place
+  domain: tolkien
+  sources:
+  - la_contea_20260520162659
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: gondor
+  subtype: place
+  domain: tolkien
+  sources:
+  - la_contea_20260520162659
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: mordor
+  subtype: place
+  domain: tolkien
+  sources:
+  - mordor_20260520162718
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: gorgoroth
+  subtype: place
+  domain: tolkien
+  sources:
+  - mordor_20260520162718
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: nurn
+  subtype: place
+  domain: tolkien
+  sources:
+  - mordor_20260520162718
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: morannon
+  subtype: place
+  domain: tolkien
+  sources:
+  - mordor_20260520162718
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: council_of_elrond
+  subtype: event
+  domain: tolkien
+  sources:
+  - consiglio_di_elrond_20260520162740
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: fellowship_of_the_ring
+  subtype: event
+  domain: tolkien
+  sources:
+  - consiglio_di_elrond_20260520162740
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: rivendell
+  subtype: place
+  domain: tolkien
+  sources:
+  - consiglio_di_elrond_20260520162740
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: morgoth
+  subtype: character
+  domain: tolkien
+  sources:
+  - sauron_20260520162800
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: barad_dur
+  subtype: place
+  domain: tolkien
+  sources:
+  - sauron_20260520162800
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: dol_guldur
+  subtype: place
+  domain: tolkien
+  sources:
+  - sauron_20260520162800
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: hari_seldon
+  subtype: character
+  domain: asimov
+  sources:
+  - hari_seldon_20260520164621
+  - la_psicostoria_20260520164819
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: psychohistory
+  subtype: ''
+  domain: asimov
+  sources:
+  - hari_seldon_20260520164621
+  - la_psicostoria_20260520164819
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: seldon_plan
+  subtype: ''
+  domain: asimov
+  sources:
+  - hari_seldon_20260520164621
+  - le_crisi_seldon_20260520164726
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: seldon_crises
+  subtype: event
+  domain: asimov
+  sources:
+  - hari_seldon_20260520164621
+  - le_crisi_seldon_20260520164726
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: the_mule
+  subtype: character
+  domain: asimov
+  sources:
+  - il_mulo_20260520164638
+  - le_crisi_seldon_20260520164726
+  - la_psicostoria_20260520164819
+  n_sources: 3
+  state: consolidated
+  consolidated_at: '2026-05-20T16:48:47'
+  last_updated: '2026-05-20'
+- id: second_foundation
+  subtype: ''
+  domain: asimov
+  sources:
+  - il_mulo_20260520164638
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: trantor
+  subtype: place
+  domain: asimov
+  sources:
+  - trantor_20260520164654
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: galactic_empire
+  subtype: ''
+  domain: asimov
+  sources:
+  - trantor_20260520164654
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: great_sack_of_trantor
+  subtype: event
+  domain: asimov
+  sources:
+  - trantor_20260520164654
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: galactic_university
+  subtype: ''
+  domain: asimov
+  sources:
+  - trantor_20260520164654
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: terminus
+  subtype: place
+  domain: asimov
+  sources:
+  - terminus_20260520164709
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: time_vault
+  subtype: artifact
+  domain: asimov
+  sources:
+  - terminus_20260520164709
+  - le_crisi_seldon_20260520164726
+  - enciclopedia_galattica_20260520164745
+  n_sources: 3
+  state: consolidated
+  consolidated_at: '2026-05-20T16:48:19'
+  last_updated: '2026-05-20'
+- id: first_foundation
+  subtype: ''
+  domain: asimov
+  sources:
+  - terminus_20260520164709
+  - enciclopedia_galattica_20260520164745
+  - la_fondazione_20260520164847
+  n_sources: 3
+  state: consolidated
+  consolidated_at: '2026-05-20T16:49:29'
+  last_updated: '2026-05-20'
+- id: terminus_city
+  subtype: place
+  domain: asimov
+  sources:
+  - terminus_20260520164709
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: encyclopedia_galactica
+  subtype: book
+  domain: asimov
+  sources:
+  - enciclopedia_galattica_20260520164745
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: second_empire
+  subtype: ''
+  domain: asimov
+  sources:
+  - enciclopedia_galattica_20260520164745
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: primary_radiant
+  subtype: artifact
+  domain: asimov
+  sources:
+  - la_psicostoria_20260520164819
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: hermione_granger
+  subtype: character
+  domain: rowling
+  sources:
+  - hermione_granger_20260520165039
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: dumbledores_army
+  subtype: ''
+  domain: rowling
+  sources:
+  - hermione_granger_20260520165039
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: time_turner
+  subtype: artifact
+  domain: rowling
+  sources:
+  - hermione_granger_20260520165039
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: spew
+  subtype: ''
+  domain: rowling
+  sources:
+  - hermione_granger_20260520165039
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: lord_voldemort
+  subtype: character
+  domain: rowling
+  sources:
+  - lord_voldemort_20260520165057
+  - harry_potter_20260520165200
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: horcruxes
+  subtype: ''
+  domain: rowling
+  sources:
+  - lord_voldemort_20260520165057
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: first_fall_of_voldemort
+  subtype: event
+  domain: rowling
+  sources:
+  - lord_voldemort_20260520165057
+  - la_prima_caduta_di_voldemort_20260520165130
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: resurrection_of_voldemort_1995
+  subtype: event
+  domain: rowling
+  sources:
+  - lord_voldemort_20260520165057
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: hogwarts_school_of_witchcraft_and_wizardry
+  subtype: place
+  domain: rowling
+  sources:
+  - hogwarts_20260520165113
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: chamber_of_secrets
+  subtype: place
+  domain: rowling
+  sources:
+  - hogwarts_20260520165113
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: room_of_requirement
+  subtype: place
+  domain: rowling
+  sources:
+  - hogwarts_20260520165113
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: battle_of_hogwarts
+  subtype: event
+  domain: rowling
+  sources:
+  - hogwarts_20260520165113
+  - harry_potter_20260520165200
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: godrics_hollow
+  subtype: place
+  domain: rowling
+  sources:
+  - la_prima_caduta_di_voldemort_20260520165130
+  - harry_potter_20260520165200
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: prophecy_about_harry_and_voldemort
+  subtype: event
+  domain: rowling
+  sources:
+  - la_prima_caduta_di_voldemort_20260520165130
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: harry_potter
+  subtype: character
+  domain: rowling
+  sources:
+  - la_prima_caduta_di_voldemort_20260520165130
+  - harry_potter_20260520165200
+  n_sources: 2
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: albus_dumbledore
+  subtype: character
+  domain: rowling
+  sources:
+  - albus_silente_20260520165215
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: gellert_grindelwald
+  subtype: character
+  domain: rowling
+  sources:
+  - albus_silente_20260520165215
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: elder_wand
+  subtype: artifact
+  domain: rowling
+  sources:
+  - albus_silente_20260520165215
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'
+- id: order_of_the_phoenix
+  subtype: ''
+  domain: rowling
+  sources:
+  - albus_silente_20260520165215
+  n_sources: 1
+  state: aliased
+  consolidated_at: null
+  last_updated: '2026-05-20'

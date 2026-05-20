@@ -341,32 +341,52 @@ Ogni frammento mantiene un riferimento al documento originale, alla posizione, e
 ### 5.2 Wiki Layer — Lo strato della conoscenza sintetizzata
 
 #### Cosa contiene
-Pagine generate dall'LLM a partire dai documenti raw. Ogni pagina ha uno scopo preciso e copre un'**entità**, un **concetto**, una **decisione**, o un **processo** rilevante per il dominio.
+Pagine generate dall'LLM a partire dai documenti raw + un **indice centrale delle entità** (`_entity_index.yaml`) che registra tutte le entità del corpus indipendentemente dal fatto che siano state materializzate in pagine. Ogni pagina copre un'**entità**, un **concetto**, una **decisione**, o un **processo** rilevante per il dominio.
 
 #### Tipi di pagine
 
-Quattro categorie principali, adattabili al contesto:
+Tre categorie principali, più l'indice:
 
 ```
-ENTITÀ
+SORGENTI (type: source)
+   pagine di sintesi 1:1 con un singolo documento raw
+   funzione: ponte tra raw e wiki, audit trail della sintesi
+   ciclo di vita: APPEND-ONLY, mai modificate dopo la creazione
+
+ENTITÀ (type: entity)
    pagine dedicate a "cose" identificabili e durevoli
    esempi: persone, organizzazioni, prodotti, luoghi,
            progetti, opere, eventi specifici
+   ciclo di vita: MATERIALIZZATE SOLO SOPRA UNA SOGLIA
+   (lazy: vedi §5.2.bis e §13)
 
-CONCETTI E TOPIC
-   pagine dedicate a temi, idee, processi, categorie
-   esempi: metodi, teorie, procedure, classi di problemi,
-           aree tematiche
-
-SORGENTI
-   pagine di sintesi che riassumono singoli documenti raw
-   funzione: ponte tra raw e wiki, audit trail della sintesi
-
-SYNTHESIS
+SYNTHESIS (futuro)
    pagine derivate da query o analisi specifiche
    esempi: confronti, panoramiche tematiche, analisi
            comparative, risposte significative
+
+INDICE ENTITÀ (_entity_index.yaml)
+   YAML centrale: registra TUTTE le entità (anche quelle
+   non materializzate) con il loro stato (aliased/consolidated),
+   le sources che le citano, il dominio, il subtype.
+   Single source of truth per "esiste questa entità?".
 ```
+
+#### Lazy materialization delle entità (decisione architetturale chiave)
+
+Non tutte le entità del corpus meritano una propria pagina materializzata. Un'entità citata da una sola fonte è essenzialmente una proiezione del suo source: una entity page generata su 1-2 contributi sarebbe quasi una copia stilizzata e riformulata della source, con costo LLM speso e nessun guadagno aggregativo.
+
+Il sistema applica quindi **lazy materialization** delle entity page:
+
+- Quando un'entità è citata da **meno di N sources** (default N=3) → resta nello stato `aliased`. **Nessuna pagina md** viene creata, **nessun vettore** entra in ChromaDB per quell'entità. È registrata solo nell'`_entity_index.yaml`, che mantiene la lista delle sources che la citano.
+- Quando l'N-esimo contributo arriva → scatta il **consolidamento**: una singola chiamata LLM legge tutte le N source page e produce la entity page consolidata, che da quel momento esiste come file + vettore. Stato diventa `consolidated`.
+- Dal consolidamento in poi → ogni nuovo doc che cita l'entità fa **merge incrementale** sulla pagina esistente, come pattern classico.
+
+Conseguenza pratica: in corpora narrativi reali tipicamente il 50%+ delle entità sta sotto la soglia (personaggi minori, luoghi citati una volta, eventi puntuali). Questa quota non costa nulla in ingest LLM e non gonfia il Hot Layer. Le entità "ricche" — quelle che davvero beneficiano dell'aggregazione cross-source — pagano un singolo consolidamento + merge incrementali successivi.
+
+Le citazioni `[[entity_id]]` nelle source page sono valide anche per entità aliased: lato query, il retrieval recupera le source page che ne parlano e l'LLM sintetizza runtime.
+
+Razionale e dettaglio implementativo in §13.
 
 #### Anatomia di una pagina wiki
 
@@ -572,11 +592,21 @@ LIVELLO 1 — Sintesi singola
                  documenti tematici autonomi
 
 LIVELLO 2 — Integrazione completa
-  Cosa fa:       L1 + aggiornamento delle pagine wiki
-                 correlate + gestione contraddizioni
+  Cosa fa:       L1 + identificazione entità + registrazione
+                 nell'indice centrale (_entity_index.yaml).
+                 Per ogni entità, in base al numero di sources
+                 cumulativo:
+                   - sotto soglia → solo update indice (no LLM)
+                   - alla soglia  → consolidamento (1 chiamata
+                     LLM che fonde le N source in una entity
+                     page nuova)
+                   - sopra soglia → merge incrementale sulla
+                     entity page esistente
   Quando:        Documenti strategici, decisioni importanti,
                  contenuti che cambiano il quadro generale
-  Costo:         Alto
+  Costo:         Variabile (lazy, vedi §13). Spesso L0+L1 sono
+                 il grosso del costo perché molte entità
+                 restano sotto soglia.
   Recuperabile:  Sì, con cross-riferimenti automatici
   Esempi:        Decisioni, contratti, specifiche di
                  riferimento, eventi significativi
@@ -1624,8 +1654,8 @@ Ogni sottosezione indica le sezioni del documento che amenda.
 
 **Problema.** Lo step che identifica le entità da un nuovo documento, se
 opera **in isolamento sul singolo documento**, produce frammentazione grave:
-nel pilot 21 documenti hanno generato 72 pagine wiki, con duplicati di tre
-tipi:
+nel pilot iniziale 21 documenti hanno generato 72 entry-entità, con
+duplicati di tre tipi:
 
 ```
 1. SINONIMO / VARIANTE
@@ -1634,43 +1664,49 @@ tipi:
        seldon_crisis vs seldon_crises
 
 2. CATEGORIA vs ISTANZE
-   una categoria esplosa in una pagina per istanza
-   es. "Crisi Seldon" → 5 pagine (una per crisi)
+   una categoria esplosa in una entry per istanza
+   es. "Crisi Seldon" → 5 entry (una per crisi)
 
 3. ALIAS / PERSONA
    stesso referente, identità in-world diverse
    es. sauron / annatar / the_necromancer
 ```
 
-La proposta originale (§6.1) cita il "diff semantico che identifica le
-pagine wiki da aggiornare" ma **non tratta la canonicalizzazione e il
-riuso degli identificatori come problema di prima classe**. Senza, la wiki
-non consolida: si moltiplica. Impatti a catena: costo superlineare
-(§11.8), crescita del Hot Layer, diluizione del retrieval (il segnale di
-un'entità è spalmato su N pagine).
+La proposta originale citava il "diff semantico che identifica le entità
+da aggiornare" ma **non trattava la canonicalizzazione e il riuso degli
+identificatori come problema di prima classe**. Senza, la wiki non
+consolida: si moltiplica. Impatti a catena: costo superlineare (§11.8),
+crescita del Hot Layer, diluizione del retrieval (il segnale di un'entità
+è spalmato su più entry).
 
 **Correzione.** Lo step di identificazione entità deve ricevere
-**l'inventario delle entità già esistenti** (filtrato per dominio) e
-operare con tre regole esplicite:
+**l'inventario delle entità già esistenti** (filtrato per dominio,
+proveniente dall'`_entity_index.yaml` — §13) e operare con tre regole
+esplicite:
 
 - **Riuso tassativo**: se l'entità esiste già nell'inventario — anche con
-  nome alternativo, sinonimo, altra lingua, articolo, singolare/plurale —
-  riusare l'id esatto, mai coniarne una variante.
-- **Categoria unica**: una categoria con più istanze è **una** pagina, non
+  nome alternativo, sinonimo, altra lingua, articolo, singolare/plurale,
+  e **anche se è in stato `aliased`** (non ancora materializzata come
+  pagina md) — riusare l'id esatto, mai coniarne una variante.
+- **Categoria unica**: una categoria con più istanze è **una** entità, non
   una per istanza, salvo che la singola istanza abbia trattazione autonoma
   sostanziale.
-- **Soglia di rilevanza**: una cosa diventa pagina solo se trattata in modo
-  sostanziale; le menzioni di passaggio non sono entità.
+- **Soglia di rilevanza**: una cosa diventa entità (cioè entry
+  nell'`_entity_index.yaml`) solo se trattata in modo sostanziale; le
+  menzioni di passaggio non sono entità.
 
 Effetto misurato: i duplicati sinonimo e l'esplosione categoria-istanza
 sono stati eliminati; il caso alias/persona resta parzialmente aperto.
 
-**Limite di scala (debito noto).** L'inventario passato nel prompt è
-**lineare nel numero di entità**. È sostenibile a scala pilot, ma oltre
-~500 entità il solo inventario satura il contesto. A regime va reso
-**gerarchico** (per dominio → categoria → entità) o pre-filtrato
-semanticamente — esattamente l'analogo del vincolo già documentato per il
-Hot Layer in §5.3.
+**Limite di scala (mitigato dal lazy merge, §13).** L'inventario passato
+nel prompt è lineare nel numero di entità note. Era sostenibile a scala
+pilot ma rischiava di saturare il contesto oltre ~500 entità. Con la
+materializzazione lazy (§13) il problema è ridimensionato: l'inventario
+contiene per le aliased solo `id + subtype + n_sources` (riga ultra-compatta),
+e per le consolidated il descrittore breve dal body. Resta inoltre la
+modalità **gerarchica** (§12.1) per i grandi numeri: scheletro aggregato
+per subtype + shortlist semantica delle entità consolidated più affini al
+documento corrente.
 
 **Residuo → lint pipeline.** Il caso alias/persona (stesso essere, nomi
 in-world diversi) è un problema di entity resolution sottile, da assegnare
@@ -1882,13 +1918,17 @@ modifica la proposta generale.
 
 Il debito dichiarato in §11.1 — l'inventario delle entità passato allo
 step di identificazione cresce linearmente col corpus — è stato chiuso.
-Soluzione: scheletro aggregato (domini → subtype → conteggi) + shortlist
-semantica delle sole entità candidate, recuperata **riusando il vettore
-della source page già calcolato** (zero embedding aggiuntivo). Misura
-pilot: la fase di identificazione resta **piatta** (~3.2k token/chiamata)
-indipendentemente dal numero di entità accumulate, contro la crescita
-lineare precedente. Il costo si sposta da O(N) a O(1) sulla fase. Sotto
-una soglia di entità configurabile resta attiva la modalità piatta
+Soluzione: scheletro aggregato (domini → subtype → conteggi sulle
+entità *consolidated*) + shortlist semantica delle sole entità candidate
+*consolidated*, recuperata **riusando il vettore della source page già
+calcolato** (zero embedding aggiuntivo). Le entità *aliased* (§13) non
+hanno vettore: vengono comunque mostrate all'estrattore come blocco
+compatto (`id [subtype] (aliased, N sources)`), che pesa poco ma evita
+la coniazione di varianti del medesimo id. Misura pilot: la fase di
+identificazione resta **piatta** (~3.2k token/chiamata) indipendentemente
+dal numero di entità accumulate, contro la crescita lineare precedente.
+Il costo si sposta da O(N) a O(1) sulla fase. Sotto una soglia di entità
+consolidated configurabile resta attiva la modalità piatta
 (retro-compatibile, più economica su corpora piccoli).
 
 ### 12.2 Consolidamento ≠ gerarchia (correzione principale)
@@ -2002,6 +2042,218 @@ Fase Scaling completata e validata su pilot a 2 corpora. Il workflow
 immutabile non duplicato, solo step wiki del nuovo livello), e la
 decisione alimenta l'active learning come una conferma da coda.
 
+## 13. Correzione strutturale Scaling: Lazy materialization delle entity page
+
+### 13.1 Motivazione empirica
+
+Pilot a 3 corpora (tolkien + asimov + rowling, ~30 doc) misurato a fine
+fase Scaling: **>50% delle entity pages create dal sistema contengono una
+sola source**. Sono entità citate sostanzialmente da un singolo doc e mai
+più toccate da altri ingest. Per ognuna è stata pagata una chiamata LLM
+`entity_create` (~2000-3000 token), prodotta una pagina md riformulazione
+quasi 1:1 della source, embeddata e indicizzata.
+
+Il merge eager — "ogni entità identificata in un doc L2 genera o aggiorna
+una entity page" — paga un costo non proporzionale al valore. Per le
+entità ricche (5+ sources, es. *Voldemort*, *Hari Seldon*, *Mordor*) il
+merge aggrega davvero ed è il pattern centrale del Wiki Layer; per le
+entità "magre" (1-2 sources, es. *Tom Riddle Sr.*, *Stamberga Strillante*,
+*Buckland*) il merge è quasi spreco — la stessa risposta sarebbe
+producibile dal retrieval delle source page.
+
+### 13.2 Design: lazy materialization con soglia
+
+L'entity layer passa da **eager** (materializza sempre) a **lazy**
+(materializza sopra soglia). Tre stati possibili per ogni entità,
+registrati in un nuovo indice centrale `data/wiki/_entity_index.yaml`:
+
+| Stato | Condizione | File md? | Vettore wiki? |
+|---|---|---|---|
+| `aliased` | `n_sources < THRESHOLD` (default 3) | No | No |
+| `consolidated` | Raggiunta la soglia: una sola chiamata LLM fonde le N source in entity page | Sì | Sì |
+| `stable` (opzionale, futuro) | M merge consecutivi senza modifiche sostanziali; merge automatico congelato | Sì | Sì |
+
+### 13.3 Nuovo flusso `_integrate_entities` (L2)
+
+```
+per ogni entity_id identificata dall'LLM nel nuovo doc:
+    indice = EntityIndex.load()
+    if entity_id ∈ indice:
+        indice[entity_id].sources.append(doc_id)
+        if state == 'aliased' and n_sources >= THRESHOLD:
+            → CONSOLIDATE: 1 chiamata LLM, input = N source page,
+              output = entity page consolidata; state → consolidated
+        elif state == 'consolidated':
+            → MERGE INCREMENTALE: comportamento eager classico
+              (entity page esistente + nuovo doc → merge LLM)
+        # else (aliased sotto soglia): solo update indice, zero LLM
+    else:
+        indice.add(entity_id, sources=[doc_id], state='aliased')
+        # zero LLM, zero file, solo riga nello YAML
+```
+
+Conseguenza: per le entità nuove o magre, l'integrazione L2 ha costo
+**zero** in chiamate LLM extra (l'identificazione entità nel doc è già
+pagata). Solo il consolidamento e il merge incrementale costano.
+
+### 13.4 Schema dell'indice
+
+```yaml
+# data/wiki/_entity_index.yaml
+version: 1
+threshold: 3
+entities:
+  - id: hari_seldon
+    subtype: character
+    domain: asimov
+    sources: [hari_seldon_20260518190004, la_fondazione_20260518190604,
+              le_crisi_seldon_20260518190350]
+    n_sources: 3
+    state: consolidated
+    consolidated_at: '2026-05-20T15:00:00'
+    last_updated: '2026-05-20'
+  - id: tom_riddle_sr
+    subtype: character
+    domain: rowling
+    sources: [voldemort_20260520113156]
+    n_sources: 1
+    state: aliased
+    consolidated_at: null
+    last_updated: '2026-05-20'
+```
+
+L'indice è la **single source of truth** per "esiste questa entità nel
+corpus?", sostituendo lo scan filesystem per la dedup degli `entity_id`.
+Per l'inventario gerarchico (§12.1) diventa input diretto: niente più
+scan delle entity page, lettura YAML una volta sola.
+
+### 13.5 Impatti sui componenti
+
+**Ingest**: cambia solo `_integrate_entities`, più nuovo metodo
+`_consolidate_entity(entity_id, source_ids)` che è una variante di
+`_create_entity_page` con N input invece di 1. `_merge_entity_page`
+resta com'è per le entità `consolidated`. L'identificazione entità
+(`_identify_entities`) e l'inventario gerarchico restano invariati ma
+ora leggono dall'indice.
+
+**Hot Layer**: filtro `state == 'consolidated'`. Le entity aliased non
+compaiono né nell'overview né nell'index. Riduce drasticamente la
+dimensione del Hot Layer su corpora reali (~50% in meno).
+
+**Query**: la whitelist citazioni include sia i `page_id` consolidated
+(da `WikiStore.list()`) sia gli `entity_id` aliased (da `EntityIndex`).
+L'LLM può legittimamente citare `[[entity_id]]` anche per entità
+aliased: il retrieval ha già pescato le source pertinenti e il modello
+sintetizza runtime. Una nota nel system prompt chiarisce: "se per
+un'entità citata non vedi una entity page tra i risultati wiki,
+sintetizzala dalle source page recuperate".
+
+**Lint**: nuova modalità `--entity-stats` che riporta la distribuzione
+degli stati, i top candidati downgrade (se applicabile), il costo
+cumulato di consolidamento e merge. È lo strumento di osservabilità del
+nuovo regime.
+
+### 13.6 Trade-off accettati
+
+1. **Asimmetria di rappresentazione**: alcune entità sono pagine md +
+   vettori, altre solo entry YAML. Il codice ha più rami ma sono
+   localizzati in `_integrate_entities` e in alcuni punti di `query.py`.
+
+2. **Retrieval più "rumoroso" per le aliased**: una domanda su un
+   personaggio minore recupera N source page invece di 1 entity page.
+   L'LLM ha più materiale da processare e può perdere coerenza se le N
+   source sono in disaccordo. Mitigazione: lo `scan obbligatorio
+   conflitti` (§11.3) era già pensato per questo caso. La confidence
+   tende a cappare più spesso a medium per le entità aliased — comportamento
+   onesto.
+
+3. **Hot Layer non vede le aliased**: orientamento meno "completo" su
+   nomi rari. Compensato dal retrieval semantico che continua a pescare
+   le source pertinenti. Per query su entità note il sistema regge.
+
+4. **Promozione manuale aliased → consolidated**: utile in casi limite
+   (entità nota come strategica ma sotto soglia in modo persistente).
+   Esposto come `lint --consolidate-entity <entity_id>` per analogia con
+   la promozione retroattiva L0→L2.
+
+### 13.7 Quando si manifesta il guadagno
+
+Il lazy merge è un win netto quando la distribuzione delle sources per
+entità è **long-tail** (molte entità con poche sources, poche entità con
+molte sources). Su corpora narrativi questa distribuzione è la norma
+empirica. Su corpora dove ogni entità è citata molte volte (es. KB
+aziendale focalizzata su un singolo prodotto), il guadagno cala perché
+quasi tutte le entità sarebbero comunque consolidate.
+
+La soglia `THRESHOLD` è il parametro di controllo: aumentarla privilegia
+risparmio costi, abbassarla privilegia ricchezza del wiki layer.
+Soglia=1 equivale al merge eager classico.
+
+### 13.8 Metriche di osservabilità e validazione empirica
+
+Da `lint --entity-stats`:
+
+- `% entity in stato aliased` — indicatore di efficacia del lazy
+- `costo cumulato consolidamento` — frazione del costo ingest spesa nei consolidamenti
+- `costo cumulato merge incrementale` — frazione spesa nei merge post-consolidamento
+- `costo evitato vs eager (stima)` — proiezione: cosa avresti speso con threshold=1
+
+Questi numeri rendono il tuning della soglia data-driven anziché
+guidato da intuizione.
+
+**Validazione empirica (pilot a 3 corpora, ~30 documenti L2)**:
+
+Misure raccolte sul pilot tolkien + asimov + rowling dopo l'introduzione
+del regime lazy con `THRESHOLD = 3` (default):
+
+```
+Totale entità in indice    : 62
+Stato aliased              : 59  (95.2%)
+Stato consolidated         :  3  ( 4.8%)
+Stato stable               :  0
+
+Distribuzione n_sources    : n=1: 76% · n=2: 19% · n=3-5: 5% · >5: 0%
+
+Costo entity layer cumulato (3 corpora):
+  consolidate (lazy)       :  27,181 tokens
+  merge incrementale       :       0 tokens (nessuna entity ha superato
+                                              il consolidamento iniziale)
+Baseline pre-refactoring (stessa scala, regime eager):
+  entity_create + entity_merge : ~146,000 tokens
+Riduzione costo entity layer  : -81%
+```
+
+**Eval set qualitativo a 3 corpora (16 domande, `tests/eval_set_threedomains.yaml`)**:
+
+15/16 risposte equivalenti o migliori del baseline pre-refactoring. Una
+sola anomalia di retrieval (`t05`: la query "Chi è il protagonista?" su
+dominio asimov pescava `the_mule` consolidated invece di `hari_seldon`
+aliased). Risolta alzando `WIKI_TOP_K` da 4 a 6 — modifica retrieval-side
+senza ri-ingest necessario: con top-6 il retrieval pesca anche
+`source_hari_seldon` accanto a `the_mule`, e l'LLM identifica
+correttamente il protagonista. Lato qualità, sono migliorate anche:
+
+- **t13 (contamination, no domain)**: con top-6 la risposta diventa
+  multi-dominio esplicitamente strutturata (Tolkien + Asimov), invece
+  che mono-dominio asimov.
+- **t14 (oggetti maledetti, no domain)**: include più source page
+  pertinenti, copertura cross-corpus più completa.
+
+**Lezione operativa**. Il regime lazy sposta parte della responsabilità
+dal layer di materializzazione al layer di retrieval: le entità centrali
+"viste solo via source page" funzionano se il top-k pesca abbastanza
+source. Per corpora narrativi a scala pilot, `WIKI_TOP_K=6` (a parità di
+`THRESHOLD=3`) è il setting validato. Su corpora più grandi la stessa
+logica suggerirà di adattare top-k al numero medio di sources per
+entità centrale — è la dimensione su cui esiste un trade-off
+ricerca-vs-rumore da tarare empiricamente.
+
+**Trade-off residuo noto** (`t12`): le crossref a 3+ corpora su temi
+astratti (es. "i prescelti nei tre cicli") possono perdere un'entità
+aliased se la sua source page non vince il top-k semantico contro
+source page di altre entità più centrali sul tema. Mitigazione naturale
+con synthesis pages persistenti (§7.4) per i confronti più ricorrenti.
+
 ---
 
 ## Glossario
@@ -2060,8 +2312,18 @@ decisione alimenta l'active learning come una conferma da coda.
 
 ---
 
-*Documento di proposta architetturale generale. Versione 2.2*
+*Documento di proposta architetturale generale. Versione 3.0*
 *v2.1: integrata la §11 con le correzioni architetturali validate sul pilot
-(walking skeleton). La proposta originale (§1–§10) è invariata; la §11 ne
-amenda i punti indicati, tracciabili per riferimento incrociato.*
+(walking skeleton).*
+*v2.2: aggiunta la §12 con le correzioni della fase Scaling (M1 inventario
+gerarchico, M2 lint consolidazione, M3 classificazione assistita).*
+*v3.0: refactoring strutturale del Wiki Layer in lazy materialization (§13),
+**validato empiricamente** su pilot a 3 corpora (-81% costo entity layer,
+95% entità in stato aliased, 15/16 risposte equivalenti o migliori del
+baseline pre-refactoring; vedi §13.8). §5.2 e §6.1 sono state riscritte per
+riflettere il nuovo design — il merge eager non è più descritto come
+opzione, è sostituito ovunque dal flusso aliased/consolidated con soglia.
+§11.1 e §12.1 sono state allineate al nuovo regime (inventario letto
+dall'`_entity_index.yaml`, distinzione aliased/consolidated). Le altre
+sotto-sezioni di §11 e §12 restano invariate, concettualmente compatibili.*
 *Da personalizzare in fase di Discovery con ogni cliente secondo i criteri della sezione 8.*

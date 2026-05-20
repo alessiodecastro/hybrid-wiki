@@ -43,51 +43,94 @@ L'ingest è il processo con cui un documento entra nel sistema. Ogni documento �
 |---|---|---|---|---|
 | **L0** | `data/raw/<doc_id>.md` (copia immutabile con frontmatter). Nessun file in `data/wiki/`. | `raw_chunks`: N chunk da ~200 parole con overlap 40, embeddati uno per uno (`ingest:l0:raw_index`). | Non aggiornato (il doc non compare nell'index). | Alto volume, basso valore individuale (avvisi, log, note di servizio, comunicazioni operative). Recuperabile **solo** via ricerca raw — non emerge nelle query orientative basate sul Hot Layer. |
 | **L1** | L0 + `data/wiki/source_<doc_id>.md` (pagina *source*: sintesi autonoma del singolo documento, sezioni `## Overview / ## Dettagli / ## Citazioni notevoli`). | L0 + `wiki_pages`: 1 vettore per la pagina source (`ingest:l1:source_page` + `ingest:l2:wiki_index` per l'embedding). | Aggiornato a fine batch: la source page compare nell'index del Hot Layer. | Documento che merita una sintesi propria ma **non** va integrato col resto della wiki (es. atto puntuale, articolo singolo, scheda non riusabile). |
-| **L2** | L1 + N file `data/wiki/<entity_id>.md` (pagine *entity*) creati o aggiornati — uno per ogni entità sostanziale estratta dal documento; può anche modificare entità già esistenti (merge col contenuto preesistente, con sezione `## Contraddizioni note` se ci sono divergenze). | L1 + 1 vettore per ogni pagina entity creata o aggiornata. Le entity pages già esistenti vengono re-embeddate dopo il merge. | Aggiornato a fine batch: tutte le nuove entity pages entrano nell'index del Hot Layer. | Documento strategico (biografie complete, eventi cardine, concetti centrali): cambia il quadro generale del corpus e va integrato. |
+| **L2** | L1 + aggiornamento di `data/wiki/_entity_index.yaml` (sempre) + 0 o più file `data/wiki/<entity_id>.md` materializzati **solo quando un'entità raggiunge la soglia di consolidamento** (default 3 sources). Le entità sotto soglia restano `aliased`: registrate nell'indice ma senza file. | L1 + 1 vettore per ogni entity page **consolidated o aggiornata** in questo ingest. Niente vettori per le aliased. | Le entity consolidated compaiono nell'index del Hot Layer; le aliased sono solo contate aggregatamente. | Documento strategico (biografie complete, eventi cardine, concetti centrali): cambia il quadro generale del corpus e va integrato. |
 
-**Lettura della tabella**: una riga di ingest L2 può quindi produrre, in un solo passaggio: 1 file raw immutabile + 1 source page + da 1 a ~10 entity pages (nuove o aggiornate) + altrettanti vettori. Il riepilogo a fine ingest mostra `wiki=[source_..., entity_id_1, entity_id_2, ...]`.
+**Lettura della tabella**: un ingest L2 in genere produce 1 raw + 1 source page + alcune righe nell'`_entity_index.yaml`. Le entity page md vengono materializzate **solo** quando un'entità accumula la N-esima source (default N=3). Vedi sezione *Pagina source vs pagina entity* sotto e §13 del design doc per il razionale architetturale (lazy materialization).
 
 Il documento raw è **immutabile**: una volta ingestato non viene mai riscritto. Unica eccezione: il metadato `level` in caso di **promozione retroattiva** (un doc L0 diventato strategico viene rieseguito agli step L1/L2 senza duplicare il raw — vedi *Classificazione assistita*).
 
-#### Pagina *source* vs pagina *entity*
+#### Pagina *source* vs pagina *entity* (lazy materialization)
 
-I file in `data/wiki/` sono di **due tipi** (campo `type` nel frontmatter), con cicli di vita radicalmente diversi:
+I file in `data/wiki/` sono di **due tipi** (campo `type` nel frontmatter), con cicli di vita radicalmente diversi. **Le entity sono materializzate lazy**: una citazione `[[entity_id]]` può esistere anche se la pagina md ancora non c'è (design §13).
 
 | | **Source page** (`type: source`) | **Entity page** (`type: entity`) |
 |---|---|---|
 | **Identità** | "vista sul documento": fissa la prospettiva di **un singolo raw** | "vista sull'entità del mondo": rappresenta una cosa (personaggio, luogo, evento) **trasversale ai documenti** |
 | **Cardinalità sorgenti** | 1:1 — sempre **una sola** source (il doc da cui è stata generata) | 1:N — lista cumulativa, deduplicata, di tutti i raw che hanno contribuito |
-| **Mutabilità** | **Append-only / immutabile**. Una volta scritta non viene mai più modificata. | **Mergeable**. Ogni nuovo doc che la menziona sostanzialmente la raffina, arricchisce o contraddice (sezione `## Contraddizioni note`). |
+| **Mutabilità** | **Append-only / immutabile**. Una volta scritta non viene mai più modificata. | **Mergeable**. Dopo il consolidamento, ogni nuovo doc che la menziona la raffina o contraddice (sezione `## Contraddizioni note`). |
 | **Fedeltà** | Fedele al singolo doc anche se in conflitto con altri (se il raw dice "1604", la source dice "1604") | Aggrega le tensioni: se due raw divergono, l'entity **mantiene entrambe le versioni esplicitamente** |
 | **id** | `source_<doc_id>` (con timestamp del doc) | `<entity_id>` (slug inglese snake_case stabile, es. `frodo_baggins`, `one_ring`) |
 | **Domain** | Sempre del singolo doc | Diventa `_mixed` se le sources sono di domini diversi |
 | **Struttura** | `## Overview / ## Dettagli / ## Citazioni notevoli` | `## Panoramica / ## Dettagli / ## Relazioni / ## Domande aperte` (+ `## Contraddizioni note` opzionale) |
-| **Esiste dal livello** | L1 in su | Solo L2 |
+| **Esiste dal livello** | L1 in su | L2, ma **solo se l'entità ha ≥ THRESHOLD sources** (default 3) |
+| **Stati** | n/a (sempre presente) | `aliased` (registrata nell'indice, NO file) → `consolidated` (raggiunta soglia, file + vettore creati) |
 
-**Come si declina nell'ingest L2** (`src/ingest.py`):
+#### L'indice centrale `_entity_index.yaml`
+
+Tutte le entità del corpus — siano materializzate o meno — vivono in `data/wiki/_entity_index.yaml`. È il **single source of truth** per:
+- "esiste un'entità con questo id?" → dedup e anti-frammentazione
+- "quali source contribuiscono a quest'entità?" → recupera le source pertinenti senza scan
+- "quest'entità è consolidata o aliased?" → decide il branch in ingest e in retrieval
+
+Esempio:
+
+```yaml
+version: 1
+threshold: 3
+entities:
+  - id: hari_seldon
+    subtype: character
+    domain: asimov
+    sources: [hari_seldon_20260518190004, la_fondazione_20260518190604, le_crisi_seldon_20260518190350]
+    n_sources: 3
+    state: consolidated
+    consolidated_at: '2026-05-20T15:00:00'
+  - id: tom_riddle_sr
+    subtype: character
+    domain: rowling
+    sources: [voldemort_20260520113156]
+    n_sources: 1
+    state: aliased
+    consolidated_at: null
+```
+
+#### Come si declina nell'ingest L2
 
 ```
 L0 → indicizzazione raw (chunk + embeddings)
-L1 → L0 + _make_source_page()       # sempre CREATE, mai merge (doc_id unico)
+L1 → L0 + _make_source_page()             # sempre CREATE, mai merge (doc_id unico)
 L2 → L1 + _integrate_entities():
-       ├─ _create_entity_page()     # entità nuova → 1 chiamata LLM, contesto = solo nuovo doc
-       └─ _merge_entity_page()      # entità esistente → 1 chiamata LLM, contesto = pagina + nuovo doc
+       per ogni entity_id estratta:
+         indice.upsert_contribution(entity_id, doc_id)
+         ├─ ALIASED sotto soglia      → solo update indice, ZERO LLM, nessun file
+         ├─ raggiunge la soglia       → _consolidate_entity()  # 1 chiamata LLM su N source page
+         └─ già CONSOLIDATED          → _merge_entity_page()   # merge incrementale, 1 chiamata LLM
 ```
 
-La source ha **un solo flusso**: `create`, mai `merge`. Lo stesso file ingestato due volte (es. `--force`) produce **due** source page con `doc_id` distinti, mai una fusione. Il prompt LLM vede solo il nuovo doc e ne produce una sintesi auto-contenuta.
+La source ha **un solo flusso** (`create`). Lo stesso file ingestato due volte produce **due** source page distinte, mai una fusione.
 
-L'entity ha **due flussi**, scelti runtime in base a `WikiStore.exists(page_id)`. Il merge è l'unico punto del sistema dove un prompt LLM riceve **due input concorrenti** (pagina esistente + nuovo doc) con regole esplicite: preservare le info ancora valide, aggiungere le nuove, e — se c'è divergenza — esplicitare il conflitto in `## Contraddizioni note`. Per questo è anche lo step più sensibile al content filter: combinare due contesti già "carichi" può superare le soglie di severity (vedi `data/content_filter_skips.jsonl` se compaiono skip granulari).
+L'entity ha **tre flussi**, scelti runtime in base allo stato nell'indice + n_sources. Le entità sotto soglia non costano nulla in LLM: solo una riga aggiunta all'YAML. Le entità che raggiungono la soglia pagano una **singola** chiamata LLM "consolidamento" che fonde le N source in una entity page nuova. Da consolidate in poi, comportamento merge incrementale classico.
 
-Conseguenze operative di questa distinzione:
+Il **consolidamento** legge le source page già nel WikiStore (non i raw grezzi): le source sono sintesi già strutturate, contesto migliore di N raw per il prompt LLM. Anche per questo lavora bene anche su corpora narrativi con contenuti densi.
+
+#### Conseguenze operative
 
 | Aspetto | Source | Entity |
 |---|---|---|
-| Conflict resolution | Non opera (1 sola fonte per definizione) | Qui scattano `## Contraddizioni note` e le `CONFLICT_RULES` lato query |
-| Lint consolidation (`--detect-duplicates`) | Non opera sulle source (immutabili 1:1) | Opera **solo** su entity (cluster di duplicati/alias, merge controllato) |
+| Conflict resolution | Non opera (1 sola fonte per definizione) | Qui scattano `## Contraddizioni note` (post-consolidamento) e le `CONFLICT_RULES` lato query (sempre) |
+| Lint consolidation (`--detect-duplicates`) | Non opera sulle source | Opera **solo** sulle entity consolidated |
 | Promozione retroattiva | Crea una nuova source (con `promoted_from`) | Può aggiornare entity esistenti tramite re-integration |
-| Citazioni `[[id]]` in risposta | Tipicamente per dettagli puntuali, numeri, citazioni testuali | Tipicamente per concetti, sintesi, relazioni |
+| Citazioni `[[id]]` in risposta | Per dettagli puntuali, numeri, citazioni testuali | Per concetti, sintesi, relazioni — **anche se l'entità è aliased**: il retrieval prende le source e l'LLM sintetizza runtime |
 
-In una battuta: **la source è la memoria di "cosa ha detto questo documento", l'entity è la memoria di "cosa sappiamo su questa cosa"**. La prima fissa una prospettiva e non la rinnega mai; la seconda costruisce un consensus cumulativo gestendo esplicitamente le tensioni tra fonti.
+In una battuta: **la source è la memoria di "cosa ha detto questo documento", l'entity è la memoria di "cosa sappiamo su questa cosa"** — ma materializzata solo quando ne vale la pena. La prima fissa una prospettiva e non la rinnega mai; la seconda costruisce un consensus cumulativo gestendo esplicitamente le tensioni tra fonti.
+
+#### Osservabilità (`lint --entity-stats`)
+
+```powershell
+python scripts/lint.py --entity-stats
+```
+
+Report read-only dello stato del wiki layer: distribuzione `aliased / consolidated`, istogramma `n_sources` (1, 2, 3-5, 6-10, >10), top entità per `n_sources` (le "regine" del corpus), aliased candidate a consolidamento manuale, costo cumulato `entity_consolidate` + `entity_merge` dal token log, verdetto sulla soglia. È lo strumento per tarare `ENTITY_CONSOLIDATION_THRESHOLD` (env var) sui dati reali del tuo corpus.
 
 **Documento singolo** — `ingest_doc.py`, livello (e per L2 il subtype) dichiarati esplicitamente:
 

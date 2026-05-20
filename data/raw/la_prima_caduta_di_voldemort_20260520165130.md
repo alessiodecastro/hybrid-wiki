@@ -1,0 +1,21 @@
+---
+id: la_prima_caduta_di_voldemort_20260520165130
+title: La Prima Caduta di Voldemort
+source: prima_caduta_voldemort.txt
+level: L2
+domain: rowling
+ingested_at: '2026-05-20T16:51:30'
+subtype: event
+---
+
+La Prima Caduta di Lord Voldemort avvenne nella notte del 31 ottobre 1981 a Godric's Hollow, villaggio del Galles occidentale dove la famiglia Potter si era rifugiata sotto Incantesimo Fidelius. È l'evento fondante del ciclo di Harry Potter: la notte in cui il mago più temibile del XX secolo fu sconfitto da un bambino di quindici mesi.
+
+Sei mesi prima, una profezia pronunciata da Sibilla Cooman (Sybill Trelawney) al Magiliardo (Hog's Head Inn) e parzialmente udita dalla spia Severus Piton, indicava un bambino "nato alla fine del settimo mese, da genitori che lo hanno sfidato per tre volte" come unico in grado di sconfiggere Voldemort. La descrizione era compatibile sia con Harry Potter sia con Neville Paciock. Voldemort scelse Harry — figlio di Mezzosangue come lui — e questa scelta auto-realizzò la profezia.
+
+Quella notte Voldemort si recò a Godric's Hollow avendo appreso da Peter Minus (Peter Pettigrew, codename "Codaliscia"), traditore tra gli amici dei Potter e nominato loro Custode Segreto al posto di Sirius Black, la posizione esatta della casa. James Potter fu il primo a essere ucciso: si pose tra Voldemort e la scala, disarmato, per guadagnare tempo perché Lily potesse fuggire con Harry dal piano di sopra. Lily, invece di scappare, si chiuse nella stanza del bambino. Voldemort entrò e le offrì esplicitamente di risparmiarla — su richiesta di Piton, ancora innamorato di lei — ma Lily rifiutò di farsi da parte e supplicò per la vita del figlio. Voldemort la uccise.
+
+Il sortilegio della morte "Avada Kedavra" lanciato immediatamente dopo contro Harry si rifletté: il sacrificio volontario di Lily, che avrebbe potuto sopravvivere e aveva invece scelto di morire per il figlio, creò un antico incantesimo protettivo (sangue dato per amore) che rese Harry temporaneamente invulnerabile a qualsiasi attacco di Voldemort. Il sortilegio rimbalzò sul lanciatore: il corpo di Voldemort fu distrutto, ma l'anima sopravvisse come entità spettrale, indebolita ma intatta grazie agli Horcrux già creati.
+
+La notizia della caduta si diffuse nel mondo magico nella stessa notte. Il 1° novembre 1981 fu celebrato con feste pubbliche da molte famiglie magiche britanniche. Il bambino Harry fu trovato dal gigante Rubeus Hagrid tra le rovine della casa di Godric's Hollow, consegnato a Sirius Black (che concesse a Hagrid la sua motocicletta volante per portarlo in salvo) e quindi affidato dal professor Silente agli zii babbani Dursley di Privet Drive 4 quella stessa notte. Sirius Black inseguì Peter Minus, ma fu incastrato per la strage di dodici babbani e l'uccisione apparente di Peter — in realtà fuggito in forma animaga — e finì ad Azkaban senza processo.
+
+L'evento generò la cicatrice a forma di fulmine sulla fronte di Harry, il legame mentale e d'anima tra i due (dovuto al frammento di Voldemort trasferitosi accidentalmente in Harry), e l'epiteto "Il Ragazzo che è Sopravvissuto" con cui Harry sarebbe stato conosciuto nel mondo magico per i successivi diciassette anni.

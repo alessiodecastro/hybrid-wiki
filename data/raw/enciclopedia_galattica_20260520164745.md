@@ -1,0 +1,17 @@
+---
+id: enciclopedia_galattica_20260520164745
+title: Enciclopedia Galattica
+source: enciclopedia_galattica.txt
+level: L2
+domain: asimov
+ingested_at: '2026-05-20T16:47:45'
+subtype: book
+---
+
+L'Enciclopedia Galattica è l'opera enciclopedica che fornisce il pretesto ufficiale per la fondazione della Prima Fondazione nel Ciclo della Fondazione di Isaac Asimov. Concepita come compendio totale del sapere umano accumulato durante l'Impero Galattico, doveva preservare la conoscenza dalla distruzione imminente.
+
+Hari Seldon presenta l'Enciclopedia alle autorità imperiali come scopo del trasferimento di centomila studiosi su Terminus. In realtà, come Seldon rivela postumo nella prima apparizione della Cripta del Tempo, l'enciclopedia è un espediente: serve a riunire su un mondo remoto un nucleo di scienziati e a dargli una missione coesiva, mentre il vero obiettivo è psicostorico. La frase con cui Salvor Hardin liquida il progetto è celebre: gli enciclopedisti stavano "preparando un'edizione monumentale di nulla".
+
+Nonostante ciò, l'opera viene effettivamente prodotta: il romanzo si apre con epigrafi tratte dalla "Encyclopedia Galactica, 116ª edizione, pubblicata nel 1020 E.F. dalla Casa Editrice dell'Enciclopedia Galattica, Terminus" — espediente narrativo che Asimov usa per introdurre contesto storico dal punto di vista di un futuro lontano.
+
+L'Enciclopedia Galattica funziona dunque su due livelli: come oggetto interno alla finzione (un'opera realmente compilata su Terminus) e come dispositivo letterario di cornice. Il suo valore simbolico è duplice: rappresenta sia l'illusione consolatoria di poter "salvare la conoscenza" contro il declino, sia il primo mattone concreto attorno a cui si organizza la civiltà destinata a diventare il Secondo Impero.
