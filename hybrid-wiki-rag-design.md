@@ -2420,55 +2420,94 @@ Pre-fix `ac01` era assegnata ad A per il bug citazioni (§14.5); post-fix si
 ribalta a B. Negli altri casi B è pari o migliore (es. `ac04` su asimov: B
 più completa sull'evoluzione della Fondazione).
 
-**Corpus con wiki sparsa (harry_potter, `ac08`/`ac09`)** — Arch B costa di
-più ma vince in qualità:
+**Corpus con wiki sparsa (harry_potter, `ac08`/`ac09`) — un falso positivo
+istruttivo.** Una prima esecuzione sembrava mostrare Arch B vincente (B 2x) e
+costoso (+30.5%). L'indagine ha rivelato che il risultato era **un artefatto
+di un bug nell'eval set**, non una proprietà delle architetture.
 
 ```
+PRIMA (eval set bug: domain=harry_potter ≠ corpus rowling)
 A tokens   B tokens     d%       Judge
 ──────────────────────────────────────────
-  13.384    17.471    +30.5%    B vince 2x
+  13.384    17.471    +30.5%    B vince 2x   ← contaminato
+
+DOPO (--domain rowling, dato pulito)
+            A tokens   B tokens     d%       Judge
+──────────────────────────────────────────────────────
+  ac08       12.637    12.688     +0.4%    winner A
+  ac09       12.017    12.126     +0.9%    winner A
+  TOTAL      24.654    24.814     +0.6%    A vince 2x
 ```
 
-**Perché l'anomalia HP è istruttiva.** La collection `wiki_pages` per il
-corpus rowling è **vuota**: per la lazy materialization (§13) le entità HP
-sono tutte `aliased`, nessuna `consolidated`, quindi nessun vettore wiki. Arch
-A inietta solo raw chunks (contesto magro); Arch B inietta sempre il
-sottografo. Su `ac09` è **Arch A** ad avere `citation_quality = 0` (non ha
-nulla da citare lato wiki), mentre B cita le entità del grafo. Il grafo dà
-struttura **dove l'embedding wiki non esiste**.
+**Causa prossimale.** In `eval_set_hp_judge.yaml` le domande erano taggate
+`domain: harry_potter`, ma il corpus HP è interamente `domain: rowling`. Arch A
+applica un **filtro ChromaDB di uguaglianza stretta** (`{"domain":
+"harry_potter"}`) che non matchava nessuno dei 10 vettori wiki / 31 chunk raw
+del corpus → retrieval **vuoto** → `citation_quality = 0`, confidence `low`.
+La collection `wiki_pages` di rowling **non è vuota**: contiene 10 source page,
+che A recupera correttamente quando il filtro è giusto. Arch B sopravviveva al
+mismatch perché il seeding del sottografo avviene **per nome di entità**
+(`harry_potter`, `lord_voldemort`, `horcrux` sono nodi a prescindere dal tag),
+non per filtro metadati.
 
-### 14.7 Lettura architetturale: grafo vs embedding wiki
+Con il dominio corretto, Arch A cita pulito (4 page wiki + 3 raw, confidence
+`high`) e **vince entrambe** sulla completezza (judge A=5, B=4). Il meccanismo
+delle entità `aliased` (§13) gestisce la wiki sparsa senza problemi: cita
+`[[entity_id]]` aliased sintetizzandole runtime da source page + raw chunk.
 
-Il confronto isola una proprietà non ovvia: **il valore relativo del grafo
-dipende dalla densità del wiki layer**, che a sua volta dipende dal regime di
-lazy materialization (§13).
+### 14.7 Lettura architetturale: igiene dei metadati e robustezza del seeding
+
+Il confronto, una volta ripulito, non isola una superiorità del grafo sulle
+wiki sparse (il dato pulito la smentisce). Isola invece **due proprietà
+distinte e reali**, entrambe rilevanti a scala:
 
 ```
-Distribuzione entità          Wiki ChromaDB     Vantaggio relativo
-─────────────────────────────────────────────────────────────────────
-molte consolidated (densa)    ricca             grafo ~pari, più economico
-                                                e selettivo (prompt più corto)
+Dimensione                    Arch A (embedding+filtro)   Arch B (grafo+nome)
+──────────────────────────────────────────────────────────────────────────────
+robustezza al drift           fragile: un tag dominio     robusto: il seeding
+dei metadati                  disallineato azzera il      per nome trova le
+                              retrieval, in silenzio      entità comunque
 
-molte aliased (sparsa)        povera/vuota       grafo NETTAMENTE meglio:
-                                                 struttura dove l'embedding
-                                                 non ha nulla
+esplicabilità delle           implicita (similarità       esplicita (triple
+relazioni                     vettoriale, opaca)          tipate ispezionabili)
+
+maturità / scala              production-hardened,        prototipo: edge
+                              ANN collaudato              CO_MENZIONATO O(n²),
+                                                          validato su ~30 doc
 ```
 
-Ne segue che **graph layer e lazy materialization sono complementari**, non
-alternativi: più il sistema è aggressivo nel tenere le entità `aliased` (per
-risparmiare, §13.7), più l'indice wiki si svuota e più il grafo diventa
-l'unica fonte di struttura. Il grafo, costruito a costo quasi-zero dalle
-stesse `sources` dell'indice, è la naturale risposta al "retrieval più
-rumoroso per le aliased" elencato come trade-off in §13.6.2.
+La prima proprietà è un monito di **igiene operativa**: il filtro dominio di
+Arch A è un *single point of failure silenzioso*. A scala — molti corpus,
+ingestion multi-fonte, tag generati da pipeline eterogenee — il drift dei
+metadati è inevitabile, e un filtro di uguaglianza stretta lo trasforma in
+retrieval vuoto senza segnalare l'errore. Mitigazioni: validazione dei tag
+dominio in ingestion, e un **fallback** quando il retrieval filtrato torna
+vuoto (ripetere senza filtro, o filtro allargato, segnalando il degrado).
+
+La seconda — esplicabilità — è il vantaggio strutturale di B che **resta in
+piedi anche dopo la correzione**: le triple tipate (`OPPONE`, `POSSIEDE`,
+`SI_TROVA_IN`…) sono ispezionabili e auditabili, mentre la similarità
+vettoriale è opaca. È un valore per scenari compliance/audit, non un risparmio
+token (sui token il confronto è **pari**, delta nel rumore).
+
+Resta valida la complementarità con la lazy materialization (§13): il grafo è
+costruito a costo quasi-zero dalle stesse `sources` dell'indice, quindi
+fornisce un secondo indice strutturale "gratis" che non dipende dallo stato
+`aliased`/`consolidated` dell'entità — utile come **rete di sicurezza** quando
+l'embedding wiki, per qualsiasi ragione (sparsità *o* metadati disallineati),
+non copre.
 
 ### 14.8 Trade-off, stato e lavoro futuro
 
 - **Invariante rispettato.** In ogni scenario le pagine MD restano su disco
   per la revisione umana: Arch B rimuove solo il costo di embedding wiki.
-- **Quando conviene.** Win su corpora con wiki densa e *long-tail* di sources
-  (sottografo selettivo, prompt più corto, qualità ≥ A dopo il fix citazioni);
-  costo extra ma qualità superiore su corpora con wiki sparsa (il grafo
-  struttura dove l'embedding è vuoto).
+- **Quando conviene.** Pari o leggermente meglio su corpora con wiki densa e
+  *long-tail* di sources (sottografo selettivo, prompt più corto, qualità ≥ A
+  dopo il fix citazioni). Sui corpora sparsi il dato pulito (§14.6) **non**
+  mostra una superiorità del grafo: A, con i metadati corretti, vince. Il
+  valore di B è altrove — **robustezza al drift dei metadati** ed
+  **esplicabilità** delle relazioni (§14.7), non risparmio token (confronto
+  sostanzialmente pari).
 - **Stato.** Prototipo sperimentale, non default. Le pipeline coesistono:
   `query.py` (Arch A) resta la pipeline di produzione, `query_graph.py`
   (Arch B) è attivabile per il confronto. L'harness `eval_compare.py`
@@ -2561,9 +2600,11 @@ sotto-sezioni di §11 e §12 restano invariate, concettualmente compatibili.*
 Materializza con Kuzu il "grafo dei collegamenti" previsto in §4.1/§5.2 e mai
 costruito, e ne misura il ruolo come alternativa all'embedding wiki (pagine MD
 preservate per la revisione umana). Validato su pilot a 3 corpora con harness
-A-vs-B e LLM-as-judge: su wiki densa Arch B risparmia token a qualità ≥ A
-(dopo il fix citazioni §14.5), su wiki sparsa costa di più ma vince in qualità
-perché il grafo struttura dove l'embedding wiki è vuoto. §14 amenda §4.1, §5.2,
+A-vs-B e LLM-as-judge: su wiki densa Arch B è pari ad A a token leggermente
+inferiori (dopo il fix citazioni §14.5). Il "vantaggio HP" iniziale di B si è
+rivelato un artefatto di un mismatch di tag dominio nell'eval set (§14.6): col
+dato pulito A vince e i token sono pari. Il valore reale di B è robustezza al
+drift dei metadati ed esplicabilità delle relazioni (§14.7). §14 amenda §4.1, §5.2,
 §5.4, §6.2 e §11.5 (estensione della whitelist al layer a grafo). Le sezioni
 amendate restano valide; §14 si aggiunge come componente sperimentale, non
 sostituisce la pipeline di produzione (Arch A).*

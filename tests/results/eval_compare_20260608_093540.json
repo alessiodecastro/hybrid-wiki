@@ -1,0 +1,167 @@
+{
+  "run_at": "2026-06-08T09:35:40",
+  "eval_set": "eval_set_hp_judge.yaml",
+  "n_questions": 2,
+  "judge_enabled": true,
+  "totals": {
+    "arch_a_tokens": 24654,
+    "arch_b_tokens": 24814,
+    "delta_tokens": 160,
+    "delta_pct": "+0.6%"
+  },
+  "questions": [
+    {
+      "id": "ac08",
+      "text": "Descrivi il rapporto tra Harry Potter e Lord Voldemort.",
+      "domain": "rowling",
+      "type": "relazionale",
+      "arch_a": {
+        "answer": "Il rapporto tra Harry Potter e Lord Voldemort è definito da tre livelli intrecciati: profezia/destino, legame magico (Horcrux) e contrapposizione etica e politica.\n\n### 1. La profezia e la scelta di Voldemort\n\nNel 1980 una profezia annuncia che “un bambino nato alla fine del settimo mese, da genitori che lo hanno sfidato per tre volte” sarà l’unico in grado di sconfiggere Voldemort. Questa descrizione si adatta sia a Harry Potter sia a Neville Paciock, ma Voldemort sceglie di colpire Harry, figlio di Mezzosangue come lui, rendendo la profezia auto‑realizzante [[source_la_prima_caduta_di_voldemort_20260520165130]].  \n\nDa quel momento Harry diventa, per Voldemort, il nemico designato: il mago che “deve” uccidere prima che lo uccida. Per il mondo magico, invece, Harry è “Il Ragazzo che è Sopravvissuto”, simbolo vivente della sconfitta iniziale del Signore Oscuro [[source_harry_potter_20260520165200]].\n\n### 2. La Prima Caduta e la nascita del legame\n\nLa notte del 31 ottobre 1981 Voldemort attacca i Potter a Godric’s Hollow, uccide James e Lily e lancia l’Avada Kedavra contro il piccolo Harry. Il sacrificio volontario di Lily crea però una protezione magica che fa rimbalzare la maledizione: il corpo di Voldemort è distrutto, mentre Harry sopravvive con una cicatrice a forma di fulmine [[la_prima_caduta_di_voldemort_20260520165130; harry_potter_20260520165200]].  \n\nQuella notte si crea anche un legame magico molto più profondo: un frammento dell’anima di Voldemort si ancora accidentalmente in Harry, rendendolo un Horcrux non intenzionale. Harry porta in sé una parte di Voldemort, e questo spiega i collegamenti mentali, le visioni e la capacità di parlare Serpentese [[harry_potter_20260520165200; lord_voldemort_20260520165057]].\n\n### 3. Horcrux e interdipendenza\n\nVoldemort ha diviso deliberatamente la sua anima in sette frammenti tramite sei Horcrux, convinto di ottenere l’immortalità; un frammento aggiuntivo si trasferisce non voluto in Harry nel 1981 [[lord_voldemort_20260520165057; source_horcrux_20260520165234]].  \n\nQuesto rende il rapporto paradossale:  \n- Harry è l’unico in grado di sconfiggere Voldemort (profezia) [[source_la_prima_caduta_di_voldemort_20260520165130]].  \n- Ma Voldemort, senza saperlo per lungo tempo, dipende dalla sopravvivenza di Harry, che ospita un pezzo della sua anima.  \n\nLa risoluzione finale passa proprio dalla rimozione di quel frammento: nel bosco di Hogwarts, prima dello scontro conclusivo, il frammento viene distrutto, spezzando il legame e permettendo la morte definitiva di Voldemort [[harry_potter_20260520165200]].\n\n### 4. Nemici speculari\n\nSul piano simbolico, Harry e Voldemort sono presentati come figure speculari:  \n- entrambi mezzosangue, orfani, cresciuti senza affetto;  \n- accomunati dalla bacchetta gemella (stessa penna di fenice) [[harry_potter_20260520165200]];  \n- ma opposti nelle scelte morali: Harry costruisce legami, accetta il sacrificio e la mortalità; Voldemort rifiuta l’amore, teme la morte e tenta di dominarla attraverso gli Horcrux [[source_harry_potter_20260520165200; source_lord_voldemort_20260520165057; source_horcrux_20260520165234]].\n\nLa loro relazione, quindi, non è solo quella tra eroe e antagonista, ma un intreccio di destino condiviso, legame d’anima e opposizione radicale di valori che culmina nella Battaglia di Hogwarts (2 maggio 1998) e nella sconfitta definitiva del Signore Oscuro [[harry_potter_20260520165200; source_lord_voldemort_20260520165057]].",
+        "confidence": "high",
+        "wiki_sources": [
+          "source_harry_potter_20260520165200",
+          "source_lord_voldemort_20260520165057",
+          "source_la_prima_caduta_di_voldemort_20260520165130",
+          "source_horcrux_20260520165234"
+        ],
+        "raw_sources": [
+          "harry_potter_20260520165200",
+          "la_prima_caduta_di_voldemort_20260520165130",
+          "lord_voldemort_20260520165057"
+        ],
+        "tokens": {
+          "total": 12637,
+          "prompt": 10355,
+          "completion": 2282,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 13,
+            "query:llm_synthesis": 12624
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Il rapporto tra [[harry_potter]] e [[lord_voldemort]] è un intreccio di destino, magia dell’anima e scelte personali che li rende nemici inseparabili per tutta la saga.\n\nLa relazione nasce con la profezia pronunciata da Sibilla Cooman, che indica un bambino capace di sconfiggere Voldemort; la descrizione si applicava sia a Harry sia a Neville Paciock, ma Voldemort sceglie di attaccare Harry, auto‑realizzando così la profezia [[prophecy_about_harry_and_voldemort]][[la_prima_caduta_di_voldemort_20260520165130]]. Questa scelta fissa Harry come suo antagonista designato.\n\nLa notte del 31 ottobre 1981, a [[godrics_hollow]], Voldemort uccide James e Lily Potter e tenta di uccidere il piccolo Harry. Il sacrificio volontario di Lily crea una protezione magica che fa rimbalzare l’Avada Kedavra: il corpo di Voldemort viene distrutto (Prima Caduta), mentre Harry sopravvive con la celebre cicatrice [[first_fall_of_voldemort]][[la_prima_caduta_di_voldemort_20260520165130]][[harry_potter_20260520165200]].\n\nSul piano magico-spirituale, Voldemort aveva frammentato la propria anima creando diversi [[horcruxes]]. In quella stessa notte un frammento ulteriore si ancora accidentalmente a Harry, rendendolo un Horcrux involontario [[horcruxes]][[lord_voldemort_20260520165057]]. Così Harry diventa insieme bersaglio, nemico profetizzato e parte del dispositivo di immortalità del Signore Oscuro. La risoluzione finale del conflitto passa dalla rimozione di questo frammento d’anima nel bosco di Hogwarts, prima dello scontro conclusivo [[harry_potter_20260520165200]].\n\nIl loro legame è rafforzato da parallelismi magici e biografici: la bacchetta di Harry è gemella di quella di Voldemort, poiché entrambe contengono una penna dello stesso fenice, segno di un destino incrociato [[harry_potter_20260520165200]]. Entrambi sono orfani dotati di grande talento, ma incarnano scelte morali opposte.\n\nDopo la [[first_fall_of_voldemort]], Voldemort sopravvive come entità spettrale; recupera un corpo nel 1995 [[resurrection_of_voldemort_1995]][[lord_voldemort_20260520165057]]. Durante gli anni di Hogwarts, Harry affronta minacce sempre più legate al ritorno del Signore Oscuro, fino alla [[battle_of_hogwarts]] del 2 maggio 1998, dove il loro confronto diretto porta alla distruzione definitiva di Voldemort [[battle_of_hogwarts]][[harry_potter_20260520165200]].\n\nIn sintesi, il rapporto Harry–Voldemort è quello di due figure che si definiscono a vicenda: una profezia li lega, una scelta di Voldemort li pone in rotta di collisione, un Horcrux li unisce fisicamente, e la Battaglia di Hogwarts chiude il cerchio con la caduta finale del Signore Oscuro.",
+        "confidence": "high",
+        "wiki_sources": [
+          "harry_potter",
+          "lord_voldemort",
+          "horcruxes",
+          "first_fall_of_voldemort",
+          "resurrection_of_voldemort_1995",
+          "battle_of_hogwarts",
+          "godrics_hollow",
+          "prophecy_about_harry_and_voldemort"
+        ],
+        "raw_sources": [
+          "harry_potter_20260520165200",
+          "la_prima_caduta_di_voldemort_20260520165130",
+          "lord_voldemort_20260520165057"
+        ],
+        "graph_entities": 11,
+        "graph_relations": 48,
+        "tokens": {
+          "total": 12688,
+          "prompt": 10457,
+          "completion": 2231,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 13,
+            "query:llm_synthesis": 12675
+          }
+        }
+      },
+      "delta_tokens": 51,
+      "delta_pct": "+0.4%",
+      "judge": {
+        "A": {
+          "accuracy": 5,
+          "completeness": 5,
+          "citation_quality": 4
+        },
+        "B": {
+          "accuracy": 5,
+          "completeness": 4,
+          "citation_quality": 4
+        },
+        "winner": "A",
+        "rationale": "A è leggermente più completa e strutturata nel descrivere la natura multilivello del rapporto, pur mantenendo accuratezza e buone citazioni."
+      }
+    },
+    {
+      "id": "ac09",
+      "text": "Cos'e' un Horcrux e chi lo usa nella saga di Harry Potter?",
+      "domain": "rowling",
+      "type": "concettuale",
+      "arch_a": {
+        "answer": "Un Horcrux è un oggetto (o, più raramente, un essere vivente) in cui un mago nasconde un frammento della propria anima per garantirsi una forma di immortalità: finché almeno un Horcrux resta intatto, la distruzione del corpo non comporta la vera morte del mago [[source_horcrux_20260520165234]].  \n\nLa creazione di un Horcrux richiede:\n- un atto di violenza che “squarcia” l’anima (un grave crimine deliberato),\n- un rituale di trasferimento dell’anima, la cui procedura è volutamente omessa dai testi disponibili [[horcrux_20260520165234]].  \n\nÈ considerata la magia oscura più estrema e proibita: la conoscenza dettagliata è confinata a opere come “Segreti delle Arti Oscure più Nere”, tenute nella Sezione Proibita della biblioteca di Hogwarts fino alla loro rimozione per ordine di Silente [[horcrux_20260520165234]].  \n\nPer distruggere un Horcrux è necessario danneggiare in modo irreparabile il contenitore (oggetto o essere) con mezzi che compromettano definitivamente il frammento d’anima: veleno o zanne di Basilisco, Fiendfyre (Fuoco Maledetto) o la Spada di Godric Grifondoro imbevuta di veleno di Basilisco [[horcrux_20260520165234]].  \n\n### Chi usa gli Horcrux nella saga\n\nL’unico mago che li usa effettivamente nella saga è Lord Voldemort (Tom Riddle).  \nSecondo le fonti, Voldemort:\n- studia gli Horcrux da studente, interrogando il professor Horace Lumacorno su come funzionino [[horcrux_20260520165234]];\n- decide di dividere la propria anima in sette frammenti tramite la creazione di sei Horcrux intenzionali, scegliendo il numero sette per il suo significato magico [[lord_voldemort_20260520165057]];\n- crea questi Horcrux tra gli anni Quaranta e il 1994, usando oggetti legati ai fondatori di Hogwarts o alla propria storia (diario di Tom Riddle, anello dei Gaunt, medaglione di Serpeverde, coppa di Tassofrasso, diadema di Corvonero, il serpente Nagini) [[lord_voldemort_20260520165057]];  \n- genera inoltre, senza volerlo, un Horcrux involontario: Harry Potter, nella notte della Prima Caduta, quando un frammento della sua anima si lega al bambino dopo il rimbalzo della maledizione mortale [[lord_voldemort_20260520165057; horcrux_20260520165234; source_harry_potter_20260520165200]].  \n\nHarry e Nagini sono quindi Horcrux “viventi”, ma non creatori né “utilizzatori” nel senso attivo: sono contenitori del frammento d’anima di Voldemort, non maghi che impiegano questa magia.  \n\nIn sintesi: un Horcrux è un contenitore di un frammento d’anima usato per evitare la morte definitiva; nella saga l’utilizzatore centrale e praticamente unico di questa magia è Lord Voldemort, che basa su di essi il proprio progetto di immortalità [[source_horcrux_20260520165234; source_lord_voldemort_20260520165057]].",
+        "confidence": "high",
+        "wiki_sources": [
+          "source_horcrux_20260520165234",
+          "source_harry_potter_20260520165200",
+          "source_lord_voldemort_20260520165057"
+        ],
+        "raw_sources": [
+          "horcrux_20260520165234",
+          "lord_voldemort_20260520165057",
+          "harry_potter_20260520165200"
+        ],
+        "tokens": {
+          "total": 12017,
+          "prompt": 10241,
+          "completion": 1776,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 17,
+            "query:llm_synthesis": 12000
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Un Horcrux è un oggetto in cui un mago nasconde un frammento della propria anima per ottenere una forma di immortalità: finché almeno un Horcrux esiste, il mago non può morire in modo definitivo. La sua creazione richiede un atto gravissimo che \"squarcia\" l’anima, seguito da un rituale di trasferimento del frammento d’anima nell’oggetto; si tratta della forma di Magia Oscura più estrema descritta nel corpus, e i dettagli tecnici del rituale non sono riportati nei testi accessibili [[horcruxes]][[horcrux_20260520165234]].\n\nL’unico utilizzatore sistematico di Horcrux nella saga, secondo le fonti del companion, è [[lord_voldemort]]. Egli divide deliberatamente la propria anima in sette frammenti, creando sei Horcrux intenzionali, mentre un settimo frammento resta nel suo corpo [[lord_voldemort_20260520165057]]. Inoltre, la notte della Prima Caduta del 31 ottobre 1981 a Godric’s Hollow [[first_fall_of_voldemort]][[godrics_hollow]], un frammento ulteriore della sua anima si lega accidentalmente a [[harry_potter]], rendendolo un Horcrux involontario [[lord_voldemort_20260520165057]][[horcrux_20260520165234]].\n\nI frammenti d’anima vincolati agli Horcrux di Voldemort sono: il diario di Tom Riddle; l’anello dei Gaunt con la Pietra della Resurrezione; il medaglione di Serpeverde; la coppa di Tassofrasso di Helga; il diadema di Corvonero; Nagini il serpente; e Harry Potter stesso come Horcrux involontario. Tutti questi Horcrux vengono distrutti tra il 1993 e il 2 maggio 1998, culminando con gli eventi della Battaglia di Hogwarts, e solo dopo la loro distruzione Voldemort può essere sconfitto in modo definitivo [[horcrux_20260520165234]][[lord_voldemort_20260520165057]][[harry_potter_20260520165200]][[battle_of_hogwarts]].\n\nNelle fonti del corpus non vengono indicati altri maghi o streghe che creino o usino Horcrux oltre a Voldemort; la pratica è presentata come rarissima e quasi unica [[horcruxes]][[horcrux_20260520165234]].",
+        "confidence": "high",
+        "wiki_sources": [
+          "horcruxes",
+          "lord_voldemort",
+          "first_fall_of_voldemort",
+          "godrics_hollow",
+          "harry_potter",
+          "battle_of_hogwarts"
+        ],
+        "raw_sources": [
+          "horcrux_20260520165234",
+          "lord_voldemort_20260520165057",
+          "harry_potter_20260520165200"
+        ],
+        "graph_entities": 11,
+        "graph_relations": 48,
+        "tokens": {
+          "total": 12126,
+          "prompt": 10341,
+          "completion": 1785,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 17,
+            "query:llm_synthesis": 12109
+          }
+        }
+      },
+      "delta_tokens": 109,
+      "delta_pct": "+0.9%",
+      "judge": {
+        "A": {
+          "accuracy": 5,
+          "completeness": 5,
+          "citation_quality": 5
+        },
+        "B": {
+          "accuracy": 5,
+          "completeness": 4,
+          "citation_quality": 5
+        },
+        "winner": "A",
+        "rationale": "Entrambe corrette; A risponde in modo più diretto e completo alla domanda su cos’è un Horcrux e chi lo usa."
+      }
+    }
+  ]
+}

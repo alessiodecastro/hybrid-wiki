@@ -65,14 +65,14 @@ questions:
 
   - id: ac08
     text: "Descrivi il rapporto tra Harry Potter e Lord Voldemort."
-    domain: harry_potter
+    domain: rowling
     type: relazionale
     focus_entities: [harry_potter, lord_voldemort, horcrux]
     notes: "Corpus harry_potter: verifica costruzione archi tra i due antagonisti."
 
   - id: ac09
     text: "Cos'è un Horcrux e chi lo usa nella saga di Harry Potter?"
-    domain: harry_potter
+    domain: rowling
     type: concettuale
     focus_entities: [horcrux, lord_voldemort, harry_potter]
     notes: "Concetto centrale HP: raw chunks ricchi; grafo aggiunge struttura."

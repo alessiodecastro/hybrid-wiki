@@ -5,14 +5,14 @@
 questions:
   - id: ac08
     text: "Descrivi il rapporto tra Harry Potter e Lord Voldemort."
-    domain: harry_potter
+    domain: rowling
     type: relazionale
     focus_entities: [harry_potter, lord_voldemort, horcrux]
-    notes: "HP relazionale. Arch A: 0 wiki hits. Arch B: subgrafo 6-11 nodi."
+    notes: "HP relazionale. Con domain=rowling corretto: A cita 4 wiki + 3 raw (winner). Arch B: subgrafo ~11 nodi."
 
   - id: ac09
     text: "Cos'e' un Horcrux e chi lo usa nella saga di Harry Potter?"
-    domain: harry_potter
+    domain: rowling
     type: concettuale
     focus_entities: [horcrux, lord_voldemort, harry_potter]
-    notes: "HP concettuale. Arch A: 0 wiki hits. Arch B: subgrafo 6 nodi."
+    notes: "HP concettuale. Con domain=rowling corretto: A cita 3 wiki + 3 raw (winner). Arch B: subgrafo ~11 nodi."

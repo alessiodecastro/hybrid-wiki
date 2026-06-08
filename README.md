@@ -493,21 +493,32 @@ pre-fix  (4 domande)          46.559    43.070    -7.5%    1 · 2 · 1  (ac01 a 
 post-fix (4 domande)          47.547    46.170    -2.9%    1 · 1 · 2  (ac01 ribaltata a B)
 ```
 
-**Corpus con wiki sparsa (harry_potter, `ac08`/`ac09`)** — Arch B **costa di più** ma vince in qualità:
+**Corpus con wiki sparsa (harry_potter, `ac08`/`ac09`) — caso istruttivo, prima un artefatto di test, poi il dato pulito.**
+
+Una prima esecuzione sembrava mostrare Arch B vincente (B 2x) ma **costoso** (+30.5%). Indagando si è scoperto che il risultato era **contaminato da un bug dell'eval set**: in `eval_set_hp_judge.yaml` le due domande erano taggate `domain: harry_potter`, mentre il corpus HP è interamente taggato `domain: rowling`. Arch A applica un **filtro ChromaDB di uguaglianza stretta** sul dominio (`{"domain": "harry_potter"}`), che non matchava **nessuno** dei 10 vettori wiki / 31 chunk raw del corpus rowling → retrieval **vuoto** → `citation_quality = 0`, confidence `low`. Arch B sopravviveva perché il suo seeding del sottografo avviene **per nome di entità** (`harry_potter`, `lord_voldemort`, `horcrux` esistono come nodi a prescindere dal tag dominio), non per filtro metadati.
+
+Ri-eseguendo con il dominio **corretto** (`--domain rowling`):
 
 ```
-A tokens   B tokens     d%       Judge
-──────────────────────────────────────────
-  13.384    17.471    +30.5%    B vince 2x
+            A tokens   B tokens     d%       Judge
+──────────────────────────────────────────────────────
+  ac08       12.637    12.688     +0.4%    winner A
+  ac09       12.017    12.126     +0.9%    winner A
+──────────────────────────────────────────────────────
+  TOTAL      24.654    24.814     +0.6%    A vince 2x
 ```
 
-Il motivo dell'anomalia HP: la collection `wiki_pages` di ChromaDB per il corpus rowling è **vuota** (entità tutte aliased, nessuna consolidated), quindi Arch A inietta solo i raw chunks (contesto piccolo) mentre Arch B inietta sempre il sottografo. Su `ac09` è **Arch A** ad avere `citation_quality = 0` (niente da citare lato wiki), mentre Arch B cita le entità del grafo: il giudice premia B su entrambe le domande HP.
+Con il filtro corretto Arch A cita pulito (4 page wiki + 3 raw, confidence `high`) e **vince entrambe** le domande sulla completezza (judge: A=5, B=4 in entrambe). Il meccanismo delle entità **aliased** (§13) — che permette di citare `[[entity_id]]` aliased sintetizzandole runtime da source page + raw chunk — gestisce benissimo il corpus sparso: la collection `wiki_pages` di rowling **non è vuota** (contiene 10 source page), e A le recupera correttamente.
+
+**Due lezioni, distinte:**
+1. *Igiene dei metadati.* Il filtro dominio di Arch A è un **single point of failure silenzioso**: un tag disallineato azzera il retrieval senza errore visibile. A scala (molti corpus, ingestion multi-fonte) serve validazione dei tag dominio e/o un fallback quando il retrieval filtrato torna vuoto.
+2. *Robustezza del seeding.* Il seeding per nome di Arch B è **robusto al drift dei metadati** in un modo che il filtro di A non è — un vantaggio architetturale reale, ma diverso da "il grafo è migliore sulle wiki sparse" (affermazione che il dato pulito **non** supporta).
 
 ### Trade-off — quando conviene Arch B
 
-- **Win netto** su corpora con wiki densa e distribuzione *long-tail* delle sources: il sottografo è più selettivo dell'embedding wiki, il prompt si accorcia, la qualità tiene (B ≥ A al judge dopo il fix).
-- **Costo extra ma qualità superiore** su corpora con wiki sparsa (molte entità aliased, poche/zero consolidated): il grafo fornisce struttura dove l'embedding wiki non ha nulla da pescare. Il costo aggiuntivo compra risposte migliori.
-- **Invariante rispettato**: in entrambi gli scenari le pagine MD restano su disco per la revisione umana — Arch B rimuove **solo** il costo di embedding wiki, non l'artefatto leggibile.
+- **Pari o leggermente meglio** su corpora con wiki densa e distribuzione *long-tail* delle sources: il sottografo è più selettivo dell'embedding wiki, il prompt si accorcia, la qualità tiene (B ≥ A al judge su tolkien/asimov dopo il fix citazioni).
+- **Robustezza ed esplicabilità**, non risparmio: il seeding per nome resiste al drift dei metadati, e le triple tipate rendono le relazioni **ispezionabili** (valore per audit/compliance). Sui token il confronto è sostanzialmente **pari** (delta tra -2.9% e +0.9%, dentro il rumore): il risparmio token **non** è il discriminante.
+- **Invariante rispettato**: in ogni scenario le pagine MD restano su disco per la revisione umana — Arch B rimuove **solo** il costo di embedding wiki, non l'artefatto leggibile.
 
 ## Struttura
 
