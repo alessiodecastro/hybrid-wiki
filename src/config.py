@@ -35,6 +35,18 @@ AZURE_API_VERSION = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-10-21")
 EMBEDDING_DIM = 1536
 
 # ----------------------------------------------------------------------------
+# Backoff/retry per le chiamate di embedding.
+# Il tier S0 di Azure ha un limite per-minuto basso su text-embedding-3-*:
+# il burst di un singolo doc L2 ricco (raw chunks + source page + ogni entity
+# page consolidata) può superarlo e tornare HTTP 429. Senza retry l'ingest del
+# documento falliva a metà (osservato nello scaling test a 100 doc). Backoff
+# esponenziale con jitter, troncato a un cap, che rispetta l'header Retry-After
+# del server quando presente. Tutti override via env per i pilot.
+EMBED_MAX_RETRIES = int(os.environ.get("EMBED_MAX_RETRIES", "6"))
+EMBED_BACKOFF_BASE = float(os.environ.get("EMBED_BACKOFF_BASE", "1.0"))   # secondi
+EMBED_BACKOFF_CAP = float(os.environ.get("EMBED_BACKOFF_CAP", "60.0"))    # secondi
+
+# ----------------------------------------------------------------------------
 # Layout su filesystem. Tutto sotto data/ è transitorio e ricostruibile a
 # partire da data/raw/incoming/ + scripts/ingest_doc.py.
 # ----------------------------------------------------------------------------
