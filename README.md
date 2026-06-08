@@ -15,10 +15,13 @@ e `asimov` (Ciclo della Fondazione). Le regole operative sono in
 - **AGENTS.md v0.2** (dominio-agnostico) come contratto operativo letto in ogni chiamata LLM.
 - **Multi-dominio**: tag `domain` per documento, filtro `--domain` in query, isolamento dei corpora.
 - **Manutenzione**: lint health-check, consolidazione duplicati/alias a conferma umana, audit e promozione retroattiva L0.
+- **Graph layer (Arch B, sperimentale)**: indice strutturale a grafo (Kuzu) come **alternativa all'embedding wiki**. Le pagine MD restano su disco per la revisione umana ma non vengono embeddate; il retrieval pesca da raw + sottografo entità invece che da raw + wiki vettoriale. Vedi sezione *[Graph layer — indice strutturale sperimentale (Arch B)](#graph-layer--indice-strutturale-sperimentale-arch-b)*.
 
 ## Cosa NON fa ancora (per design)
 
-Access control · multimodal · synthesis pages + dependency graph · lint automatica · UI · ottimizzazione costi.
+Access control · multimodal · synthesis pages · lint automatica · UI · ottimizzazione costi.
+
+> Il **grafo strutturale delle entità** (chiamato *grafo dei collegamenti* nel design §4.1/§5.2, finora mai materializzato) esiste ora come **prototipo sperimentale "Arch B"**: vedi sezione dedicata e design §14.
 
 ## Setup
 
@@ -406,26 +409,132 @@ Le fasi tracciate:
 - `ingest:hot_layer_rebuild`      — rigenerazione overview Hot Layer
 - `query:embedding`               — embedding della domanda
 - `query:llm_synthesis`           — chiamata finale di risposta
+- `build:llm_triples`             — estrazione triple tipate per il graph layer (solo `build_graph.py --llm-relations`)
+
+## Graph layer — indice strutturale sperimentale (Arch B)
+
+Esperimento architetturale che mette a confronto due modi di fornire il **contesto strutturale** a query time, mantenendo invariata la priorità del progetto: **la revisione umana del wiki**. Le pagine MD non vengono mai eliminate — cambia solo *come* il loro contenuto raggiunge il modello.
+
+| | **Arch A** (default, `ask.py`) | **Arch B** (sperimentale, `query_graph.py`) |
+|---|---|---|
+| Indice raw | ChromaDB `raw_chunks` | ChromaDB `raw_chunks` (identico) |
+| Contesto strutturale | ChromaDB `wiki_pages` (embedding delle pagine wiki) | **Grafo Kuzu** (`get_subgraph()`): sottografo entità + relazioni |
+| Pagine MD su disco | Sì (sorgente dell'embedding wiki) | Sì (**solo** revisione umana, **non** embeddate) |
+| Costo embedding wiki | Pagato a ogni ingest L1/L2 | **Zero** (le entity page non entrano in ChromaDB) |
+| Contesto a query time | raw hits + wiki hits | raw hits + sottografo entità (JSON compatto) |
+
+L'idea: il grafo sostituisce il *ruolo* dell'indice vettoriale wiki come fonte di contesto strutturale. Le query pescano raw chunks (ChromaDB) + sottografo (Kuzu) invece di raw + wiki embeds. Le pagine wiki MD restano come artefatto leggibile, senza costo di embedding.
+
+Stack: **Kuzu** (graph DB embedded, sintassi Cypher-compatibile, nessun server, persistenza su file in `data/graph/kuzu_db/`). Zero token a query time: la traversal del grafo è puramente strutturale.
+
+### Costruzione del grafo (`build_graph.py`)
+
+Due fasi, la prima a costo zero, la seconda opzionale:
+
+```powershell
+python scripts/build_graph.py                          # zero token: solo nodi + CO_MENZIONATO
+python scripts/build_graph.py --rebuild                # wipe e ricostruzione completa
+python scripts/build_graph.py --rebuild --llm-relations  # + triple tipate via LLM (~18k token one-time)
+```
+
+- **FASE 1 — Nodi** (zero token): un nodo `Entity` per ogni entry dell'`_entity_index.yaml`, con `label`, `subtype`, `domain`, `state` e uno `snippet` (primi 400 char del body della pagina più rilevante — entity page se consolidated, altrimenti prima source page).
+- **FASE 2 — Archi co-menzione** (zero token): per ogni `doc_id` condiviso da due o più entità si crea un arco bidirezionale `CO_MENZIONATO`. È la struttura "gratis" derivata dalle `sources` dell'indice.
+- **FASE 3 — Triple tipate** (opzionale, `--llm-relations`): per ogni entità, una chiamata LLM legge il body wiki ed estrae triple `(soggetto, relazione, oggetto)` tipate, scegliendo i soggetti/oggetti **solo** dalla whitelist degli `entity_id` noti (anti-allucinazione). Tipi ammessi: `CONOSCE, E_UN, SI_TROVA_IN, PARTE_DI, OPPONE, ALLEATO_DI, POSSIEDE, CREA, GOVERNA, DISTRUGGE, MEMBRO_DI`. Le triple invalide (entità fuori whitelist, self-loop, type vuoto) vengono scartate in parsing.
+
+**Stato del grafo sul pilot a 3 corpora** (tolkien + asimov + rowling, build con `--llm-relations`):
+
+```
+Nodi Entity        : 62
+Archi CO_MENZIONATO: 230
+Archi tipati LLM   : 123   (PARTE_DI 35 · SI_TROVA_IN 33 · CREA 16 ·
+                            POSSIEDE/GOVERNA/OPPONE/CONOSCE 8 ciascuno ·
+                            ALLEATO_DI 3 · MEMBRO_DI 2)
+Archi totali       : 353
+```
+
+Nota di qualità: l'estrazione LLM produce occasionalmente un tipo malformato fuori dall'elenco (osservati 2 archi `ALLESATO_DI`, refuso di `ALLEATO_DI`). È rumore tollerato — non rompe la traversal — ma indica che un filtro `type ∈ whitelist` lato build sarebbe un irrobustimento utile.
+
+### Pipeline di query a grafo (`query_graph.py`)
+
+`QueryPipelineGraph.ask()` riusa l'intera infrastruttura di `ask.py` (Hot Layer, `CONFLICT_RULES`, policy multi-corpus, parser tollerante, token tracking, audit log) e cambia **solo** la fonte del contesto strutturale:
+
+1. **Embedding domanda + retrieval raw**: identici ad Arch A (la collection `wiki_pages` non viene mai toccata).
+2. **Rilevamento entità** (zero token LLM): unione di (a) entità le cui `sources` compaiono nei `doc_id` dei raw hits, e (b) entità il cui id leggibile (`snake_case` → parole) è citato nel testo della domanda.
+3. **Traversal del grafo**: `get_subgraph(entity_ids, hops=1)` espande ai soli vicini diretti. Il sottografo viene troncato a **12 nodi** e ogni nodo porta uno **snippet di 100 char** nel prompt. Le relazioni `CO_MENZIONATO` bidirezionali sono deduplicate.
+4. **Iniezione**: il sottografo è serializzato come **JSON compatto** (`focus / nodes / relations`) e inserito nel prompt al posto dei wiki hits.
+5. **Whitelist citazioni**: `entity_id` del sottografo + `doc_id` raw recuperati. **Le regole di citazione sono vincolanti e rafforzate**: ogni entità del grafo nominata nella risposta DEVE portare `[[entity_id]]` (id esatto in snake_case, non il label), e deve comparire in `wiki_sources`.
+
+Parametri (in cima a `query_graph.py`): `_MAX_SUBGRAPH_NODES = 12`, `_SUBGRAPH_HOPS = 1`, `_SNIPPET_IN_PROMPT = 100`. Tarati per non saturare il contesto: un primo giro con `hops=2`/`snippet=300` rendeva Arch B **più** costoso di Arch A; riducendo a `hops=1`/`snippet=100` il sottografo torna selettivo e il prompt più corto.
+
+> **Lezione di prompt (fix citazioni).** Nella prima versione, la regola di citazione di Arch B era troppo "morbida": su una domanda relazionale (`ac01`, il ruolo di Frodo) il modello produceva una risposta accurata e completa **senza alcun** `[[entity_id]]` — `citation_quality = 0` al judge, contro 5 di Arch A. La regola è stata resa **obbligatoria ed esplicita** ("ogni entità del grafo nominata → wikilink alla prima menzione; usa l'id esatto; rileggi la risposta prima del JSON e popola `wiki_sources`"). Post-fix: `ac01` passa a `citation_quality = 5` con 12 entità citate, e il giudizio si ribalta da *winner A* a *winner B*.
+
+### Confronto A vs B (`eval_compare.py`)
+
+Esegue **entrambe** le pipeline sulle stesse domande, misura i token per domanda (snapshot dei record del TokenTracker, fase `query:llm_synthesis`) e, con `--judge`, fa valutare le due risposte da un LLM-giudice (accuracy / completeness / citation_quality 0-5 + winner).
+
+```powershell
+python scripts/eval_compare.py --limit 4 --judge                              # prime 4 domande (tolkien/asimov) + giudizio
+python scripts/eval_compare.py --eval-set tests/eval_set_hp_judge.yaml --judge  # eval HP-only (ac08, ac09)
+python scripts/eval_compare.py --domain tolkien                                # filtro dominio, senza giudizio
+```
+
+Per vincoli di lock di Kuzu, le due pipeline sono inizializzate **una sola volta** fuori dal loop e `pipe_b.close()` rilascia il file lock a fine run. L'output va in `tests/results/eval_compare_YYYYMMDD_HHMMSS.json`.
+
+### Risultati empirici
+
+Misure sul pilot a 3 corpora (`gpt-5.1`; il delta token oscilla tra run perché la lunghezza dell'output non è deterministica):
+
+**Corpora con wiki densa (tolkien/asimov)** — Arch B **risparmia token** e regge la qualità:
+
+```
+Run                         A tokens   B tokens     d%      Judge (A·tie·B)
+─────────────────────────────────────────────────────────────────────────
+pre-fix  (4 domande)          46.559    43.070    -7.5%    1 · 2 · 1  (ac01 a A per cit=0)
+post-fix (4 domande)          47.547    46.170    -2.9%    1 · 1 · 2  (ac01 ribaltata a B)
+```
+
+**Corpus con wiki sparsa (harry_potter, `ac08`/`ac09`)** — Arch B **costa di più** ma vince in qualità:
+
+```
+A tokens   B tokens     d%       Judge
+──────────────────────────────────────────
+  13.384    17.471    +30.5%    B vince 2x
+```
+
+Il motivo dell'anomalia HP: la collection `wiki_pages` di ChromaDB per il corpus rowling è **vuota** (entità tutte aliased, nessuna consolidated), quindi Arch A inietta solo i raw chunks (contesto piccolo) mentre Arch B inietta sempre il sottografo. Su `ac09` è **Arch A** ad avere `citation_quality = 0` (niente da citare lato wiki), mentre Arch B cita le entità del grafo: il giudice premia B su entrambe le domande HP.
+
+### Trade-off — quando conviene Arch B
+
+- **Win netto** su corpora con wiki densa e distribuzione *long-tail* delle sources: il sottografo è più selettivo dell'embedding wiki, il prompt si accorcia, la qualità tiene (B ≥ A al judge dopo il fix).
+- **Costo extra ma qualità superiore** su corpora con wiki sparsa (molte entità aliased, poche/zero consolidated): il grafo fornisce struttura dove l'embedding wiki non ha nulla da pescare. Il costo aggiuntivo compra risposte migliori.
+- **Invariante rispettato**: in entrambi gli scenari le pagine MD restano su disco per la revisione umana — Arch B rimuove **solo** il costo di embedding wiki, non l'artefatto leggibile.
 
 ## Struttura
 
 ```
 hybrid-wiki/
 ├── src/                       # moduli core (ingest, query, lint, classifier, stores, ...)
+│   ├── query.py               # pipeline Arch A (raw + wiki ChromaDB)
+│   ├── query_graph.py         # pipeline Arch B sperimentale (raw + grafo Kuzu)
+│   └── graph_store.py         # wrapper Kuzu: nodi Entity + archi Relation
 ├── data/
 │   ├── raw/incoming/          # documenti sorgente per dominio (tolkien/, asimov/) + manifest
 │   ├── raw/                   # documenti originali ingestati (immutabili)
 │   ├── wiki/                  # pagine sintetizzate + HOT_LAYER.md
 │   ├── vectors/               # ChromaDB (creato a runtime)
+│   ├── graph/kuzu_db/         # graph DB Kuzu (Arch B, creato da build_graph.py)
 │   ├── lint/                  # consolidation_report.yaml + applied_merges.jsonl (audit)
 │   ├── classification/        # review_queue.yaml + examples.jsonl (active learning) + rules.yaml
 │   └── *_log.jsonl            # query_log, token_log (audit append-only)
 ├── schema/AGENTS.md           # contratto operativo dominio-agnostico (v0.2)
-├── scripts/                   # CLI: ingest_doc, ingest_folder, ask, classify, lint, tokens
+├── scripts/                   # CLI: ingest_doc, ingest_folder, ask, classify, lint, tokens,
+│                              #      build_graph (costruzione grafo), eval_compare (A vs B)
 └── tests/
     ├── eval_set.yaml          # eval dominio singolo (tolkien)
     ├── eval_set_crossdomain.yaml
-    └── results/               # report per-run: evalset_results_YYYYMMDD_HHMMSS.txt
+    ├── eval_set_arch_compare.yaml   # 10 domande tolkien/asimov/HP/cross per il confronto A vs B
+    ├── eval_set_hp_judge.yaml       # ac08/ac09 (harry_potter) per il judge Arch B
+    └── results/               # report per-run: evalset_results_*.txt + eval_compare_*.json
 ```
 
 ## Note di funzionamento
@@ -441,8 +550,10 @@ hybrid-wiki/
 
 ## Stato e roadmap
 
-**Completati**: Walking Skeleton · correzioni dal pilot (design §11) · fase **Scaling** (design §12: inventario gerarchico, lint di consolidazione, classificazione assistita, promozione retroattiva).
+**Completati**: Walking Skeleton · correzioni dal pilot (design §11) · fase **Scaling** (design §12: inventario gerarchico, lint di consolidazione, classificazione assistita, promozione retroattiva) · lazy materialization delle entity page (design §13).
 
-**Non ancora implementati** (design §7 e §10): access control multi-utente, sincronizzazione batch/near-real-time, synthesis pages + dependency graph, eval framework con scoring automatico, multimodal, ottimizzazione costi.
+**Prototipo sperimentale**: **graph layer / Arch B** (design §14) — grafo strutturale Kuzu come alternativa all'embedding wiki, con harness di confronto A vs B e LLM-as-judge. Implementa il *grafo dei collegamenti* previsto in §4.1/§5.2 ma finora mai materializzato.
 
-Riferimento completo: `../hybrid-wiki-rag-design.md` (v2.2, §§11–12 per le correzioni validate sul pilot).
+**Non ancora implementati** (design §7 e §10): access control multi-utente, sincronizzazione batch/near-real-time, synthesis pages persistenti, eval framework con scoring automatico, multimodal, ottimizzazione costi.
+
+Riferimento completo: `../hybrid-wiki-rag-design.md` (v3.1; §§11–12 correzioni pilot/Scaling, §13 lazy materialization, §14 graph layer Arch B).

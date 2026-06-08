@@ -1,0 +1,18 @@
+# Eval set HP-only per il judge A vs B.
+# Usato per verificare se il costo token extra di Arch B su HP (wiki sparse)
+# e' giustificato da una qualita' di risposta superiore.
+
+questions:
+  - id: ac08
+    text: "Descrivi il rapporto tra Harry Potter e Lord Voldemort."
+    domain: harry_potter
+    type: relazionale
+    focus_entities: [harry_potter, lord_voldemort, horcrux]
+    notes: "HP relazionale. Arch A: 0 wiki hits. Arch B: subgrafo 6-11 nodi."
+
+  - id: ac09
+    text: "Cos'e' un Horcrux e chi lo usa nella saga di Harry Potter?"
+    domain: harry_potter
+    type: concettuale
+    focus_entities: [horcrux, lord_voldemort, harry_potter]
+    notes: "HP concettuale. Arch A: 0 wiki hits. Arch B: subgrafo 6 nodi."

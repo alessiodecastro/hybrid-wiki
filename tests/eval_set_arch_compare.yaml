@@ -1,0 +1,85 @@
+# Eval set per confronto Arch A (wiki ChromaDB) vs Arch B (graph + raw).
+#
+# Copertura:
+#   - 3 corpora: tolkien, asimov, harry_potter + 1 cross-corpus
+#   - Tipi: factual, relazionale, multi_hop, concettuale, dettaglio
+#
+# Ogni domanda ha:
+#   id            : identificativo univoco
+#   text          : testo della domanda in italiano
+#   domain        : filtro opzionale (null = nessun filtro)
+#   type          : factual | relazionale | multi_hop | concettuale | dettaglio
+#   focus_entities: entità attese nel subgrafo (diagnostica)
+#   notes         : perché questa domanda è interessante per il confronto
+
+questions:
+
+  - id: ac01
+    text: "Chi è Frodo Baggins e qual è il suo ruolo nel viaggio verso Mordor?"
+    domain: tolkien
+    type: factual
+    focus_entities: [frodo_baggins, one_ring, samwise_gamgee, mordor]
+    notes: "Entità centrale Tolkien. Arch B deve trovare subgrafo frodo+anello+sam."
+
+  - id: ac02
+    text: "Che relazione c'è tra Frodo Baggins e Samwise Gamgee?"
+    domain: tolkien
+    type: relazionale
+    focus_entities: [frodo_baggins, samwise_gamgee]
+    notes: "Due entità co-menzionate nello stesso doc: test diretto degli archi CO_MENZIONATO."
+
+  - id: ac03
+    text: "Dove si trova Monte Fato e quale evento decisivo vi accade?"
+    domain: tolkien
+    type: dettaglio
+    focus_entities: [mount_doom, one_ring, mordor]
+    notes: "Risposta dipende da raw chunks precisi: verifica se Arch B mantiene il dettaglio."
+
+  - id: ac04
+    text: "Chi è Hari Seldon e qual è il suo contributo alla storia galattica?"
+    domain: asimov
+    type: factual
+    focus_entities: [hari_seldon, first_foundation]
+    notes: "Entità Asimov con entity page: subgrafo dovrebbe includere psicostoria + fondazione."
+
+  - id: ac05
+    text: "Cos'è la psicostoria e come viene usata per pianificare il futuro dell'umanità?"
+    domain: asimov
+    type: concettuale
+    focus_entities: [hari_seldon, first_foundation, le_crisi_seldon]
+    notes: "Domanda concettuale: verifica se il grafo fornisce contesto sufficiente senza wiki embed."
+
+  - id: ac06
+    text: "Chi è il Mulo e perché rappresenta una minaccia per il Piano Seldon?"
+    domain: asimov
+    type: relazionale
+    focus_entities: [il_mulo, first_foundation, hari_seldon]
+    notes: "Entità con wiki page materializzata (the_mule.md): test snippet da entity page."
+
+  - id: ac07
+    text: "Quali luoghi fisici svolgono un ruolo simbolico nella storia della Fondazione?"
+    domain: asimov
+    type: multi_hop
+    focus_entities: [terminus, trantor, first_foundation, time_vault]
+    notes: "Multi-hop su luoghi Asimov: co-menzionati in più docs."
+
+  - id: ac08
+    text: "Descrivi il rapporto tra Harry Potter e Lord Voldemort."
+    domain: harry_potter
+    type: relazionale
+    focus_entities: [harry_potter, lord_voldemort, horcrux]
+    notes: "Corpus harry_potter: verifica costruzione archi tra i due antagonisti."
+
+  - id: ac09
+    text: "Cos'è un Horcrux e chi lo usa nella saga di Harry Potter?"
+    domain: harry_potter
+    type: concettuale
+    focus_entities: [horcrux, lord_voldemort, harry_potter]
+    notes: "Concetto centrale HP: raw chunks ricchi; grafo aggiunge struttura."
+
+  - id: ac10
+    text: "Confronta il tema della profezia o del piano storico inevitabile in Tolkien e in Asimov."
+    domain: null
+    type: cross_corpus
+    focus_entities: [hari_seldon, first_foundation, one_ring, sauron]
+    notes: "Cross-corpus senza filtro: test della policy multi-corpus in entrambe le architetture."

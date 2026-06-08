@@ -1,0 +1,196 @@
+{
+  "run_at": "2026-05-25T11:53:37",
+  "eval_set": "eval_set_arch_compare.yaml",
+  "n_questions": 3,
+  "judge_enabled": false,
+  "totals": {
+    "arch_a_tokens": 35033,
+    "arch_b_tokens": 33044,
+    "delta_tokens": -1989,
+    "delta_pct": "-5.7%"
+  },
+  "questions": [
+    {
+      "id": "ac01",
+      "text": "Chi è Frodo Baggins e qual è il suo ruolo nel viaggio verso Mordor?",
+      "domain": "tolkien",
+      "type": "factual",
+      "arch_a": {
+        "answer": "Frodo Baggins è un hobbit della Contea, nato il 22 settembre 2968 della Terza Era a Hobbiton, figlio di Drogo Baggins e Primula Brandybuck. Rimasto orfano a dodici anni per l’annegamento dei genitori nel Brandivino, viene cresciuto dai Brandybuck a Buckland finché Bilbo Baggins, suo cugino di secondo grado, lo adotta come erede e lo porta a vivere a Bag End [[source_frodo_baggins_introduzione_20260520162549]][[frodo_baggins_introduzione_20260520162549]].  \n\nÈ descritto come “più alto della media, magro, con la pelle chiara, occhi luminosi e una piega di volontà al mento” e mostra una curiosità intellettuale insolita per un hobbit: legge molto, conosce un poco di elfico antico e condivide con Bilbo il fascino per il mondo oltre la Contea [[frodo_baggins_introduzione_20260520162549]].\n\nAl suo cinquantesimo compleanno, lo stesso giorno in cui Bilbo compie 111 anni, Frodo eredita Bag End e l’Anello Unico, allora creduto un semplice anello di invisibilità. Solo diciassette anni dopo Gandalf gli rivela la vera natura dell’oggetto, mettendo in moto il viaggio che porterà Frodo fino a Mordor [[frodo_baggins_introduzione_20260520162549]].\n\n### Ruolo nel viaggio verso Mordor\n\nAl Consiglio di Elrond, convocato a Granburrone per decidere il destino dell’Anello, Frodo si offre esitante di portarlo a Mordor per distruggerlo, assumendo il ruolo di Portatore dell’Anello e centro morale della missione [[source_consiglio_di_elrond_20260520162740]][[consiglio_di_elrond_20260520162740]]. Elrond forma la Compagnia dell’Anello intorno a lui: nove membri che accompagnano e proteggono Frodo nel viaggio verso il Monte Fato [[source_consiglio_di_elrond_20260520162740]].\n\nIl ruolo specifico di Frodo nel viaggio verso Mordor è quindi:\n\n- **Portatore dell’Anello Unico**: è l’unico incaricato di portare l’Anello fino al Monte Fato per distruggerlo, gesto da cui dipende la sconfitta di Sauron [[source_consiglio_di_elrond_20260520162740]][[frodo_baggins_introduzione_20260520162549]].\n- **Fulcro del percorso narrativo**: il suo viaggio lo conduce da Brea e Granburrone attraverso Moria e Lothlórien fino al Monte Fato, con una fase finale condotta quasi solo con Samwise Gamgee attraverso Mordor [[frodo_baggins_introduzione_20260520162549]][[mordor_20260520162718]].\n- **Protagonista della traversata di Mordor**: Frodo e Sam entrano in Mordor da Cirith Ungol nel marzo 3019; il loro cammino attraverso le pianure di Gorgoroth fino al Monte Fato dura circa otto giorni, nell’aria satura di ceneri e sotto l’oscurità innaturale voluta da Sauron [[mordor_20260520162718]].\n- **Dipendenza dal legame con Sam**: il corpus sottolinea il ruolo centrale del legame con Samwise Gamgee nella fase conclusiva della missione in Mordor; Sam è definito il suo compagno più fedele, che lo accompagna fino alla fine del viaggio [[source_frodo_baggins_introduzione_20260520162549]][[samwise_gamgee_20260520162630]].\n\nFrodo porta con sé pochi oggetti essenziali: l’Anello legato a una catenella d’argento, il pugnale elfico Pungolo, la cotta di mithril, il pane elfico (lembas) e la fiala di Galadriel con la luce della stella di Eärendil, strumenti che lo aiutano a sopravvivere e a resistere fino al cuore di Mordor [[frodo_baggins_introduzione_20260520162549]].",
+        "confidence": "high",
+        "wiki_sources": [
+          "source_frodo_baggins_introduzione_20260520162549",
+          "source_consiglio_di_elrond_20260520162740",
+          "source_mordor_20260520162718",
+          "source_samwise_gamgee_20260520162630"
+        ],
+        "raw_sources": [
+          "frodo_baggins_introduzione_20260520162549",
+          "consiglio_di_elrond_20260520162740",
+          "mordor_20260520162718",
+          "samwise_gamgee_20260520162630"
+        ],
+        "tokens": {
+          "total": 12460,
+          "prompt": 10310,
+          "completion": 2150,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 22,
+            "query:llm_synthesis": 12438
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Frodo Baggins è un hobbit della Contea, nato il 22 settembre 2968 della Terza Era a Hobbiton, figlio di Drogo Baggins e Primula Brandybuck. Rimasto orfano a dodici anni, viene dapprima cresciuto dai Brandybuck a Buckland, poi adottato dal cugino di secondo grado Bilbo Baggins come erede e condotto a Bag End. È descritto come più alto della media per un hobbit, magro, con pelle chiara, occhi luminosi e una marcata forza di volontà; possiede una curiosità intellettuale poco comune tra gli hobbit, legge molto e conosce un poco di Elfico antico, condividendo con Bilbo il fascino per il mondo esterno alla Contea [[frodo_baggins_introduzione_20260520162549]][[frodo_baggins]].\n\nNel giorno del suo cinquantesimo compleanno eredita da Bilbo sia Bag End sia l’Anello Unico, allora ritenuto un semplice anello di invisibilità. Diciassette anni più tardi Gandalf gli rivela che si tratta dell’Anello forgiato da Sauron, evento che dà avvio al viaggio dell’Anello [[frodo_baggins_introduzione_20260520162549]][[gandalf]]. Al Consiglio di Elrond a Granburrone, convocato per decidere il destino dell’Anello, Frodo si offre esitante di portarlo a Mordor per distruggerlo nel Monte Fato; Elrond accetta la sua offerta e istituisce la Compagnia dell’Anello, con Frodo come Portatore dell’Anello e centro della missione [[consiglio_di_elrond_20260520162740]][[council_of_elrond]][[fellowship_of_the_ring]].\n\nNel viaggio verso Mordor, Frodo è dunque il custode materiale dell’Anello Unico, portato al collo con una catenella d’argento, e il protagonista del cammino che, attraverso Brea, Granburrone, Moria e Lothlórien, conduce fino al Monte Fato in territorio nemico [[frodo_baggins_introduzione_20260520162549]][[mordor_20260520162718]][[mordor]]. Viaggia con pochi oggetti essenziali legati alla missione: il coltello elfico Pungolo, una cotta di mithril donata da Bilbo, il pane elfico lembas ricevuto a Lothlórien e la fiala di Galadriel contenente la luce della stella di Eärendil [[frodo_baggins_introduzione_20260520162549]].\n\nIl suo compagno più fedele è Samwise Gamgee, giardiniere di Bag End, che lo segue fin dall’inizio: Sam viene coinvolto da Gandalf e non abbandona mai Frodo, accompagnandolo dalla Contea fino a Mordor. Insieme entrano in Mordor da Cirith Ungol nel marzo del 3019 della Terza Era e attraversano le pianure di Gorgoroth per raggiungere il Monte Fato, dove la missione di distruggere l’Anello giunge al culmine [[samwise_gamgee_20260520162630]][[mordor_20260520162718]][[samwise_gamgee]][[gorgoroth]][[mount_doom]].\n\nIn sintesi, Frodo Baggins è il Portatore dell’Anello e il fulcro della missione verso Mordor: la riuscita del viaggio e la possibilità di distruggere l’Anello Unico dipendono dalla sua decisione al Consiglio di Elrond e dalla sua capacità di portare l’Anello fino al Monte Fato nel cuore del dominio di Sauron.",
+        "confidence": "high",
+        "wiki_sources": [
+          "frodo_baggins",
+          "samwise_gamgee",
+          "gandalf",
+          "council_of_elrond",
+          "fellowship_of_the_ring",
+          "mordor",
+          "gorgoroth",
+          "mount_doom"
+        ],
+        "raw_sources": [
+          "frodo_baggins_introduzione_20260520162549",
+          "samwise_gamgee_20260520162630",
+          "consiglio_di_elrond_20260520162740",
+          "mordor_20260520162718",
+          "gandalf_introduzione_20260520162604"
+        ],
+        "graph_entities": 22,
+        "graph_relations": 72,
+        "tokens": {
+          "total": 11780,
+          "prompt": 9873,
+          "completion": 1907,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 22,
+            "query:llm_synthesis": 11758
+          }
+        }
+      },
+      "delta_tokens": -680,
+      "delta_pct": "-5.5%",
+      "judge": null
+    },
+    {
+      "id": "ac02",
+      "text": "Che relazione c'è tra Frodo Baggins e Samwise Gamgee?",
+      "domain": "tolkien",
+      "type": "relazionale",
+      "arch_a": {
+        "answer": "Frodo Baggins e Samwise Gamgee sono legati da un rapporto multiplo: sociale, pratico e profondamente affettivo.\n\n1. **Rapporto “formale” nella Contea**  \n   - Sam è il giardiniere di Bag End, prima al servizio di Bilbo e poi di Frodo: “diventa giardiniere personale di Bilbo prima e di Frodo poi” [[source_samwise_gamgee_20260520162630]][[samwise_gamgee_20260520162630]].  \n   - Frodo è il padrone di casa a Bag End; Sam è quindi inizialmente un subordinato, legato a lui da un rapporto di lavoro e di fiducia quotidiana [[source_samwise_gamgee_20260520162630]].\n\n2. **Compagni di viaggio e membri della stessa Compagnia**  \n   - Quando Gandalf scopre Sam ad origliare la conversazione sull’Anello, lo “coinvolge nel viaggio come ‘punizione’ — in realtà, come compagno di Frodo” [[samwise_gamgee_20260520162630]].  \n   - Al Consiglio di Elrond, Frodo è scelto come Portatore dell’Anello, e Sam è uno dei nove membri della Compagnia dell’Anello: la formazione include Frodo e Sam tra i quattro hobbit designati [[source_consiglio_di_elrond_20260520162740]][[consiglio_di_elrond_20260520162740]].  \n   - Nei fatti, Sam “non lascerà mai Frodo da solo: lo segue attraverso la Vecchia Foresta, i Tumulilande, Brea, Granburrone, Moria, Lothlórien, e poi nel viaggio diretto a Mordor” [[samwise_gamgee_20260520162630]]. Anche il profilo di Frodo ribadisce che “il suo compagno più fedele è Samwise Gamgee, giardiniere di Bag End. Insieme percorrono la fase finale del viaggio attraverso Mordor” [[frodo_baggins_introduzione_20260520162549]].\n\n3. **Amicizia e lealtà personale**  \n   - Il legame non è solo funzionale: Frodo è descritto come avente un “ruolo centrale del legame con Samwise Gamgee nella fase conclusiva della missione in Mordor” [[source_frodo_baggins_introduzione_20260520162549]].  \n   - Sam è indicato come “compagno di Frodo Baggins nel viaggio dell’Anello” [[source_samwise_gamgee_20260520162630]], e la sua caratterizzazione insiste sulla lealtà assoluta: segue Frodo ovunque e non lo abbandona neppure nei momenti più estremi del viaggio.\n\nIn sintesi: Frodo è il padrone e poi il leader della missione, Sam nasce come suo giardiniere ma diventa il suo compagno più fedele, amico e sostegno indispensabile nel portare l’Anello fino a Mordor.",
+        "confidence": "high",
+        "wiki_sources": [
+          "source_samwise_gamgee_20260520162630",
+          "source_frodo_baggins_introduzione_20260520162549",
+          "source_consiglio_di_elrond_20260520162740"
+        ],
+        "raw_sources": [
+          "samwise_gamgee_20260520162630",
+          "frodo_baggins_introduzione_20260520162549",
+          "consiglio_di_elrond_20260520162740"
+        ],
+        "tokens": {
+          "total": 11818,
+          "prompt": 10275,
+          "completion": 1543,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 18,
+            "query:llm_synthesis": 11800
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Frodo Baggins e Samwise Gamgee sono inizialmente legati da un rapporto sociale e lavorativo: Sam è il giardiniere di Bag End e \"diventa giardiniere personale di Bilbo prima e di Frodo poi\" [[samwise_gamgee_20260520162630]]. Nel corso della storia questo legame si approfondisce e, per le fonti del corpus, Sam diventa soprattutto il compagno più fedele di Frodo: \"Il suo compagno più fedele è Samwise Gamgee, giardiniere di Bag End. Insieme percorrono la fase finale del viaggio attraverso Mordor\" [[frodo_baggins_introduzione_20260520162549]]. Sam viene coinvolto nella missione proprio per la sua vicinanza a Frodo e \"non lascerà mai Frodo da solo: lo segue attraverso la Vecchia Foresta, i Tumulilande, Brea, Granburrone, Moria, Lothlórien, e poi nel viaggio diretto a Mordor\" [[samwise_gamgee_20260520162630]]. Nel corpus, quindi, il loro rapporto è al tempo stesso padrone/servitore, compagni di viaggio e amicizia di lealtà eccezionale.",
+        "confidence": "high",
+        "wiki_sources": [
+          "frodo_baggins",
+          "samwise_gamgee"
+        ],
+        "raw_sources": [
+          "frodo_baggins_introduzione_20260520162549",
+          "samwise_gamgee_20260520162630"
+        ],
+        "graph_entities": 18,
+        "graph_relations": 60,
+        "tokens": {
+          "total": 10731,
+          "prompt": 9862,
+          "completion": 869,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 18,
+            "query:llm_synthesis": 10713
+          }
+        }
+      },
+      "delta_tokens": -1087,
+      "delta_pct": "-9.2%",
+      "judge": null
+    },
+    {
+      "id": "ac03",
+      "text": "Dove si trova Monte Fato e quale evento decisivo vi accade?",
+      "domain": "tolkien",
+      "type": "dettaglio",
+      "arch_a": {
+        "answer": "Monte Fato si trova in Mordor, al centro della pianura di Gorgoroth: è un vulcano attivo chiamato anche Orodruin o Amon Amarth, posto nel cuore del dominio di Sauron [[source_monte_fato_20260520162731]][[mordor_20260520162718]].\n\nL’evento decisivo che vi accade è la distruzione dell’Anello Unico: il 25 marzo 3019 della Terza Era, nella Crepa del Destino all’interno della Sammath Naur, Gollum, dopo aver strappato l’Anello a Frodo, perde l’equilibrio e cade nel magma con il suo “tesoro”, provocando la rovina dell’Anello e, di conseguenza, il crollo di Barad-dûr e la fine del potere di Sauron [[monte_fato_20260520162731]][[anello_unico_20260520162643]].",
+        "confidence": "high",
+        "wiki_sources": [
+          "source_monte_fato_20260520162731",
+          "source_mordor_20260520162718",
+          "source_anello_unico_20260520162643"
+        ],
+        "raw_sources": [
+          "monte_fato_20260520162731",
+          "mordor_20260520162718",
+          "anello_unico_20260520162643"
+        ],
+        "tokens": {
+          "total": 10755,
+          "prompt": 10217,
+          "completion": 538,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 17,
+            "query:llm_synthesis": 10738
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Il Monte Fato (Orodruin, Amon Amarth) è un vulcano attivo situato al centro della pianura di Gorgoroth, nella regione di Mordor, dominio del Signore Oscuro Sauron nel sud-est della Terra di Mezzo.[[mordor]][[mordor_20260520162718]][[monte_fato_20260520162731]]\n\nL’evento decisivo che vi accade è la distruzione dell’Anello Unico: il 25 marzo 3019 della Terza Era, nella Crepa del Destino all’interno delle fucine di Sammath Naur, Gollum, dopo aver sottratto l’Anello a Frodo, cade nel magma con il suo “tesoro”, e così l’Anello viene annientato. L’eruzione conseguente porta anche alla distruzione di Barad-dûr.[[monte_fato_20260520162731]][[anello_unico_20260520162643]]",
+        "confidence": "high",
+        "wiki_sources": [
+          "mordor"
+        ],
+        "raw_sources": [
+          "monte_fato_20260520162731",
+          "mordor_20260520162718",
+          "anello_unico_20260520162643"
+        ],
+        "graph_entities": 14,
+        "graph_relations": 48,
+        "tokens": {
+          "total": 10533,
+          "prompt": 9979,
+          "completion": 554,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 17,
+            "query:llm_synthesis": 10516
+          }
+        }
+      },
+      "delta_tokens": -222,
+      "delta_pct": "-2.1%",
+      "judge": null
+    }
+  ]
+}

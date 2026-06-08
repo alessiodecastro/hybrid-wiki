@@ -1,0 +1,629 @@
+{
+  "run_at": "2026-05-25T12:04:23",
+  "eval_set": "eval_set_arch_compare.yaml",
+  "n_questions": 10,
+  "judge_enabled": false,
+  "totals": {
+    "arch_a_tokens": 110715,
+    "arch_b_tokens": 116459,
+    "delta_tokens": 5744,
+    "delta_pct": "+5.2%"
+  },
+  "questions": [
+    {
+      "id": "ac01",
+      "text": "Chi è Frodo Baggins e qual è il suo ruolo nel viaggio verso Mordor?",
+      "domain": "tolkien",
+      "type": "factual",
+      "arch_a": {
+        "answer": "Frodo Baggins è un hobbit della Contea, nato a Hobbiton il 22 settembre 2968 della Terza Era, figlio di Drogo Baggins e Primula Brandybuck. Rimasto orfano a dodici anni per l’annegamento dei genitori nel Brandivino, viene cresciuto a Buckland dai Brandybuck fino all’adozione da parte di Bilbo Baggins, che lo porta a vivere a Bag End e lo nomina suo erede [[source_frodo_baggins_introduzione_20260520162549]].\n\nFisicamente è “più alto della media, magro, con la pelle chiara, occhi luminosi e una piega di volontà al mento”, con una curiosità intellettuale insolita per un hobbit: legge molto, conosce un poco di elfico antico ed è affascinato dal mondo oltre la Contea [[frodo_baggins_introduzione_20260520162549]].\n\nIl suo ruolo nel viaggio verso Mordor è centrale: Frodo è il Portatore dell’Anello. Nel suo cinquantesimo compleanno eredita da Bilbo Bag End e l’Anello Unico, che inizialmente considera solo un anello di invisibilità; Gandalf gli rivelerà diciassette anni dopo la vera natura dell’oggetto, dando avvio alla missione che lo conduce fino al Monte Fato [[frodo_baggins_introduzione_20260520162549]].  \n\nAl Consiglio di Elrond, quando si discute il destino dell’Anello, Frodo si offre esitante di portarlo a Mordor per distruggerlo; Elrond accetta e attorno a lui viene costituita la Compagnia dell’Anello, di cui Frodo è quindi il fulcro: è colui che deve fisicamente trasportare l’Anello nel cuore di Mordor [[source_consiglio_di_elrond_20260520162740]].\n\nDurante il viaggio, Frodo porta con sé pochi oggetti essenziali legati alla missione:  \n- l’Anello Unico appeso a una catenella d’argento;  \n- il pugnale elfico Pungolo;  \n- la cotta di mithril ricevuta da Bilbo;  \n- il pane elfico (lembas) donato a Lothlórien;  \n- la fiala di Galadriel con la luce della stella di Eärendil [[frodo_baggins_introduzione_20260520162549]].  \n\nLa fase conclusiva del viaggio lo vede attraversare Mordor insieme al suo compagno più fedele, Samwise Gamgee: entrano nella terra nera da Cirith Ungol nel marzo 3019 e attraversano le pianure di Gorgoroth per circa otto giorni fino al Monte Fato, dove deve condurre l’Anello al luogo della sua distruzione [[mordor_20260520162718]][[frodo_baggins_introduzione_20260520162549]]. L’intera missione verso Mordor ruota quindi attorno alla sua capacità di sopportare il peso fisico e spirituale dell’Anello e di condurlo nel solo luogo in cui può essere distrutto.",
+        "confidence": "high",
+        "wiki_sources": [
+          "source_frodo_baggins_introduzione_20260520162549",
+          "source_consiglio_di_elrond_20260520162740",
+          "source_mordor_20260520162718"
+        ],
+        "raw_sources": [
+          "frodo_baggins_introduzione_20260520162549",
+          "mordor_20260520162718",
+          "consiglio_di_elrond_20260520162740"
+        ],
+        "tokens": {
+          "total": 11912,
+          "prompt": 10310,
+          "completion": 1602,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 22,
+            "query:llm_synthesis": 11890
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Frodo Baggins è un hobbit della Contea e il portatore dell’Anello Unico nel viaggio verso Mordor. Secondo la fonte dedicata, nasce il 22 settembre 2968 T.E. a Hobbiton, figlio di Drogo Baggins e Primula Brandybuck; rimasto orfano a dodici anni, viene prima cresciuto dai Brandybuck a Buckland e poi adottato dal cugino di secondo grado Bilbo Baggins, che lo porta a Bag End e lo designa come proprio erede. Frodo è descritto come un hobbit fisicamente più alto della media, magro, dalla pelle chiara e dagli occhi luminosi, con una spiccata curiosità intellettuale: legge molto e conosce un poco di Elfico antico, qualità insolite per un abitante della Contea [[frodo_baggins_introduzione_20260520162549]].\n\nNel suo cinquantesimo compleanno Frodo eredita da Bilbo sia Bag End sia l’Anello Unico, che in quel momento è ancora ritenuto un semplice anello di invisibilità. Diciassette anni più tardi, Gandalf gli rivela che si tratta dell’Anello forgiato da Sauron, dando così avvio agli eventi che porteranno alla missione di distruzione dell’Anello [[frodo_baggins_introduzione_20260520162549]; [[gandalf_introduzione_20260520162604]].\n\nIl ruolo di Frodo nel viaggio verso Mordor è centrale. Al Consiglio di Elrond, convocato a Granburrone per stabilire il destino dell’Anello, egli si offre – pur esitante – di portare l’Anello a Mordor per distruggerlo nel Monte Fato [[consiglio_di_elrond_20260520162740]; [[council_of_elrond]]. Elrond accetta e istituisce la Compagnia dell’Anello, nove membri che accompagnano Frodo nelle prime fasi del viaggio. Frodo diventa così il fulcro della missione segreta: mentre gli eserciti dei Popoli Liberi affrontano Sauron in campo aperto, il compito decisivo è quello del portatore dell’Anello che, in clandestinità, deve condurre il manufatto al cuore del potere nemico per distruggerlo.\n\nSecondo la sintesi sull’itinerario di Frodo, il suo viaggio lo conduce dalla Contea a Brea, quindi a Granburrone, poi attraverso Moria e Lothlórien fino a Mordor e al Monte Fato [[frodo_baggins_introduzione_20260520162549]. Il documento su Mordor specifica che Frodo e Sam entrano nel reame nemico da Cirith Ungol nel marzo del 3019 della Terza Era e attraversano le pianure di Gorgoroth fino al Monte Fato in circa otto giorni [[mordor_20260520162718]; [[mordor]].\n\nIl compagno più fedele di Frodo è Samwise Gamgee, suo giardiniere a Bag End, che viene coinvolto da Gandalf e non lo abbandona più: lo segue in tutte le tappe, fino al viaggio finale dentro Mordor [[frodo_baggins_introduzione_20260520162549]; [[samwise_gamgee_20260520162630]]. Il ruolo di Frodo come portatore dell’Anello è quindi inscindibile dal sostegno pratico e morale di Sam.\n\nDurante il viaggio verso Mordor, Frodo porta con sé pochi ma cruciali oggetti: l’Anello Unico appeso a una catenella d’argento, il coltello elfico Pungolo e una cotta di mithril donati da Bilbo, il pane elfico (lembas) ricevuto a Lothlórien e la fiala di Galadriel con la luce della stella di Eärendil [[frodo_baggins_introduzione_20260520162549]. Questi strumenti lo aiutano a sopravvivere e a resistere lungo il cammino, ma il nucleo del suo ruolo resta la scelta iniziale al Consiglio di Elrond e la responsabilità personale di portare l’Anello fino al centro di Mordor per distruggerlo.",
+        "confidence": "high",
+        "wiki_sources": [
+          "frodo_baggins",
+          "council_of_elrond",
+          "mordor",
+          "samwise_gamgee",
+          "gandalf"
+        ],
+        "raw_sources": [
+          "frodo_baggins_introduzione_20260520162549",
+          "consiglio_di_elrond_20260520162740",
+          "mordor_20260520162718",
+          "samwise_gamgee_20260520162630",
+          "gandalf_introduzione_20260520162604"
+        ],
+        "graph_entities": 22,
+        "graph_relations": 72,
+        "tokens": {
+          "total": 12258,
+          "prompt": 9873,
+          "completion": 2385,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 22,
+            "query:llm_synthesis": 12236
+          }
+        }
+      },
+      "delta_tokens": 346,
+      "delta_pct": "+2.9%",
+      "judge": null
+    },
+    {
+      "id": "ac02",
+      "text": "Che relazione c'è tra Frodo Baggins e Samwise Gamgee?",
+      "domain": "tolkien",
+      "type": "relazionale",
+      "arch_a": {
+        "answer": "Frodo Baggins e Samwise Gamgee sono legati da un doppio rapporto: sociale/professionale e profondamente personale.\n\n1. **Padrone e giardiniere (rapporto “esterno”)**  \n   - Sam è il giardiniere di Casa Baggins (Bag End): eredita il mestiere dal padre Hamfast, giardiniere storico della casa, e diventa giardiniere personale prima di Bilbo e poi di Frodo [[source_samwise_gamgee_20260520162630]; [[samwise_gamgee_20260520162630]].  \n   - Frodo dunque è, nella vita quotidiana della Contea, il datore di lavoro di Sam e il suo “padrone” socialmente riconosciuto.\n\n2. **Compagni di viaggio e amicizia profonda (rapporto “interno”)**  \n   - Quando Gandalf sorprende Sam ad ascoltare di nascosto la conversazione sull’Anello, lo “condanna” a fare da compagno a Frodo nel viaggio che sta per iniziare [[samwise_gamgee_20260520162630]].  \n   - Da quel momento Sam “non lascerà mai Frodo da solo”: lo segue ovunque, dalla Contea fino al Monte Fato, passando per Brea, Granburrone, Moria, Lothlórien e poi Mordor [[samwise_gamgee_20260520162630]]; [[frodo_baggins_introduzione_20260520162549]].  \n   - Nella sintesi su Frodo, Sam è definito “il suo compagno più fedele”, che con lui percorre la fase finale del viaggio attraverso Mordor [[frodo_baggins_introduzione_20260520162549]].  \n\nIn sintesi: Sam è il giardiniere e servitore di Frodo nella Contea, ma soprattutto il suo più leale amico e compagno di missione nell’impresa di distruggere l’Anello.",
+        "confidence": "high",
+        "wiki_sources": [
+          "source_samwise_gamgee_20260520162630",
+          "source_frodo_baggins_introduzione_20260520162549"
+        ],
+        "raw_sources": [
+          "samwise_gamgee_20260520162630",
+          "frodo_baggins_introduzione_20260520162549"
+        ],
+        "tokens": {
+          "total": 11319,
+          "prompt": 10275,
+          "completion": 1044,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 18,
+            "query:llm_synthesis": 11301
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Frodo Baggins e Samwise Gamgee sono inizialmente legati da un rapporto sociale di tipo domestico: Sam, figlio di Hamfast Gamgee, eredita dal padre il mestiere di giardiniere di Bag End e diventa giardiniere personale di Bilbo Baggins prima e di Frodo poi[[samwise_gamgee_20260520162630]][[frodo_baggins]]. Frodo, che ha ereditato Bag End e l’Anello da Bilbo, è quindi il padrone di casa, mentre Sam è il suo servitore.\nNel corso degli eventi, questo rapporto si approfondisce e viene descritto esplicitamente come un vincolo di lealtà e amicizia: nel profilo di Frodo, Sam è presentato come \"il suo compagno più fedele\", giardiniere di Bag End che lo accompagna fino alla fine del viaggio, attraversando assieme Mordor[[frodo_baggins_introduzione_20260520162549]]. Nel profilo di Sam si precisa che, dopo essere stato sorpreso da Gandalf a spiare la conversazione sull’Anello, viene coinvolto nel viaggio proprio come compagno di Frodo, e che \"Sam non lascerà mai Frodo da solo\", seguendolo dalla Contea fino a Mordor[[samwise_gamgee_20260520162630]].\nAlla luce delle fonti presenti nel corpus, la relazione fra i due può quindi essere riassunta così: Sam è il giardiniere e servitore di Frodo a Bag End, ma soprattutto il suo amico più leale e compagno inseparabile nella missione di portare l’Anello fino al Monte Fato[[frodo_baggins]][[samwise_gamgee_20260520162630]][[frodo_baggins_introduzione_20260520162549]].",
+        "confidence": "high",
+        "wiki_sources": [
+          "frodo_baggins",
+          "samwise_gamgee"
+        ],
+        "raw_sources": [
+          "frodo_baggins_introduzione_20260520162549",
+          "samwise_gamgee_20260520162630"
+        ],
+        "graph_entities": 18,
+        "graph_relations": 60,
+        "tokens": {
+          "total": 10897,
+          "prompt": 9862,
+          "completion": 1035,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 18,
+            "query:llm_synthesis": 10879
+          }
+        }
+      },
+      "delta_tokens": -422,
+      "delta_pct": "-3.7%",
+      "judge": null
+    },
+    {
+      "id": "ac03",
+      "text": "Dove si trova Monte Fato e quale evento decisivo vi accade?",
+      "domain": "tolkien",
+      "type": "dettaglio",
+      "arch_a": {
+        "answer": "Monte Fato si trova al centro della pianura di Gorgoroth, nella terra di Mordor, la regione del sud‑est della Terra di Mezzo che è dominio di Sauron. È un vulcano attivo chiamato anche Orodruin o Amon Amarth (“Monte del Destino”). [[monte_fato_20260520162731]][[mordor_20260520162718]]\n\nL’evento decisivo che vi accade è la distruzione dell’Anello Unico: il 25 marzo 3019 della Terza Era, nella Crepa del Destino all’interno della Sammath Naur, Gollum strappa l’Anello a Frodo, perde l’equilibrio e cade nel magma insieme al suo “tesoro”; l’eruzione conseguente distrugge anche Barad‑dûr e segna la caduta definitiva del potere di Sauron. [[monte_fato_20260520162731]][[anello_unico_20260520162643]]",
+        "confidence": "high",
+        "wiki_sources": [
+          "source_monte_fato_20260520162731",
+          "source_mordor_20260520162718",
+          "source_anello_unico_20260520162643"
+        ],
+        "raw_sources": [
+          "monte_fato_20260520162731",
+          "mordor_20260520162718",
+          "anello_unico_20260520162643"
+        ],
+        "tokens": {
+          "total": 10768,
+          "prompt": 10217,
+          "completion": 551,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 17,
+            "query:llm_synthesis": 10751
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Monte Fato (Orodruin, Amon Amarth) è un vulcano attivo situato al centro della pianura di Gorgoroth, all’interno di Mordor, la Terra Nera nel sud-est della Terra di Mezzo. [[mount_doom]] [[mordor]] [[monte_fato_20260520162731]] [[mordor_20260520162718]]\n\nL’evento decisivo che vi accade è la distruzione dell’Anello Unico: l’Anello viene distrutto nella Crepa del Destino, all’interno delle fucine di Sammath Naur, il 25 marzo 3019 della Terza Era, quando Gollum, dopo averlo strappato a Frodo, cade nel magma insieme al suo “tesoro”. L’eruzione conseguente abbatte anche Barad-dûr, segnando la fine del potere di Sauron. [[monte_fato_20260520162731]]",
+        "confidence": "high",
+        "wiki_sources": [
+          "mount_doom",
+          "mordor"
+        ],
+        "raw_sources": [
+          "monte_fato_20260520162731",
+          "mordor_20260520162718"
+        ],
+        "graph_entities": 14,
+        "graph_relations": 48,
+        "tokens": {
+          "total": 10550,
+          "prompt": 9979,
+          "completion": 571,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 17,
+            "query:llm_synthesis": 10533
+          }
+        }
+      },
+      "delta_tokens": -218,
+      "delta_pct": "-2.0%",
+      "judge": null
+    },
+    {
+      "id": "ac04",
+      "text": "Chi è Hari Seldon e qual è il suo contributo alla storia galattica?",
+      "domain": "asimov",
+      "type": "factual",
+      "arch_a": {
+        "answer": "Hari Seldon è un matematico originario del pianeta Helicon, vissuto nell’ultima fase dell’Impero Galattico, figura centrale del Ciclo della Fondazione di Isaac Asimov. È il fondatore della psicostoria e il principale artefice del Piano Seldon, che struttura l’intero Ciclo.\n\n### Identità e biografia essenziale\n\n- Nasce nell’anno 11.988 dell’Era Galattica sul pianeta Helicon [[hari_seldon_20260520164621; source_hari_seldon_20260520164621]].\n- Trascorre gran parte della vita su Trantor, capitale dell’Impero, dove diventa professore di matematica all’Università di Streeling [[hari_seldon_20260520164621; hari_seldon_20260520164621]].\n- Viene processato per tradimento dalla Commissione di Pubblica Salvezza a causa delle sue previsioni sul crollo dell’Impero, ma evita l’esecuzione negoziando l’esilio della propria équipe di circa centomila persone su Terminus [[hari_seldon_20260520164621]].\n- Muore nel 12.069 E.G., poco dopo l’insediamento della Fondazione su Terminus [[hari_seldon_20260520164621]].\n\nÈ ricordato anche come “Raven” Seldon (“il Corvo”) per il carattere funesto delle sue profezie, e come il più grande pianificatore della storia umana [[hari_seldon_20260520164621]].\n\n### Contributo alla storia galattica\n\n1. **Fondazione della psicostoria**\n\nSeldon sviluppa la psicostoria, disciplina che combina storia, sociologia e matematica statistica per prevedere il comportamento di grandi masse umane su scala galattica [[source_la_psicostoria_20260520164819; hari_seldon_20260520164621]]. Con essa prevede il crollo dell’Impero Galattico entro circa cinque secoli e un conseguente periodo di circa 30.000 anni di barbarie prima della nascita di un Secondo Impero [[hari_seldon_20260520164621; source_l_impero_galattico_20260520164929]].\n\n2. **Il Piano Seldon e le due Fondazioni**\n\nPer ridurre il periodo di caos da 30.000 a circa 1.000 anni, progetta il Piano Seldon: la creazione di due Fondazioni ai due estremi opposti della Galassia, strumenti psicostorici per guidare l’evoluzione storica verso un Secondo Impero [[hari_seldon_20260520164621]]. La Prima Fondazione viene istituita su Terminus nell’anno 12.069 E.G., ufficialmente per compilare l’Enciclopedia Galattica, ma in realtà per diventare il nucleo del futuro Secondo Impero [[la_fondazione_20260520164847; la_fondazione_20260520164847]]. L’Enciclopedia è la copertura che gli permette di trasferire e concentrare scienziati e tecnici in un mondo periferico [[source_enciclopedia_galattica_20260520164745]].\n\n3. **Disegno delle Crisi Seldon**\n\nLa storia iniziale della Fondazione è scandita dalle Crisi Seldon: nodi storici in cui tutte le alternative possibili convergono su un’unica soluzione, già prevista dalla psicostoria [[le_crisi_seldon_20260520164726]]. In corrispondenza di ogni crisi, su Terminus si apre la Cripta del Tempo (Time Vault) e appare un ologramma preregistrato di Seldon che spiega a posteriori la natura della crisi, confermando che il percorso seguito era quello previsto [[hari_seldon_20260520164621; terminus_20260520164709; le_crisi_seldon_20260520164726]]. Questo meccanismo assicura che la Fondazione resti allineata al Piano senza conoscerne i dettagli, requisito essenziale della psicostoria [[source_la_psicostoria_20260520164819]].\n\n4. **Impatto storico complessivo**\n\nIn termini di storia galattica, il contributo di Seldon è duplice:\n- Diagnosi: mostra che l’Impero Galattico, pur controllando circa 25 milioni di pianeti per oltre dodicimila anni, è avviato a un collasso inevitabile per cause interne [[source_l_impero_galattico_20260520164929]].\n- Terapia storica: progetta una transizione controllata dal primo al Secondo Impero, riducendo drasticamente l’età di barbarie grazie alla Fondazione di Terminus, alle Crisi Seldon e al sistema delle due Fondazioni [[source_la_fondazione_20260520164847; le_crisi_seldon_20260520164726]].\n\nLa saga sottolinea però anche il limite del suo progetto: la psicostoria è efficace sulle masse, non sui singoli individui; l’imprevedibilità individuale (esemplificata in seguito dal Mulo) costituisce il punto debole del Piano [[hari_seldon_20260520164621; source_la_psicostoria_20260520164819]].",
+        "confidence": "high",
+        "wiki_sources": [
+          "source_hari_seldon_20260520164621",
+          "source_la_fondazione_20260520164847",
+          "source_l_impero_galattico_20260520164929",
+          "source_la_psicostoria_20260520164819",
+          "source_enciclopedia_galattica_20260520164745"
+        ],
+        "raw_sources": [
+          "hari_seldon_20260520164621",
+          "la_fondazione_20260520164847",
+          "le_crisi_seldon_20260520164726",
+          "terminus_20260520164709",
+          "l_impero_galattico_20260520164929"
+        ],
+        "tokens": {
+          "total": 12871,
+          "prompt": 10194,
+          "completion": 2677,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 18,
+            "query:llm_synthesis": 12853
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Hari Seldon è un matematico del pianeta Helicon, figura centrale del Ciclo della Fondazione. Nato nell’anno 11.988 dell’Era Galattica, trascorre gran parte della vita su Trantor, capitale dell’Impero Galattico, dove diventa professore di matematica all’Università di Streeling e fonda la disciplina della psicostoria [[hari_seldon_20260520164621]].\n\nLa psicostoria combina storia, sociologia e matematica statistica per prevedere il comportamento di grandi masse su scala galattica [[la_psicostoria_20260520164819]][[psychohistory]]. Applicandola, Seldon dimostra che l’Impero Galattico, pur apparendo eterno, è destinato a crollare entro circa cinque secoli, con un’epoca di barbarie di trentamila anni prima della nascita di un Secondo Impero [[hari_seldon_20260520164621]][[l_impero_galattico_20260520164929]].\n\nPer ridurre questo periodo di caos da trentamila a circa mille anni, Seldon elabora il Piano Seldon [[seldon_plan]]. Il Piano prevede la creazione di due Fondazioni \"ai due estremi opposti della Galassia\" e la scansione della storia futura in una serie di \"Crisi Seldon\", punti critici in cui le forze sociali e politiche restringono le scelte possibili a una sola soluzione storicamente coerente, già calcolata dalla psicostoria [[hari_seldon_20260520164621]][[le_crisi_seldon_20260520164726]][[seldon_crises]].\n\nPer attuare il Piano, Seldon negozia con le autorità imperiali l’esilio suo e di un’équipe di circa centomila persone sul pianeta Terminus, all’estremo margine della Galassia [[hari_seldon_20260520164621]][[terminus_20260520164709]]. Terminus, scelto per la sua povertà di risorse e isolamento, diventa la sede della Prima Fondazione [[terminus]][[first_foundation]]. Ufficialmente la Fondazione nasce per compilare l’Enciclopedia Galattica, ma questa è solo un pretesto: il vero obiettivo è preservare il sapere e accelerare la rinascita della civiltà dopo il crollo imperiale [[la_fondazione_20260520164847]][[encyclopedia_galactica]].\n\nSeldon muore nell’anno 12.069 E.G., poco dopo l’insediamento della Fondazione su Terminus [[hari_seldon_20260520164621]]. Tuttavia, continua a influenzare la storia galattica tramite le registrazioni olografiche conservate nella Cripta del Tempo ([[time_vault]]) su Terminus: a ogni Crisi Seldon, la Cripta si apre e compare un simulacro di Seldon che spiega la natura della crisi appena superata e conferma che lo sviluppo storico segue il Piano [[hari_seldon_20260520164621]][[terminus_20260520164709]].\n\nGrazie a questo meccanismo, la Prima Fondazione evolve attraverso fasi successive (enciclopedisti, Sindaci di Terminus, Principi Mercanti), consolidando il proprio ruolo come nucleo del futuro Secondo Impero, lungo il percorso delineato da Seldon [[la_fondazione_20260520164847]]. In sintesi, il contributo di Hari Seldon alla storia galattica è quello di aver progettato e parzialmente determinato l’evoluzione dell’umanità dal declino del Primo Impero alla nascita del Secondo, trasformando la storia delle masse in un processo in gran parte prevedibile e guidato [[hari_seldon_20260520164621]][[le_crisi_seldon_20260520164726]].",
+        "confidence": "high",
+        "wiki_sources": [
+          "hari_seldon",
+          "psychohistory",
+          "seldon_plan",
+          "seldon_crises",
+          "first_foundation",
+          "terminus",
+          "time_vault",
+          "encyclopedia_galactica",
+          "second_empire"
+        ],
+        "raw_sources": [
+          "hari_seldon_20260520164621",
+          "la_psicostoria_20260520164819",
+          "le_crisi_seldon_20260520164726",
+          "terminus_20260520164709",
+          "la_fondazione_20260520164847",
+          "l_impero_galattico_20260520164929",
+          "enciclopedia_galattica_20260520164745"
+        ],
+        "graph_entities": 13,
+        "graph_relations": 56,
+        "tokens": {
+          "total": 12826,
+          "prompt": 10427,
+          "completion": 2399,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 18,
+            "query:llm_synthesis": 12808
+          }
+        }
+      },
+      "delta_tokens": -45,
+      "delta_pct": "-0.3%",
+      "judge": null
+    },
+    {
+      "id": "ac05",
+      "text": "Cos'è la psicostoria e come viene usata per pianificare il futuro dell'umanità?",
+      "domain": "asimov",
+      "type": "concettuale",
+      "arch_a": {
+        "answer": "La psicostoria è una disciplina scientifica immaginaria del Ciclo della Fondazione di Isaac Asimov che combina storia, sociologia e matematica statistica per prevedere il comportamento futuro di grandi popolazioni umane su scala galattica [[source_la_psicostoria_20260520164819]]. È fondata e sviluppata da Hari Seldon, che la rende uno strumento predittivo operativo capace di guidare la storia umana dopo il crollo dell’Impero Galattico [[source_la_psicostoria_20260520164819]] [[source_hari_seldon_20260520164621]].\n\n### Principi di funzionamento\n\nDue assiomi fondamentali ne definiscono i limiti [[la_psicostoria_20260520164819]]:\n\n1. **Scala enorme**: le previsioni sono valide solo per popolazioni vastissime, idealmente l’intera Galassia, con milioni di mondi e milioni di miliardi di individui. Non predice il singolo, ma le tendenze di intere civiltà; l’analogia è con la teoria cinetica dei gas: impossibile seguire una molecola, possibile descrivere il gas nel suo complesso [[la_psicostoria_20260520164819]].\n\n2. **Ignoranza dei soggetti**: la popolazione non deve conoscere i risultati dell’analisi psicostorica, altrimenti cambierebbe comportamento e renderebbe false le previsioni. Per questo i dettagli del Piano Seldon vengono tenuti segreti [[la_psicostoria_20260520164819]] [[le_crisi_seldon_20260520164726]].\n\nI risultati sono espressi nelle “funzioni di Seldon” e visualizzati nel **Radiante Primario**, leggibile solo da pochi psicostorici della Seconda Fondazione [[la_psicostoria_20260520164819]].\n\n### Uso per pianificare il futuro dell’umanità\n\n1. **Previsione del collasso e dell’epoca di barbarie**  \n   Seldon usa la psicostoria per dimostrare che l’Impero Galattico crollerà entro circa cinque secoli e che seguirebbero trentamila anni di barbarie prima di un Secondo Impero [[hari_seldon_20260520164621]].  \n\n2. **Il Piano Seldon**  \n   Per ridurre il periodo di caos da 30.000 a 1.000 anni, progetta il **Piano Seldon**: due Fondazioni poste ai due estremi della Galassia, destinate a guidare l’evoluzione storica verso un nuovo Impero [[hari_seldon_20260520164621]].  \n   - La **Prima Fondazione** su Terminus è il principale braccio operativo visibile: da piccolo centro scientifico periferico deve diventare il nucleo del Secondo Impero, rafforzandosi attraverso potere tecnologico, economico e ideologico secondo traiettorie previste psicostoricamente [[source_la_fondazione_20260520164847]] [[first_foundation]].\n   - La **Seconda Fondazione** (citata nel corpus come corpo di psicostorici) controlla e corregge il Piano leggendo e aggiornando le funzioni di Seldon [[la_psicostoria_20260520164819]].\n\n3. **Le Crisi Seldon come nodi obbligati**  \n   Il Piano è strutturato attorno alle **Crisi Seldon**: punti critici in cui le forze sociali, economiche e politiche convergono in modo tale che, pur credendo di scegliere liberamente, i leader della Fondazione sono di fatto “spinti” verso l’unica soluzione storicamente coerente prevista dalla psicostoria [[source_le_crisi_seldon_20260520164726]].  \n   In queste occasioni si apre la **Cripta del Tempo** su Terminus: un ologramma di Seldon, registrato secoli prima, descrive a posteriori la crisi appena superata e ne conferma la previsione, rafforzando la legittimità del Piano e delle trasformazioni politiche che comporta [[time_vault]] [[le_crisi_seldon_20260520164726]].\n\n4. **Limiti e rotture del Piano**  \n   La psicostoria presuppone una distribuzione “normale” degli individui e non contempla eccezioni estreme. L’apparizione del Mulo, un mutante con poteri mentali capaci di influenzare in modo diretto le masse, rappresenta un singolo individuo anomalo che manda fuori bersaglio le previsioni e mostra il limite strutturale della disciplina [[la_psicostoria_20260520164819]] [[il_mulo_20260520164638]].  \n   Questo non annulla l’idea di fondo (le masse restano in larga parte prevedibili), ma obbliga la Seconda Fondazione a intervenire attivamente per riportare la storia entro binari compatibili col Piano [[il_mulo_20260520164638]].\n\nIn sintesi, nel mondo della Fondazione la psicostoria è insieme strumento teorico e programma politico: calcola macro-tendenze storiche su cui viene costruito un grandioso progetto di ingegneria del futuro, articolato in Fondazioni, Crisi Seldon e interventi correttivi dei psicostorici.",
+        "confidence": "high",
+        "wiki_sources": [
+          "source_la_psicostoria_20260520164819",
+          "source_hari_seldon_20260520164621",
+          "time_vault",
+          "first_foundation",
+          "source_le_crisi_seldon_20260520164726",
+          "source_la_fondazione_20260520164847"
+        ],
+        "raw_sources": [
+          "la_psicostoria_20260520164819",
+          "hari_seldon_20260520164621",
+          "le_crisi_seldon_20260520164726",
+          "il_mulo_20260520164638"
+        ],
+        "tokens": {
+          "total": 12511,
+          "prompt": 9915,
+          "completion": 2596,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 24,
+            "query:llm_synthesis": 12487
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "La psicostoria è una disciplina scientifica immaginaria del Ciclo della Fondazione che unisce storia, sociologia e matematica statistica per prevedere il comportamento futuro di grandi masse umane su scala galattica [[la_psicostoria_20260520164819]][[psychohistory]]. È fondata da Hari Seldon, matematico di Helicon, che la sviluppa fino a renderla uno strumento predittivo operativo [[hari_seldon_20260520164621]][[hari_seldon]].\n\nSi basa su due assiomi principali: (1) le previsioni sono possibili solo su popolazioni enormi, idealmente l’intera Galassia, e non sulle azioni di singoli individui; (2) la popolazione non deve conoscere i risultati delle analisi psicostoriche, altrimenti modificherebbe il proprio comportamento rendendo errate le previsioni [[la_psicostoria_20260520164819]]. Seldon paragona il suo metodo alla teoria cinetica dei gas: è impossibile descrivere il moto di una singola molecola, ma si può descrivere con precisione il comportamento statistico di un grande numero di molecole [[la_psicostoria_20260520164819]].\n\nI risultati della psicostoria vengono espressi nelle cosiddette \"funzioni di Seldon\" e visualizzati nel Radiante Primario ([[primary_radiant]]), un dispositivo che proietta le equazioni del Piano. Solo pochi matematici della Seconda Fondazione sono in grado di interpretare e modificare queste proiezioni [[la_psicostoria_20260520164819]][[second_foundation]].\n\nPer pianificare il futuro dell’umanità, Seldon usa la psicostoria per analizzare la traiettoria dell’Impero Galattico e conclude che esso è destinato a crollare entro circa cinque secoli, seguito da trentamila anni di barbarie prima della nascita di un Secondo Impero [[hari_seldon_20260520164621]][[second_empire]]. Per ridurre questo periodo oscuro a circa mille anni, elabora il Piano Seldon ([[seldon_plan]]): la creazione di due Fondazioni ai due estremi opposti della Galassia. La Prima Fondazione, insediata su Terminus con il pretesto di compilare l’Enciclopedia Galattica, funge da nucleo scientifico-tecnologico del futuro Secondo Impero [[hari_seldon_20260520164621]][[first_foundation]][[terminus]][[encyclopedia_galactica]].\n\nIl Piano è strutturato attorno alle Crisi Seldon ([[seldon_crises]]), punti critici in cui le forze politiche, economiche e sociali convergono fino a lasciare di fatto una sola via d’uscita storicamente coerente: quella calcolata in anticipo dalla psicostoria [[le_crisi_seldon_20260520164726]]. I leader della Fondazione vivono queste scelte come frutto del proprio libero arbitrio, ma in realtà rientrano nel ventaglio di esiti previsti. Terminata ogni crisi, sulla capitale Terminus si apre la Cripta del Tempo ([[time_vault]]), da cui appare una registrazione olografica di Hari Seldon che spiega retrospettivamente la natura della crisi e ne conferma la previsione [[hari_seldon_20260520164621]][[le_crisi_seldon_20260520164726]].\n\nIn questo modo, la psicostoria non solo prevede ma anche progetta il corso macro-storico dell’umanità, guidandola dal crollo dell’Impero Galattico alla nascita del Secondo Impero in tempi drasticamente ridotti, purché non intervengano fattori imprevisti [[hari_seldon_20260520164621]].\n\nIl limite strutturale della disciplina è messo in luce dalla comparsa del Mulo ([[the_mule]]), un mutante dotato di poteri mentali individuali tali da influenzare direttamente le emozioni delle masse [[la_psicostoria_20260520164819]][[il_mulo_20260520164638]]. Un singolo individuo così anomalo non rientra nei modelli statistici della psicostoria, che assume una distribuzione \"normale\" degli individui. Di conseguenza, una delle proiezioni della Cripta del Tempo risulta clamorosamente errata, e il corso previsto della storia viene deviato [[il_mulo_20260520164638]]. Solo l’intervento della Seconda Fondazione, composta da psicostorici e mentali in grado di agire sulle menti umane, riesce a neutralizzare il Mulo e a riportare in parte la traiettoria storica entro binari compatibili con il Piano [[il_mulo_20260520164638]][[second_foundation]].\n\nIn sintesi, la psicostoria è lo strumento matematico con cui Hari Seldon costruisce un Piano a lunghissimo termine per ridurre al minimo l’epoca di barbarie tra due imperi galattici, orchestrando crisi storiche controllate attraverso le Fondazioni; ma la sua efficacia dipende dall’assenza di individui eccezionali e consapevoli del Piano, come il Mulo, che ne rappresentano il principale punto debole.",
+        "confidence": "high",
+        "wiki_sources": [
+          "psychohistory",
+          "hari_seldon",
+          "seldon_plan",
+          "seldon_crises",
+          "second_foundation",
+          "primary_radiant",
+          "time_vault",
+          "first_foundation",
+          "terminus",
+          "second_empire",
+          "encyclopedia_galactica",
+          "the_mule"
+        ],
+        "raw_sources": [
+          "la_psicostoria_20260520164819",
+          "hari_seldon_20260520164621",
+          "le_crisi_seldon_20260520164726",
+          "il_mulo_20260520164638",
+          "enciclopedia_galattica_20260520164745",
+          "terminus_20260520164709"
+        ],
+        "graph_entities": 13,
+        "graph_relations": 56,
+        "tokens": {
+          "total": 12821,
+          "prompt": 10095,
+          "completion": 2726,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 24,
+            "query:llm_synthesis": 12797
+          }
+        }
+      },
+      "delta_tokens": 310,
+      "delta_pct": "+2.5%",
+      "judge": null
+    },
+    {
+      "id": "ac06",
+      "text": "Chi è il Mulo e perché rappresenta una minaccia per il Piano Seldon?",
+      "domain": "asimov",
+      "type": "relazionale",
+      "arch_a": {
+        "answer": "Il Mulo è un mutante umano eccezionale, dotato di poteri mentali capaci di percepire e manipolare direttamente le emozioni altrui, sia di singoli individui sia di intere popolazioni. Può instillare lealtà assoluta, paura o disperazione, e su questa capacità costruisce un potere politico‑militare che gli permette di conquistare in pochi anni una vasta porzione della Galassia, inclusa la stessa Fondazione [[the_mule]][[il_mulo_20260520164638]]. Il soprannome “il Mulo” allude alla sua sterilità, come l’animale ibrido, e alla sua natura di anomalia genetica irripetibile [[il_mulo_20260520164638]].  \n\nRappresenta una minaccia radicale per il Piano Seldon per due motivi principali:\n\n1. **È il “punto cieco” della psicostoria**  \n   La psicostoria di Hari Seldon funziona assumendo che il comportamento storico dipenda da grandi masse di individui distribuiti “normalmente”, senza che singoli eccezionali alterino in modo decisivo le tendenze statistiche [[source_le_crisi_seldon_20260520164726]][[hari_seldon_20260520164621]]. Il Mulo, come individuo unico e non ripetibile con poteri mentali straordinari, viola proprio questo assioma: è una variabile che la psicostoria non può modellizzare. Le sue conquiste non compaiono in nessuna previsione; la caduta temporanea della Fondazione non è contemplata dal Piano [[the_mule]][[il_mulo_20260520164638]].  \n\n2. **Interrompe il meccanismo delle Crisi Seldon**  \n   Le Crisi Seldon sono nodi storici in cui le opzioni si restringono a un’unica soluzione già prevista dal Piano; a ogni crisi corrisponde l’apertura della Cripta del Tempo con un messaggio di Seldon che “indovina” a posteriori la soluzione adottata [[source_le_crisi_seldon_20260520164726]][[time_vault]]. Con l’avvento del Mulo, questo schema si spezza: durante una crisi attesa, la registrazione di Seldon risulta clamorosamente fuori bersaglio, perché la psicostoria non aveva previsto un mutante individuale come lui [[le_crisi_seldon_20260520164726]][[il_mulo_20260520164638]]. È la dimostrazione narrativa che il Piano funziona solo finché restano validi i suoi assiomi statistici: basta una variabile eccezionale a invalidarlo temporaneamente.  \n\nPer questi motivi il Mulo porta la Fondazione “sull’orlo del collasso” e mostra i limiti strutturali del Piano Seldon e della psicostoria stessa [[the_mule]][[source_il_mulo_20260520164638]]. Sarà la Seconda Fondazione, con interventi mentali al suo stesso livello, a neutralizzarne l’ambizione e a riportare il Piano sui binari previsti, senza eliminarlo fisicamente [[il_mulo_20260520164638]][[la_fondazione_20260520164847]].",
+        "confidence": "high",
+        "wiki_sources": [
+          "the_mule",
+          "source_il_mulo_20260520164638",
+          "source_le_crisi_seldon_20260520164726",
+          "time_vault",
+          "source_hari_seldon_20260520164621"
+        ],
+        "raw_sources": [
+          "il_mulo_20260520164638",
+          "le_crisi_seldon_20260520164726",
+          "la_fondazione_20260520164847",
+          "hari_seldon_20260520164621"
+        ],
+        "tokens": {
+          "total": 11277,
+          "prompt": 9703,
+          "completion": 1574,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 20,
+            "query:llm_synthesis": 11257
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Il Mulo è un mutante umano e uno dei principali antagonisti del Ciclo della Fondazione. È dotato di straordinari poteri mentali che gli permettono di percepire e manipolare direttamente le emozioni altrui, suscitando lealtà, paura o disperazione in individui e masse. Il soprannome \"il Mulo\" richiama la sua sterilità e il fatto di essere un'anomalia genetica irripetibile. Fisicamente debole e dall'aspetto sgraziato, riesce comunque a conquistare in pochi anni una vasta porzione della Galassia, inclusa la stessa Fondazione, che viene sottomessa senza che le previsioni psicostoriche lo avessero contemplato.[[il_mulo_20260520164638]]\n\nRappresenta una minaccia per il Piano Seldon perché costituisce il punto cieco strutturale della psicostoria: la disciplina di Hari Seldon prevede il comportamento statistico delle masse, assumendo una distribuzione \"normale\" degli individui. L'emergere di un singolo mutante con poteri unici e non ripetibili esce dal dominio di validità di tali leggi. Di conseguenza, una Crisi Seldon attesa viene affrontata con una registrazione nella Cripta del Tempo che risulta completamente fuori bersaglio, proprio perché il Mulo non era stato previsto.[[il_mulo_20260520164638]][[le_crisi_seldon_20260520164726]]\n\nLa sequenza delle Crisi Seldon, che fino ad allora avevano confermato il Piano, si spezza con la sua comparsa: il Mulo conquista la Fondazione e ne devia il ruolo storico, dimostrando che il Piano funziona solo finché valgono i suoi assiomi statistici. In termini tematici, incarna l'idea che una sola persona eccezionale può, almeno temporaneamente, deviare il corso previsto della storia, anche se non cancellarlo del tutto.[[il_mulo_20260520164638]][[hari_seldon]][[seldon_crises]]\n\nLa sua avanzata viene infine fermata dalla Seconda Fondazione, un gruppo di psicostorici dotati di poteri mentali comparabili ai suoi, che lo neutralizzano mediante un intervento psichico che ne smorza l'ambizione senza ucciderlo, riportando gradualmente il Piano Seldon sui suoi binari.[[il_mulo_20260520164638]][[la_fondazione_20260520164847]]",
+        "confidence": "high",
+        "wiki_sources": [
+          "the_mule",
+          "hari_seldon",
+          "seldon_crises",
+          "second_foundation",
+          "first_foundation"
+        ],
+        "raw_sources": [
+          "il_mulo_20260520164638",
+          "le_crisi_seldon_20260520164726",
+          "la_fondazione_20260520164847",
+          "hari_seldon_20260520164621"
+        ],
+        "graph_entities": 13,
+        "graph_relations": 56,
+        "tokens": {
+          "total": 11789,
+          "prompt": 9903,
+          "completion": 1886,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 20,
+            "query:llm_synthesis": 11769
+          }
+        }
+      },
+      "delta_tokens": 512,
+      "delta_pct": "+4.5%",
+      "judge": null
+    },
+    {
+      "id": "ac07",
+      "text": "Quali luoghi fisici svolgono un ruolo simbolico nella storia della Fondazione?",
+      "domain": "asimov",
+      "type": "multi_hop",
+      "arch_a": {
+        "answer": "Nella storia della Fondazione alcuni luoghi fisici svolgono un ruolo insieme narrativo e fortemente simbolico. Nel corpus attuale emergono soprattutto Terminus (con Terminus City), la Cripta del Tempo e Trantor.\n\n1. Terminus (e Terminus City)\n- Terminus è descritto come il mondo abitabile più periferico e isolato della Galassia, posto all’estremo margine di una spirale galattica e lontanissimo da Trantor [[terminus_20260520164709]]. Questa collocazione simboleggia lo spostamento del baricentro storico: dal vecchio centro imperiale alla periferia dove dovrà nascere il Secondo Impero. \n- Il pianeta è povero di risorse: non possiede metalli pesanti né risorse minerarie, e l’unica città è Terminus City, sviluppata attorno al complesso dell’Enciclopedia [[terminus_20260520164709]]. Questa indigenza, scelta deliberatamente dalla psicostoria, ha valore simbolico: la Prima Fondazione è costretta a sviluppare potere scientifico, tecnologico, commerciale e politico invece di affidarsi alla forza militare [[first_foundation]].\n- Terminus è la sede ufficiale della Prima Fondazione e il fulcro visibile del Piano Seldon [[source_terminus_20260520164709]], pur non essendone il vero centro ultimo: rappresenta la parte dichiarata e pubblica del progetto, in contrasto con la componente nascosta della Seconda Fondazione.\n\n2. La Cripta del Tempo (Time Vault)\n- La Cripta del Tempo è una camera su Terminus che ospita le registrazioni olografiche di Hari Seldon, programmate per attivarsi in corrispondenza delle principali Crisi Seldon [[time_vault]] [[terminus_20260520164709]].\n- Ogni apertura della Cripta durante una crisi ha un carattere quasi rituale: i dirigenti della Fondazione si radunano in attesa del messaggio, e l’ologramma di Seldon conferma a posteriori che la crisi era prevista e che il corso degli eventi resta conforme al Piano [[time_vault]] [[le_crisi_seldon_20260520164726]]. Simbolicamente, la Cripta è una sorta di “tempio della psicostoria”, luogo in cui il futuro viene svelato e la storia appare come necessità più che come libera scelta.\n- In almeno un caso, quando la crisi reale non coincide con la previsione, la Cripta assume il valore opposto: invece di rassicurare, mette in luce i limiti del Piano e l’irruzione dell’imprevedibile [[time_vault]].\n\n3. Trantor (e le sue rovine)\n- Trantor è il pianeta-capitale dell’Impero Galattico, una ecumenopoli che governa venticinque milioni di mondi da una posizione vicina al centro gravitazionale della Galassia [[source_trantor_20260520164654]]. La sua superficie interamente coperta da una città continua sotto cupole metalliche simboleggia il massimo grado di centralizzazione, complessità burocratica e potere imperiale.\n- Dopo il Grande Sacco, le cupole vengono squarciate, il pianeta devastato e riconvertito a mondo rurale: le superfici metalliche diventano campi coltivati e Trantor si trasforma in un mondo spopolato e agricolo [[trantor_20260520164654]]. Questo mutamento fisico rappresenta il crollo dell’ordine imperiale e un brusco ritorno a una forma di vita più semplice.\n- Proprio tra le rovine della Biblioteca Galattica di Trantor si insedia però la Seconda Fondazione, identificata con lo “Star’s End” delle registrazioni di Seldon [[source_trantor_20260520164654]]. Così Trantor assume un doppio valore simbolico: è il segno tangibile della fine dell’Impero, ma anche il vero centro nascosto del Piano Seldon e della ricostruzione futura.\n\nIn sintesi, Terminus incarna la periferia che diventa nuovo centro e laboratorio di potere non militare; la Cripta del Tempo è il luogo rituale in cui il Piano psicostorico si manifesta e legittima le svolte storiche; Trantor, da ecumenopoli a rovina rurale e sede segreta della Seconda Fondazione, riassume insieme la caduta del vecchio ordine e la continuità nascosta del progetto di Seldon.",
+        "confidence": "high",
+        "wiki_sources": [
+          "first_foundation",
+          "time_vault",
+          "source_terminus_20260520164709",
+          "source_trantor_20260520164654",
+          "source_la_fondazione_20260520164847"
+        ],
+        "raw_sources": [
+          "terminus_20260520164709",
+          "trantor_20260520164654",
+          "le_crisi_seldon_20260520164726"
+        ],
+        "tokens": {
+          "total": 12424,
+          "prompt": 10075,
+          "completion": 2349,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 23,
+            "query:llm_synthesis": 12401
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Nel corpus attuale emergono tre luoghi fisici con un chiaro ruolo simbolico nella storia della Fondazione.\n\n1) Terminus (e Terminus City) – la periferia che diventa centro\nTerminus è descritto come il mondo abitabile più periferico e isolato della Galassia, privo di metalli pesanti, senza risorse minerarie e con un’unica città, Terminus City, sviluppata attorno al complesso dell’Enciclopedia [[terminus_20260520164709]]. Questa marginalità è parte del Piano Seldon: l’assenza di risorse e difese costringe la Fondazione a sviluppare scienza, tecnologia e abilità politica come sole “armi” di sopravvivenza [[terminus_20260520164709]; [[la_fondazione_20260520164847]]. Terminus incarna quindi la periferia materiale che si trasforma in centro politico e scientifico, e la dipendenza dalla conoscenza anziché dalla forza militare.\nLa presenza della Cripta del Tempo (Time Vault), da cui emergono le registrazioni di Seldon a ogni Crisi Seldon, dà al pianeta un ruolo quasi sacrale: è il luogo in cui il Piano si manifesta visibilmente e in cui la storia viene periodicamente “confermata” come già prevista [[terminus_20260520164709]; [[le_crisi_seldon_20260520164726]].\n\n2) Trantor – la caduta dell’Impero e la trasformazione del passato\nTrantor è la capitale dell’Impero Galattico, ma dopo il “Grande Sacco” subisce una devastazione tale che le sue cupole vengono squarciate e le superfici metalliche riconvertite in campi coltivati; il mondo diventa rurale e spopolato [[trantor_20260520164654]]. Questo passaggio da ecumenopoli tecnologica a pianeta agricolo simboleggia il collasso della civiltà imperiale che sembrava eterna. Il “Grande Sacco” di Trantor, collocato circa due secoli e mezzo dopo la fondazione della Fondazione, segna di fatto la fine dell’Impero [[trantor_20260520164654]].\nAl tempo stesso, proprio su Trantor, tra le rovine della Biblioteca Galattica, si colloca il vero centro della Seconda Fondazione, indicato da Seldon con l’enigmatico “Star’s End” [[trantor_20260520164654]]. Il luogo che rappresentava il potere centralizzato dell’Impero diventa così il nascondiglio della nuova élite psicostorica che prepara il Secondo Impero: il passato distrutto viene riusato come base segreta per il futuro.\n\n3) La Biblioteca Galattica su Trantor – memoria e mascheramento\nAll’interno di Trantor, la Biblioteca Galattica funge da ulteriore simbolo: è il residuo organizzato del sapere dell’Impero e, insieme, il velo dietro cui si nasconde la Seconda Fondazione [[trantor_20260520164654]]. Le sue rovine ospitano il centro degli psicostorici, trasformando un luogo di memoria del passato in un luogo di controllo del futuro.\n\nAltri luoghi (come Helicon o l’Università di Streeling) compaiono nel corpus ma non sono sviluppati esplicitamente come luoghi simbolici, quindi non è possibile approfondirli in questo senso senza uscire dal perimetro delle fonti disponibili [[hari_seldon_20260520164621]].",
+        "confidence": "high",
+        "wiki_sources": [
+          "first_foundation",
+          "terminus",
+          "trantor",
+          "great_sack_of_trantor",
+          "galactic_university",
+          "second_foundation"
+        ],
+        "raw_sources": [
+          "terminus_20260520164709",
+          "la_fondazione_20260520164847",
+          "le_crisi_seldon_20260520164726",
+          "trantor_20260520164654",
+          "hari_seldon_20260520164621"
+        ],
+        "graph_entities": 17,
+        "graph_relations": 68,
+        "tokens": {
+          "total": 12085,
+          "prompt": 10010,
+          "completion": 2075,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 23,
+            "query:llm_synthesis": 12062
+          }
+        }
+      },
+      "delta_tokens": -339,
+      "delta_pct": "-2.7%",
+      "judge": null
+    },
+    {
+      "id": "ac08",
+      "text": "Descrivi il rapporto tra Harry Potter e Lord Voldemort.",
+      "domain": "harry_potter",
+      "type": "relazionale",
+      "arch_a": {
+        "answer": "Nel corpus attuale non è presente alcun documento raw né alcuna pagina wiki che tratti esplicitamente il rapporto tra Harry Potter e Lord Voldemort come relazione complessiva. Esistono singole voci biografiche dedicate separatamente a Harry e a Voldemort, ma non sono state restituite dal retrieval per questa domanda e non posso quindi citarle né utilizzarle direttamente.\n\nQuesto significa che, attenendosi alle regole del companion wiki (niente integrazione dal canone esterno se non supportata da documenti del corpus):\n\n- non è possibile ricostruire in modo tracciabile l’evoluzione del loro rapporto;\n- non si possono elencare in dettaglio eventi specifici che li coinvolgono insieme (conflitti, profezie, ecc.);\n- non si possono citare episodi chiave o dinamiche psicologiche reciproche se non ancorandole a documenti effettivamente presenti, che però in questo caso non sono disponibili via retrieval.\n\nFuori dal corpus, dal canone dei libri di *Harry Potter* è noto che Harry e Voldemort sono legati da:\n- un rapporto di antagonismo centrale alla saga;\n- un legame magico particolare originato dal tentativo di Voldemort di uccidere Harry da bambino;\n- una profezia che collega i due come avversari destinati allo scontro finale.\n\nTuttavia, questi elementi non possono essere “convalidati” qui con citazioni interne, quindi restano informazioni extra-corpus, utili solo come contesto generale ma non come risposta documentata secondo gli standard del sistema.",
+        "confidence": "low",
+        "wiki_sources": [],
+        "raw_sources": [],
+        "tokens": {
+          "total": 6936,
+          "prompt": 6128,
+          "completion": 808,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 13,
+            "query:llm_synthesis": 6923
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Il rapporto tra Harry Potter e Lord Voldemort è descritto nel corpus come un legame di antagonismo centrale per l’intera saga, strutturato intorno ad alcuni eventi chiave e a una profezia che li collega direttamente.\n\n1. Origine del legame: la profezia e Godric’s Hollow  \nLa voce sulla Prima Caduta di Voldemort presenta la notte del 31 ottobre 1981 a [[godrics_hollow]] come evento “fondativo dell’intero ciclo narrativo”, in cui [[lord_voldemort]] tenta di uccidere il piccolo [[harry_potter]] dopo aver assassinato James e Lily Potter, ma finisce sconfitto proprio in quell’atto [[godrics_hollow]]. Questo episodio è collegato esplicitamente alla *[[prophecy_about_harry_and_voldemort]]*, che mette in relazione i due personaggi fin dalla nascita di Harry, suggerendo che il loro destino sia intrecciato e che uno dei due sia destinato a sconfiggere l’altro [[prophecy_about_harry_and_voldemort]].\n\n2. Prima caduta e sopravvivenza “unica” di Harry  \nLa pagina su [[first_fall_of_voldemort]] sottolinea che Voldemort viene sconfitto proprio nel momento in cui tenta di uccidere “il quindicimesi Harry Potter”, sopravvivenza che fa di Harry una figura eccezionale nel mondo magico e lo designa implicitamente come antagonista naturale del Signore Oscuro [[first_fall_of_voldemort]], [[harry_potter]]. In questa sintesi, il rapporto è definito da un atto originario di violenza: Voldemort vede Harry come minaccia profetizzata e ne fa il bersaglio principale; Harry diventa “il ragazzo che è sopravvissuto” proprio per aver resistito a Voldemort.\n\n3. Immortalità di Voldemort e centralità di Harry nel suo ritorno  \nLa biografia di [[lord_voldemort]] insiste sul suo progetto di immortalità tramite gli [[horcruxes]], che gli consente di sopravvivere alla sconfitta del 1981 e di preparare la propria [[resurrection_of_voldemort_1995]] [[lord_voldemort]], [[horcruxes]]. In questo quadro, Harry è al centro non solo della sua caduta ma anche del conflitto che segue il ritorno del Signore Oscuro: la co‑menzione tra l’evento di resurrezione e gli Horcrux mostra che la lotta tra i due passa inevitabilmente per la distruzione dei frammenti d’anima di Voldemort [[resurrection_of_voldemort_1995]], [[horcruxes]]. Il loro rapporto è quindi anche quello tra il persecutore che ha legato la propria esistenza a un incantesimo oscuro e la vittima designata che, proprio per questo legame, è l’unica in grado di rovesciarlo.\n\n4. Conflitto culminante a Hogwarts  \nLa biografia di [[harry_potter]] collega entrambi i personaggi alla [[battle_of_hogwarts]], presentata come momento culminante del confronto: l’evento è co‑menzionato con Harry, Voldemort e Hogwarts, segnando lo scontro finale tra il preside Silente (in memoria), gli alleati di Harry e le forze di Voldemort all’interno dell’istituzione dove entrambi si sono formati, anche se in epoche e ruoli diversi [[battle_of_hogwarts]], [[hogwarts_school_of_witchcraft_and_wizardry]]. Qui il rapporto antagonista si chiude in forma di “resa dei conti” conclusiva.\n\n5. Sintesi del rapporto  \nNel complesso, il corpus tratteggia il rapporto Harry–Voldemort come:\n- Destinale, perché fondato su una profezia che lega la sopravvivenza dell’uno alla distruzione dell’altro [[prophecy_about_harry_and_voldemort]].  \n- Asimmetrico, perché nasce dall’aggressione di Voldemort al neonato Harry e dal tentativo di eliminare la minaccia che la profezia annuncia [[first_fall_of_voldemort]], [[harry_potter]].  \n- Prolungato nel tempo, dalla notte di Godric’s Hollow al ritorno del 1995 e fino alla Battaglia di Hogwarts [[godrics_hollow]], [[resurrection_of_voldemort_1995]], [[battle_of_hogwarts]].  \n- Centrato sugli Horcrux, che rendono la sconfitta di Voldemort impossibile senza un’azione mirata in cui Harry ha un ruolo decisivo [[horcruxes], [[lord_voldemort]].\n\nIl corpus non entra nei dettagli psicologici o nei momenti specifici dei loro scontri; si limita a definire il loro legame in termini di profezia, tentato omicidio, caduta, resurrezione e scontro finale.",
+        "confidence": "medium",
+        "wiki_sources": [
+          "harry_potter",
+          "lord_voldemort",
+          "first_fall_of_voldemort",
+          "godrics_hollow",
+          "prophecy_about_harry_and_voldemort",
+          "resurrection_of_voldemort_1995",
+          "battle_of_hogwarts",
+          "horcruxes",
+          "hogwarts_school_of_witchcraft_and_wizardry"
+        ],
+        "raw_sources": [],
+        "graph_entities": 11,
+        "graph_relations": 46,
+        "tokens": {
+          "total": 11060,
+          "prompt": 8636,
+          "completion": 2424,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 13,
+            "query:llm_synthesis": 11047
+          }
+        }
+      },
+      "delta_tokens": 4124,
+      "delta_pct": "+59.5%",
+      "judge": null
+    },
+    {
+      "id": "ac09",
+      "text": "Cos'è un Horcrux e chi lo usa nella saga di Harry Potter?",
+      "domain": "harry_potter",
+      "type": "concettuale",
+      "arch_a": {
+        "answer": "Un Horcrux, nel mondo di Harry Potter, è un oggetto magico nel quale un mago o una strega nasconde una parte della propria anima, ottenuta tramite l’omicidio, per legarsi artificialmente alla vita: finché almeno un Horcrux esiste, quella persona non può morire definitivamente.\n\nChi lo usa nella saga:\n- l’unico utilizzatore sistematico, noto e descritto nel corpus canonico, è Lord Voldemort (Tom Riddle), che ne crea diversi per rendersi virtualmente immortale;\n- altri personaggi possono studiare il concetto (per esempio Horace Lumacorno lo conosce e ne parla a Tom Riddle), ma non risultano altri creatori effettivi di Horcrux nella storia principale.\n\nNota sui limiti di corpus: dai metadati del companion wiki risulta l’esistenza di un documento dedicato agli Horcrux, ma il suo contenuto non è stato effettivamente recuperato (nessun RAW disponibile). La definizione sopra si basa quindi sulla conoscenza generale del canone, non su testi interni al corpus; non è dunque possibile fornire citazioni puntuali né escludere lacune o discrepanze locali.",
+        "confidence": "medium",
+        "wiki_sources": [],
+        "raw_sources": [],
+        "tokens": {
+          "total": 6825,
+          "prompt": 6135,
+          "completion": 690,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 17,
+            "query:llm_synthesis": 6808
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Nel corpus disponibile, gli Horcrux sono menzionati come il cuore del progetto di immortalità di Tom Marvolo Riddle, divenuto Lord Voldemort: il suo piano per sfuggire alla morte si basa sugli Horcrux, presentati come strumenti magici che permettono di ancorare o proteggere l’esistenza del mago dalla distruzione definitiva.[[lord_voldemort]][[horcruxes]]\n\nLe biografie e le sintesi dedicate a Voldemort collegano direttamente questo progetto alla sua Prima Caduta a Godric’s Hollow (1981) e alla sua resurrezione del 1995, indicando che la sopravvivenza e il ritorno del Signore Oscuro sono resi possibili proprio dagli Horcrux.[[first_fall_of_voldemort]][[resurrection_of_voldemort_1995]][[lord_voldemort]]\n\nPer quanto riguarda chi li usa nella saga, nelle fonti attuali l’unico utilizzatore esplicitamente attestato è Lord Voldemort: la nozione stessa di Horcrux compare in relazione al suo piano di divenire effettivamente immortale, e non sono citati altri maghi che li creino o se ne servano.[[lord_voldemort]][[first_fall_of_voldemort]][[resurrection_of_voldemort_1995]]\n\nDettagli più fini (numero esatto degli Horcrux, identità dei singoli oggetti, procedura di creazione) non sono specificati nei documenti raw indicizzati, quindi non possono essere ricostruiti in modo affidabile dal solo corpus.",
+        "confidence": "medium",
+        "wiki_sources": [
+          "lord_voldemort",
+          "horcruxes",
+          "first_fall_of_voldemort",
+          "resurrection_of_voldemort_1995"
+        ],
+        "raw_sources": [],
+        "graph_entities": 11,
+        "graph_relations": 46,
+        "tokens": {
+          "total": 9549,
+          "prompt": 8635,
+          "completion": 914,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 17,
+            "query:llm_synthesis": 9532
+          }
+        }
+      },
+      "delta_tokens": 2724,
+      "delta_pct": "+39.9%",
+      "judge": null
+    },
+    {
+      "id": "ac10",
+      "text": "Confronta il tema della profezia o del piano storico inevitabile in Tolkien e in Asimov.",
+      "domain": null,
+      "type": "cross_corpus",
+      "arch_a": {
+        "answer": "In Asimov e in Tolkien il tema di profezia/piano inevitabile è presente, ma incarnato in modi quasi opposti. Le fonti disponibili qui coprono solo il corpus di Asimov in modo diretto, mentre per Tolkien c’è solo materiale indiretto (es. il Consiglio di Elrond) e mancano pagine dedicate a “provvidenza”, “destino” o simili: quanto segue su Tolkien è quindi solo parzialmente ricostruibile dal corpus, con un gap notevole sul piano teologico‑filosofico.\n\n---\n\n## Asimov – Il Piano Seldon e il determinismo psicostorico\n\nNel Ciclo della Fondazione il “piano storico inevitabile” è un progetto umano: il Piano Seldon, fondato sulla psicostoria.  \n\n- **Psicostoria come previsione statistica**  \n  La psicostoria è una disciplina che combina storia, sociologia e matematica statistica per prevedere il comportamento futuro di grandi popolazioni, su scala galattica [[source_la_psicostoria_20260520164819]; [la_psicostoria_20260520164819]]. Funziona solo:\n  - su masse enormi di individui;\n  - se i soggetti non conoscono i risultati delle previsioni, per non alterarli [[source_la_psicostoria_20260520164819]; [la_psicostoria_20260520164819]].  \n\n  L’analogia esplicita è con la teoria cinetica dei gas: impossibile prevedere il moto di una molecola, ma possibile descrivere statisticamente il gas nel suo complesso [[la_psicostoria_20260520164819]].\n\n- **Il Piano Seldon come “profezia progettata”**  \n  Hari Seldon prevede il crollo dell’Impero Galattico entro circa cinque secoli e un’epoca di trentamila anni di barbarie prima del Secondo Impero [[source_hari_seldon_20260520164621]; [hari_seldon_20260520164621]]. Progetta allora il Piano Seldon: due Fondazioni ai margini della Galassia, per ridurre l’interregno da 30.000 a 1.000 anni [[source_hari_seldon_20260520164621]; [hari_seldon_20260520164621]].  \n  Il Piano non è una profezia mistica, ma una sequenza di traiettorie storiche probabili, rese operative da scelte istituzionali concrete (fondazione di Terminus, ruolo della Prima/Seconda Fondazione, ecc.) [[source_hari_seldon_20260520164621]; [source_l_impero_galattico_20260520164929]].\n\n- **Crisi Seldon: inevitabilità strutturale**  \n  Le Crisi Seldon sono i nodi in cui le alternative si restringono a un’unica via d’uscita coerente con il Piano [[source_le_crisi_seldon_20260520164726]; [le_crisi_seldon_20260520164726]].  \n  Dal punto di vista dei protagonisti, le decisioni sono vissute come libere; dal punto di vista psicostorico, l’intreccio di forze sociali “spinge” la Fondazione nella direzione già calcolata [[source_le_crisi_seldon_20260520164726]; [le_crisi_seldon_20260520164726]].  \n  La Cripta del Tempo su Terminus, che si apre a ogni crisi con una registrazione di Seldon “a posteriori”, teatralizza questa inevitabilità: conferma che quanto è accaduto era previsto [[le_crisi_seldon_20260520164726]].\n\n- **Limiti e rotture del determinismo**  \n  L’avvento del Mulo, mutante individuale imprevisto, manda “fuori bersaglio” una delle registrazioni della Cripta e dimostra che il Piano funziona solo finché sono validi i suoi assiomi statistici [[source_le_crisi_seldon_20260520164726]; [le_crisi_seldon_20260520164726]].  \n  L’inevitabilità storica è quindi forte ma condizionata: non è volontà trascendente, bensì modello probabilistico vulnerabile a anomalie individuali.\n\n---\n\n## Tolkien – Profezia e Provvidenza (copertura parziale)\n\nNel corpus attuale non esistono voci dedicate alla concezione del destino in Tolkien; compare però il **Consiglio di Elrond**, dove emerge il tema della “missione” affidata a Frodo.\n\n- **Decisione umana sotto un’ombra di destino**  \n  Al Consiglio di Elrond, i rappresentanti dei popoli liberi discutono cosa fare dell’Anello Unico; alla fine decidono di distruggerlo portandolo a Mordor, formando la Compagnia dell’Anello [[source_consiglio_di_elrond_20260520162740]].  \n  Le fonti descrivono l’evento come deliberazione politica e morale, non come esecuzione di un piano rivelato in termini matematici o inevitabili: i partecipanti discutono alternative, dissensi, responsabilità [[source_consiglio_di_elrond_20260520162740]].  \n\n- **Gap sul tema teologico del destino**  \n  Tradizionalmente, nel legendarium questo tipo di decisione è spesso letto come intreccio di libertà e “Provvidenza” (una guida benevola che non annulla la libertà umana). Tuttavia:\n  - nel materiale disponibile non compaiono spiegazioni esplicite di questo aspetto;\n  - non vi sono pagine che trattino in modo sistematico profezie, canzoni profetiche, o la visione di Ilúvatar.  \n  Il confronto sul piano filosofico (predestinazione vs Provvidenza) risulta quindi solo parzialmente supportato dalle fonti interne.\n\n---\n\n## Confronto sintetico (nei limiti del corpus)\n\n- **Origine del “piano”**  \n  - Asimov: piano interamente umano e scientifico (psicostoria, Hari Seldon) [[source_la_psicostoria_20260520164819]; [source_hari_seldon_20260520164621]].  \n  - Tolkien: nelle fonti presenti il “piano” appare solo come decisione del Consiglio (livello politico‑morale) [[source_consiglio_di_elrond_20260520162740]]; eventuali livelli provvidenziali restano fuori dal corpus.\n\n- **Grado di determinismo**  \n  - Asimov: forte determinismo statistico sulle grandi masse; la libertà individuale è narrativamente percepita ma strutturalmente incanalata, salvo anomalie come il Mulo [[source_le_crisi_seldon_20260520164726]; [le_crisi_seldon_20260520164726]].  \n  - Tolkien (per quanto visibile qui): la decisione sulla sorte dell’Anello è presentata come esito di discussione e consenso, non come punto di una traiettoria calcolata; il testo non la qualifica come inevitabile in senso tecnico [[source_consiglio_di_elrond_20260520162740]].\n\n- **Funzione narrativa**  \n  - Asimov: il Piano Seldon struttura l’intera saga come sequenza di Crisi; la tensione è tra ciò che è già previsto e ciò che può sfuggire al Piano [[source_le_crisi_seldon_20260520164726]].  \n  - Tolkien: nel solo episodio disponibile, la tensione è tra il peso della responsabilità (chi porterà l’Anello?) e il consenso dei popoli liberi, più che tra libertà e un piano già scritto [[source_consiglio_di_elrond_20260520162740]].\n\nIn sintesi, nelle fonti attualmente disponibili il “piano inevitabile” asimoviano è esplicito, formalizzato e scientifico; in Tolkien il tema della profezia/Provvidenza è solo indirettamente suggerito attraverso scene come il Consiglio di Elrond, e non viene tematizzato né sistematizzato nel corpus presente. \n\n---\n\n```json\n{\n  \"answer\": \"In Asimov e in Tolkien il tema di profezia/piano inevitabile è presente, ma incarnato in modi quasi opposti. Le fonti disponibili qui coprono solo il corpus di Asimov in modo diretto, mentre per Tolkien c’è solo materiale indiretto (es. il Consiglio di Elrond) e mancano pagine dedicate a “provvidenza”, “destino” o simili: quanto segue su Tolkien è quindi solo parzialmente ricostruibile dal corpus, con un gap notevole sul piano teologico‑filosofico.\\n\\n---\\n\\n## Asimov – Il Piano Seldon e il determinismo psicostorico\\n\\nNel Ciclo della Fondazione il “piano storico inevitabile” è un progetto umano: il Piano Seldon, fondato sulla psicostoria.  \\n\\n- **Psicostoria come previsione statistica**  \\n  La psicostoria è una disciplina che combina storia, sociologia e matematica statistica per prevedere il comportamento futuro di grandi popolazioni, su scala galattica [[source_la_psicostoria_20260520164819]; [la_psicostoria_20260520164819]]. Funziona solo:\\n  - su masse enormi di individui;\\n  - se i soggetti non conoscono i risultati delle previsioni, per non alterarli [[source_la_psicostoria_20260520164819]; [la_psicostoria_20260520164819]].  \\n\\n  L’analogia esplicita è con la teoria cinetica dei gas: impossibile prevedere il moto di una molecola, ma possibile descrivere statisticamente il gas nel suo complesso [[la_psicostoria_20260520164819]].\\n\\n- **Il Piano Seldon come “profezia progettata”**  \\n  Hari Seldon prevede il crollo dell’Impero Galattico entro circa cinque secoli e un’epoca di trentamila anni di barbarie prima del Secondo Impero [[source_hari_seldon_20260520164621]; [hari_seldon_20260520164621]]. Progetta allora il Piano Seldon: due Fondazioni ai margini della Galassia, per ridurre l’interregno da 30.000 a 1.000 anni [[source_hari_seldon_20260520164621]; [hari_seldon_20260520164621]].  \\n  Il Piano non è una profezia mistica, ma una sequenza di traiettorie storiche probabili, rese operative da scelte istituzionali concrete (fondazione di Terminus, ruolo della Prima/Seconda Fondazione, ecc.) [[source_hari_seldon_20260520164621]; [source_l_impero_galattico_20260520164929]].\\n\\n- **Crisi Seldon: inevitabilità strutturale**  \\n  Le Crisi Seldon sono i nodi in cui le alternative si restringono a un’unica via d’uscita coerente con il Piano [[source_le_crisi_seldon_20260520164726]; [le_crisi_seldon_20260520164726]].  \\n  Dal punto di vista dei protagonisti, le decisioni sono vissute come libere; dal punto di vista psicostorico, l’intreccio di forze sociali “spinge” la Fondazione nella direzione già calcolata [[source_le_crisi_seldon_20260520164726]; [le_crisi_seldon_20260520164726]].  \\n  La Cripta del Tempo su Terminus, che si apre a ogni crisi con una registrazione di Seldon “a posteriori”, teatralizza questa inevitabilità: conferma che quanto è accaduto era previsto [[le_crisi_seldon_20260520164726]].\\n\\n- **Limiti e rotture del determinismo**  \\n  L’avvento del Mulo, mutante individuale imprevisto, manda “fuori bersaglio” una delle registrazioni della Cripta e dimostra che il Piano funziona solo finché sono validi i suoi assiomi statistici [[source_le_crisi_seldon_20260520164726]; [le_crisi_seldon_20260520164726]].  \\n  L’inevitabilità storica è quindi forte ma condizionata: non è volontà trascendente, bensì modello probabilistico vulnerabile a anomalie individuali.\\n\\n---\\n\\n## Tolkien – Profezia e Provvidenza (copertura parziale)\\n\\nNel corpus attuale non esistono voci dedicate alla concezione del destino in Tolkien; compare però il **Consiglio di Elrond**, dove emerge il tema della “missione” affidata a Frodo.\\n\\n- **Decisione umana sotto un’ombra di destino**  \\n  Al Consiglio di Elrond, i rappresentanti dei popoli liberi discutono cosa fare dell’Anello Unico; alla fine decidono di distruggerlo portandolo a Mordor, formando la Compagnia dell’Anello [[source_consiglio_di_elrond_20260520162740]].  \\n  Le fonti descrivono l’evento come deliberazione politica e morale, non come esecuzione di un piano rivelato in termini matematici o inevitabili: i partecipanti discutono alternative, dissensi, responsabilità [[source_consiglio_di_elrond_20260520162740]].  \\n\\n- **Gap sul tema teologico del destino**  \\n  Tradizionalmente, nel legendarium questo tipo di decisione è spesso letto come intreccio di libertà e “Provvidenza” (una guida benevola che non annulla la libertà umana). Tuttavia:\\n  - nel materiale disponibile non compaiono spiegazioni esplicite di questo aspetto;\\n  - non vi sono pagine che trattino in modo sistematico profezie, canzoni profetiche, o la visione di Ilúvatar.  \\n  Il confronto sul piano filosofico (predestinazione vs Provvidenza) risulta quindi solo parzialmente supportato dalle fonti interne.\\n\\n---\\n\\n## Confronto sintetico (nei limiti del corpus)\\n\\n- **Origine del “piano”**  \\n  - Asimov: piano interamente umano e scientifico (psicostoria, Hari Seldon) [[source_la_psicostoria_20260520164819]; [source_hari_seldon_20260520164621]].  \\n  - Tolkien: nelle fonti presenti il “piano” appare solo come decisione del Consiglio (livello politico‑morale) [[source_consiglio_di_elrond_20260520162740]]; eventuali livelli provvidenziali restano fuori dal corpus.\\n\\n- **Grado di determinismo**  \\n  - Asimov: forte determinismo statistico sulle grandi masse; la libertà individuale è narrativamente percepita ma strutturalmente incanalata, salvo anomalie come il Mulo [[source_le_crisi_seldon_20260520164726]; [le_crisi_seldon_20260520164726]].  \\n  - Tolkien (per quanto visibile qui): la decisione sulla sorte dell’Anello è presentata come esito di discussione e consenso, non come punto di una traiettoria calcolata; il testo non la qualifica come inevitabile in senso tecnico [[source_consiglio_di_elrond_20260520162740]].\\n\\n- **Funzione narrativa**  \\n",
+        "confidence": "low",
+        "wiki_sources": [],
+        "raw_sources": [
+          "la_psicostoria_20260520164819",
+          "le_crisi_seldon_20260520164726",
+          "source_consiglio_di_elrond_20260520162740",
+          "source_le_crisi_seldon_20260520164726"
+        ],
+        "tokens": {
+          "total": 13872,
+          "prompt": 10372,
+          "completion": 3500,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 25,
+            "query:llm_synthesis": 13847
+          }
+        }
+      },
+      "arch_b": {
+        "answer": "Nel corpus attuale la dimensione della profezia o del piano storico inevitabile è documentata in modo articolato solo per Asimov; per Tolkien non sono ancora presenti analisi tematiche specifiche sulla provvidenza o sul destino, per cui il confronto può essere fatto solo a metà.\n\nNel dominio asimoviano, la psicostoria è definita come disciplina che combina storia, sociologia e matematica statistica per prevedere il comportamento futuro di grandi popolazioni umane [[la_psicostoria_20260520164819]]. Essa si fonda su due assiomi: la scala vastissima della popolazione considerata e il fatto che questa popolazione non debba conoscere le previsioni, pena l’invalidazione dei modelli [[la_psicostoria_20260520164819]]. Su queste basi Hari Seldon elabora il Piano Seldon, prevedendo il crollo dell’Impero Galattico entro pochi secoli e una fase di barbarie di 30.000 anni, che il Piano mira a ridurre a 1.000 anni tramite la creazione di due Fondazioni [[hari_seldon_20260520164621]].\n\nLe Crisi Seldon costituiscono la concretizzazione narrativa di questo \"piano inevitabile\": sono punti critici in cui le possibilità di scelta si restringono fino a una sola via d’uscita coerente con le previsioni, così che i protagonisti agiscono come se fossero liberi, ma in realtà seguono la traiettoria già calcolata dalla psicostoria [[le_crisi_seldon_20260520164726]]. Ogni crisi superata viene poi ratificata retrospettivamente da un messaggio olografico di Seldon nella Cripta del Tempo su Terminus [[le_crisi_seldon_20260520164726]]. L’inevitabilità qui è di natura scientifica: è il risultato di leggi statistiche applicate a masse enormi di individui, non di un disegno metafisico.\n\nTuttavia, il corpus mostra anche il limite strutturale di questo determinismo: con l’avvento del Mulo, mutante individuale non previsto, una delle crisi attese viene mancata completamente e il messaggio di Seldon risulta \"fuori bersaglio\" [[le_crisi_seldon_20260520164726]]. Questo episodio dimostra che la psicostoria e il Piano Seldon funzionano solo finché restano validi i loro assiomi statistici; un singolo fattore anomalo sufficientemente potente può deviare la storia rispetto alla traiettoria calcolata [[la_psicostoria_20260520164819]] [[le_crisi_seldon_20260520164726]]. Il \"piano storico inevitabile\" di Asimov è dunque forte ma condizionato, e soprattutto opera come strumento umano, fallibile, non come una profezia assoluta.\n\nPer quanto riguarda Tolkien, le fonti disponibili nel companion wiki trattano personaggi, luoghi e eventi del ciclo dell’Anello, ma non contengono per ora sezioni specifiche su provvidenza, profezia o destino. Non disponiamo quindi di testi interni al corpus che analizzino in modo esplicito il rapporto fra volontà divina, libertà dei personaggi e compimento delle profezie. Ogni parallelo più dettagliato (per esempio tra la provvidenza tolkieniana e la psicostoria asimoviana) richiederebbe di attingere al canone esterno, che le regole del sistema non permettono di usare come base fattuale principale.\n\nIn sintesi, nel quadro offerto dalle fonti: Asimov presenta un modello di inevitabilità storica fondato su una scienza statistica (psicostoria) e su un piano progettato da un uomo (Seldon), che rende molti snodi della storia quasi obbligati ma resta vulnerabile a eccezioni individuali; per Tolkien, il companion non contiene ancora materiale sufficiente per esporre con la stessa precisione il tema della profezia o del destino, per cui il confronto rimane necessariamente sbilanciato.",
+        "confidence": "medium",
+        "wiki_sources": [
+          "hari_seldon",
+          "psychohistory",
+          "seldon_plan",
+          "seldon_crises",
+          "time_vault",
+          "galactic_empire"
+        ],
+        "raw_sources": [
+          "la_psicostoria_20260520164819",
+          "le_crisi_seldon_20260520164726",
+          "hari_seldon_20260520164621",
+          "l_impero_galattico_20260520164929"
+        ],
+        "graph_entities": 17,
+        "graph_relations": 68,
+        "tokens": {
+          "total": 12624,
+          "prompt": 10179,
+          "completion": 2445,
+          "calls": 2,
+          "by_phase": {
+            "query:embedding": 25,
+            "query:llm_synthesis": 12599
+          }
+        }
+      },
+      "delta_tokens": -1248,
+      "delta_pct": "-9.0%",
+      "judge": null
+    }
+  ]
+}

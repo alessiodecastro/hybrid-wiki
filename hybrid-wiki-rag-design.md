@@ -20,7 +20,9 @@
 11. [Roadmap di implementazione](#10-roadmap-di-implementazione)
 12. [Correzioni architetturali dal Walking Skeleton (pilot)](#11-correzioni-architetturali-dal-walking-skeleton-pilot)
 13. [Correzioni dalla fase Scaling](#12-correzioni-dalla-fase-scaling)
-14. [Glossario](#glossario)
+14. [Lazy materialization delle entity page](#13-correzione-strutturale-scaling-lazy-materialization-delle-entity-page)
+15. [Graph layer come indice strutturale (Arch B)](#14-graph-layer-come-indice-strutturale-arch-b)
+16. [Glossario](#glossario)
 
 ---
 
@@ -2256,6 +2258,231 @@ con synthesis pages persistenti (§7.4) per i confronti più ricorrenti.
 
 ---
 
+## 14. Graph layer come indice strutturale (Arch B)
+
+Esperimento architetturale che **materializza il "grafo dei collegamenti"**
+previsto fin dall'inizio (§4.1, §5.2) ma mai costruito nel walking skeleton,
+e ne valuta empiricamente il ruolo come **alternativa all'indice vettoriale
+wiki**. Validato sul pilot a 3 corpora (tolkien + asimov + rowling) con un
+harness di confronto A-vs-B e LLM-as-judge.
+
+*Amenda: §4.1 (architettura — il grafo diventa componente reale, non solo
+diagramma), §5.2 (grafo dei collegamenti), §5.4 (indici di ricerca — il
+grafo affianca/sostituisce l'indice wiki), §6.2 (query multi-indice), §11.5
+(whitelist citazioni — estesa al layer a grafo).*
+
+### 14.1 Motivazione: un componente promesso e mai costruito
+
+Il diagramma di §4.1 mostra **tre** fonti di contesto a query time — indice
+wiki, **grafo dei collegamenti**, indice raw — e §5.2 descrive i link tra
+pagine come "dati strutturati … un grafo navigabile". Nella realizzazione
+(walking skeleton + Scaling) il grafo non è però mai stato materializzato:
+il suo ruolo — fornire la struttura delle entità e delle loro relazioni — è
+stato assorbito dall'**embedding vettoriale delle pagine wiki** in ChromaDB.
+
+Questo lascia aperta una domanda di design: *l'embedding wiki è davvero il
+modo migliore di dare struttura al modello, o è un surrogato di un grafo
+esplicito mai costruito?* §14 risponde costruendo il grafo e misurando.
+
+**Vincolo non negoziabile.** La priorità del progetto resta la **revisione
+umana del wiki**. L'esperimento perciò **non tocca le pagine MD**: restano
+su disco come artefatto leggibile. Cambia solo *come* il loro contenuto
+strutturale raggiunge il modello a query time. Arch B rimuove **soltanto**
+l'embedding wiki da ChromaDB, non l'artefatto.
+
+### 14.2 Due architetture a confronto
+
+```
+ARCH A (attuale)                    ARCH B (sperimentale)
+─────────────────────               ─────────────────────
+raw_chunks   (ChromaDB)             raw_chunks   (ChromaDB)   ← identico
+wiki_pages   (ChromaDB)             grafo Entity (Kuzu)       ← sostituito
+pagine MD    (disco, embeddate)     pagine MD    (disco, NON embeddate)
+                                                  ↑ revisione umana preservata
+```
+
+Il grafo **sostituisce il ruolo** dell'indice `wiki_pages` come fonte di
+contesto strutturale: le query pescano raw chunks + sottografo (Kuzu) invece
+di raw + wiki embeds. Backend: **Kuzu**, graph DB embedded, sintassi
+Cypher-compatibile, nessun server, persistenza su file. Zero token a query
+time: la traversal è puramente strutturale.
+
+Lo schema è minimale e dominio-agnostico:
+
+```
+Entity(id, label, subtype, domain, state, wiki_snippet)   — un nodo per entità
+Relation(FROM Entity TO Entity, rel_type, confidence, source_doc)  — arco tipato
+```
+
+### 14.3 Costruzione del grafo: zero-token + arricchimento LLM opzionale
+
+Il grafo si costruisce in fasi a costo crescente; la struttura di base è
+**gratis** (deriva da dati già presenti nell'`_entity_index.yaml`, §13):
+
+1. **Nodi** (zero token): un nodo `Entity` per ogni entry dell'indice, con
+   uno `snippet` di 400 char dal body più ricco disponibile (entity page se
+   `consolidated`, altrimenti prima source page).
+2. **Archi `CO_MENZIONATO`** (zero token): co-menzione bidirezionale tra due
+   entità che condividono un `doc_id` nelle rispettive `sources`. È la
+   struttura implicita già contenuta nell'indice, resa esplicita.
+3. **Triple tipate** (opzionale, costo LLM one-time): per ogni entità una
+   chiamata estrae triple `(soggetto, relazione, oggetto)` con tipi semantici
+   da un vocabolario chiuso (`CONOSCE, E_UN, SI_TROVA_IN, PARTE_DI, OPPONE,
+   ALLEATO_DI, POSSIEDE, CREA, GOVERNA, DISTRUGGE, MEMBRO_DI`). Soggetto e
+   oggetto **devono** appartenere alla whitelist degli `entity_id` noti —
+   stessa logica anti-allucinazione della whitelist citazioni (§11.5),
+   applicata in fase di build. Triple con entità fuori whitelist, self-loop o
+   type vuoto vengono scartate in parsing.
+
+Stato del grafo sul pilot (build con triple LLM, ~18k token one-time):
+
+```
+Nodi Entity        : 62
+Archi CO_MENZIONATO: 230
+Archi tipati LLM   : 123   (PARTE_DI 35 · SI_TROVA_IN 33 · CREA 16 ·
+                            POSSIEDE/GOVERNA/OPPONE/CONOSCE 8 · ALLEATO_DI 3 ·
+                            MEMBRO_DI 2)
+Archi totali       : 353
+```
+
+**Osservazione di qualità (rumore LLM).** L'estrazione produce
+occasionalmente un tipo malformato fuori vocabolario (2 archi `ALLESATO_DI`,
+refuso di `ALLEATO_DI`). Non rompe la traversal, ma conferma un principio già
+noto in §11.1/§12.3: l'output LLM su giudizi strutturati va **vincolato a una
+whitelist e validato**, mai accettato grezzo. Qui manca ancora il filtro
+`rel_type ∈ vocabolario` lato build — debito noto minore.
+
+### 14.4 Query a grafo: cosa cambia e cosa resta uguale
+
+`QueryPipelineGraph` riusa l'intera pipeline di §6.2 (Hot Layer, scan
+conflitti, `CONFLICT_RULES`, policy multi-corpus, parser tollerante con
+fallback §11.7, token tracking, audit log) e cambia **solo** lo step di
+recupero del contesto strutturale:
+
+- **Rilevamento entità** (zero token): unione di (a) entità le cui `sources`
+  compaiono nei `doc_id` dei raw hits, e (b) entità il cui id leggibile è
+  citato nel testo della domanda. Nessuna chiamata LLM per il routing.
+- **Traversal**: `get_subgraph(entity_ids, hops=1)` → vicini diretti,
+  troncato a 12 nodi, snippet 100 char per nodo, `CO_MENZIONATO` bidirezionali
+  deduplicati. Il sottografo è iniettato come **JSON compatto** al posto dei
+  wiki hits.
+
+**Lezione di tuning (selettività del sottografo).** Un primo giro con
+`hops=2`/`snippet=300` rendeva Arch B **più costoso** di Arch A (+5%):
+l'espansione a 2 hop su un grafo denso di `CO_MENZIONATO` trascina decine di
+nodi e satura il contesto. Riducendo a `hops=1`/`snippet=100` il sottografo
+torna selettivo e il prompt si accorcia. Principio: un indice strutturale
+esplicito è un vantaggio **solo se la traversal è parsimoniosa**; un grafo
+iniettato avido è peggio di un buon top-k vettoriale.
+
+### 14.5 Affidabilità delle citazioni nel layer a grafo
+
+*Estende §11.5 (whitelist citazioni) al contesto a grafo.*
+
+**Problema.** La whitelist di §11.5 vincola *quali* id sono citabili, ma non
+forza il modello a citarli. Con il contesto a grafo è emerso un fallimento
+nuovo: su una domanda relazionale (`ac01`, il ruolo di Frodo) Arch B produceva
+una risposta accurata e completa **senza alcun** `[[entity_id]]` —
+`citation_quality = 0` al judge, contro 5 di Arch A. Il modello "raccontava"
+le entità del sottografo senza marcarle, pur avendole sotto gli occhi nel JSON.
+
+**Correzione.** La regola di citazione va resa **obbligatoria ed esplicita**,
+non solo permissiva: ogni entità del sottografo nominata nella risposta DEVE
+portare `[[entity_id]]` alla prima menzione (id esatto in `snake_case`, non il
+label leggibile), le entità di `focus` devono comparire in `wiki_sources`, e
+il modello deve **rileggere** la risposta prima del blocco JSON per popolare
+le liste di sorgenti. Effetto misurato: `ac01` passa da
+`citation_quality = 0` a `5` (12 entità citate) e il giudizio si ribalta da
+*winner A* a *winner B*.
+
+Principio generalizzabile (oltre Arch B): una whitelist permissiva
+("*puoi* citare questi id") è necessaria ma non sufficiente; quando il
+contratto richiede tracciabilità, serve un vincolo **imperativo**
+("*devi* citare l'entità che usi") + un passo di auto-verifica pre-output.
+
+### 14.6 Risultati empirici
+
+Misure sul pilot a 3 corpora (`gpt-5.1`; il delta token oscilla tra run
+perché la lunghezza di output non è deterministica — vanno letti gli ordini
+di grandezza, non la singola cifra):
+
+**Corpora con wiki densa (tolkien/asimov)** — Arch B risparmia e regge la
+qualità:
+
+```
+Run                      A tokens   B tokens     d%      Judge A·tie·B
+──────────────────────────────────────────────────────────────────────
+pre-fix  (4 domande)       46.559    43.070    -7.5%    1 · 2 · 1
+post-fix (4 domande)       47.547    46.170    -2.9%    1 · 1 · 2
+```
+
+Pre-fix `ac01` era assegnata ad A per il bug citazioni (§14.5); post-fix si
+ribalta a B. Negli altri casi B è pari o migliore (es. `ac04` su asimov: B
+più completa sull'evoluzione della Fondazione).
+
+**Corpus con wiki sparsa (harry_potter, `ac08`/`ac09`)** — Arch B costa di
+più ma vince in qualità:
+
+```
+A tokens   B tokens     d%       Judge
+──────────────────────────────────────────
+  13.384    17.471    +30.5%    B vince 2x
+```
+
+**Perché l'anomalia HP è istruttiva.** La collection `wiki_pages` per il
+corpus rowling è **vuota**: per la lazy materialization (§13) le entità HP
+sono tutte `aliased`, nessuna `consolidated`, quindi nessun vettore wiki. Arch
+A inietta solo raw chunks (contesto magro); Arch B inietta sempre il
+sottografo. Su `ac09` è **Arch A** ad avere `citation_quality = 0` (non ha
+nulla da citare lato wiki), mentre B cita le entità del grafo. Il grafo dà
+struttura **dove l'embedding wiki non esiste**.
+
+### 14.7 Lettura architetturale: grafo vs embedding wiki
+
+Il confronto isola una proprietà non ovvia: **il valore relativo del grafo
+dipende dalla densità del wiki layer**, che a sua volta dipende dal regime di
+lazy materialization (§13).
+
+```
+Distribuzione entità          Wiki ChromaDB     Vantaggio relativo
+─────────────────────────────────────────────────────────────────────
+molte consolidated (densa)    ricca             grafo ~pari, più economico
+                                                e selettivo (prompt più corto)
+
+molte aliased (sparsa)        povera/vuota       grafo NETTAMENTE meglio:
+                                                 struttura dove l'embedding
+                                                 non ha nulla
+```
+
+Ne segue che **graph layer e lazy materialization sono complementari**, non
+alternativi: più il sistema è aggressivo nel tenere le entità `aliased` (per
+risparmiare, §13.7), più l'indice wiki si svuota e più il grafo diventa
+l'unica fonte di struttura. Il grafo, costruito a costo quasi-zero dalle
+stesse `sources` dell'indice, è la naturale risposta al "retrieval più
+rumoroso per le aliased" elencato come trade-off in §13.6.2.
+
+### 14.8 Trade-off, stato e lavoro futuro
+
+- **Invariante rispettato.** In ogni scenario le pagine MD restano su disco
+  per la revisione umana: Arch B rimuove solo il costo di embedding wiki.
+- **Quando conviene.** Win su corpora con wiki densa e *long-tail* di sources
+  (sottografo selettivo, prompt più corto, qualità ≥ A dopo il fix citazioni);
+  costo extra ma qualità superiore su corpora con wiki sparsa (il grafo
+  struttura dove l'embedding è vuoto).
+- **Stato.** Prototipo sperimentale, non default. Le pipeline coesistono:
+  `query.py` (Arch A) resta la pipeline di produzione, `query_graph.py`
+  (Arch B) è attivabile per il confronto. L'harness `eval_compare.py`
+  rende il trade-off misurabile su qualsiasi nuovo corpus.
+- **Lavoro futuro.** (a) Filtro `rel_type ∈ vocabolario` lato build (§14.3);
+  (b) selezione del numero di hop/nodi **adattiva** alla densità del
+  sottografo invece che costante; (c) modalità **ibrida** che usa il grafo
+  quando il wiki layer è sparso e l'embedding quando è denso, decisa per-query
+  dalla copertura del retrieval; (d) promozione del grafo a componente di
+  prima classe affianco all'embedding (come da diagramma §4.1) anziché in
+  alternativa, se l'ibrido conferma il guadagno.
+
+---
+
 ## Glossario
 
 **Audit trail** — Registro cronologico e immutabile di tutte le operazioni rilevanti del sistema. Permette di ricostruire chi ha fatto cosa e quando.
@@ -2278,7 +2505,11 @@ con synthesis pages persistenti (§7.4) per i confronti più ricorrenti.
 
 **Frontmatter** — Intestazione strutturata (tipicamente in formato YAML) all'inizio di una pagina markdown. Contiene metadati leggibili sia dagli umani che dal sistema.
 
+**Graph layer / Grafo dei collegamenti** — Indice strutturale che rappresenta esplicitamente le entità (nodi) e le loro relazioni (archi tipati) come un grafo navigabile. Nel sistema (§14) è materializzato con Kuzu come alternativa sperimentale all'embedding vettoriale delle pagine wiki: fornisce il contesto strutturale a query time via traversal, a costo token nullo.
+
 **Hot Layer** — Insieme di pagine sempre presenti nella memoria attiva dell'LLM, che forniscono il contesto di orientamento.
+
+**Kuzu** — Database a grafo *embedded* (senza server, persistenza su file), con sintassi di query Cypher-compatibile. Usato in §14 come backend del graph layer.
 
 **Ingest** — Processo con cui un nuovo documento entra nel sistema e viene elaborato.
 
@@ -2312,7 +2543,7 @@ con synthesis pages persistenti (§7.4) per i confronti più ricorrenti.
 
 ---
 
-*Documento di proposta architetturale generale. Versione 3.0*
+*Documento di proposta architetturale generale. Versione 3.1*
 *v2.1: integrata la §11 con le correzioni architetturali validate sul pilot
 (walking skeleton).*
 *v2.2: aggiunta la §12 con le correzioni della fase Scaling (M1 inventario
@@ -2326,4 +2557,14 @@ opzione, è sostituito ovunque dal flusso aliased/consolidated con soglia.
 §11.1 e §12.1 sono state allineate al nuovo regime (inventario letto
 dall'`_entity_index.yaml`, distinzione aliased/consolidated). Le altre
 sotto-sezioni di §11 e §12 restano invariate, concettualmente compatibili.*
+*v3.1: aggiunta la §14 — **graph layer come indice strutturale (Arch B)**.
+Materializza con Kuzu il "grafo dei collegamenti" previsto in §4.1/§5.2 e mai
+costruito, e ne misura il ruolo come alternativa all'embedding wiki (pagine MD
+preservate per la revisione umana). Validato su pilot a 3 corpora con harness
+A-vs-B e LLM-as-judge: su wiki densa Arch B risparmia token a qualità ≥ A
+(dopo il fix citazioni §14.5), su wiki sparsa costa di più ma vince in qualità
+perché il grafo struttura dove l'embedding wiki è vuoto. §14 amenda §4.1, §5.2,
+§5.4, §6.2 e §11.5 (estensione della whitelist al layer a grafo). Le sezioni
+amendate restano valide; §14 si aggiunge come componente sperimentale, non
+sostituisce la pipeline di produzione (Arch A).*
 *Da personalizzare in fase di Discovery con ogni cliente secondo i criteri della sezione 8.*

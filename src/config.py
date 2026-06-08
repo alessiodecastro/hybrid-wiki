@@ -45,6 +45,7 @@ WIKI_DIR = DATA_DIR / "wiki"                # pagine wiki generate (entity + sou
 VECTORS_DIR = DATA_DIR / "vectors"          # store ChromaDB persistente
 HOT_LAYER_PATH = WIKI_DIR / "HOT_LAYER.md"  # singolo file: overview + index
 ENTITY_INDEX_PATH = WIKI_DIR / "_entity_index.yaml"  # indice centrale entità (§13)
+GRAPH_DIR = DATA_DIR / "graph"               # Kuzu graph DB (Arch B: indice strutturale)
 QUERY_LOG_PATH = DATA_DIR / "query_log.jsonl"  # audit trail append-only delle query
 TOKEN_LOG_PATH = DATA_DIR / "token_log.jsonl"  # consumo token per fase, append-only
 
@@ -153,5 +154,5 @@ MIXED_DOMAIN = "_mixed"
 
 # Crea le directory necessarie all'import. Idempotente: exist_ok=True evita
 # errori se il filesystem è già popolato (caso comune in pilot).
-for d in (RAW_DIR, INCOMING_DIR, WIKI_DIR, VECTORS_DIR, SCHEMA_DIR, LINT_DIR, CLASSIFICATION_DIR):
+for d in (RAW_DIR, INCOMING_DIR, WIKI_DIR, VECTORS_DIR, SCHEMA_DIR, LINT_DIR, CLASSIFICATION_DIR, GRAPH_DIR):
     d.mkdir(parents=True, exist_ok=True)
